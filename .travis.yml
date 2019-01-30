@@ -1,0 +1,125 @@
+language: python
+
+# DO NOT CACHE PIP: we rather use a fresh conda
+# cache: pip
+
+python:
+  - "2.7"
+  - "3.5"
+  - "3.6"
+#  - "3.7"  NOT AVAILABLE ON TRAVIS YET..
+#  - "3.7-dev" # 3.7 development branch
+#  - "nightly" # currently points to 3.7-dev
+# PyPy versions
+#  - "pypy"  # PyPy2 2.5.0
+#  - "pypy3" # Pypy3 2.4.0
+#  - "pypy-5.3.1"
+
+env:
+  global:
+  - GH_REF: git@github.com:smarie/python-makefun.git
+  matrix:
+  - PYTEST_VERSION="<3" PYTEST_HTML_VERSION="==1.9.0"  # indeed recent pytest_html require pytest>=3
+  - PYTEST_VERSION="<4" PYTEST_HTML_VERSION=""
+
+before_install:
+  # (a) linux dependencies
+  - sudo apt-get install pandoc
+  - sudo apt-get install ant
+  - sudo apt-get install ant-optional
+
+  # ------------ USE CONDA BECAUSE OTHERWISE WE HAVE VERSION CONFLICTS WITH PYTEST AND ITS PLUGINS ---
+  # (b) install conda - from https://conda.io/docs/user-guide/tasks/use-conda-with-travis-ci.html
+  - echo "downloading miniconda"; if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      sudo wget -q https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+    else
+      sudo wget -q https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - echo "installing miniconda to $HOME/miniconda";  bash miniconda.sh -b -p $HOME/miniconda; export PATH="$HOME/miniconda/bin:$PATH"
+  - echo "configuring miniconda"; hash -r; conda config --set always_yes yes --set changeps1 no
+  # - conda update -q conda NO !!!!
+
+  # (c) base conda environment
+  - echo "creating conda environment"; conda create -q -y -n test-environment python=$TRAVIS_PYTHON_VERSION
+  - echo "activating conda environment"; source activate test-environment
+
+install:
+  - conda list
+  - python ci_tools/py_install.py conda ci_tools/requirements-conda.txt
+  - python ci_tools/py_install.py pip ci_tools/requirements-pip.txt
+  # travis-specific installs
+  - pip install PyGithub  # for ci_tools/github_release.py
+  - pip install codecov  # See https://github.com/codecov/example-python.
+  - conda list
+  # WARNING to use the "true" pytest (or py.test) depending on version, "pytest" is NOT the way to go !
+  - python -m pytest --version  #  - pytest --version
+
+script:
+#  - coverage run tests.py
+  - pip install .
+  - python -c "import os; os.chdir('..'); import makefun; import makefun.plugin"
+# ***tests***
+#  - coverage run tests.py
+#  - pytest --junitxml=reports/junit/junit.xml --html=reports/junit/report.html --cov-report term-missing --cov=./makefun -v makefun/tests/
+# now done in a dedicated script to capture exit code 1 and transform it to 0
+  - chmod a+x ./ci_tools/run_tests.sh
+  - sh ./ci_tools/run_tests.sh
+  - python ci_tools/generate-junit-badge.py 100  # generates the badge for the test results and fail build if less than x%
+
+after_success:
+# ***reporting***
+#  - junit2html junit.xml testrun.html  output is really not nice
+  - ant -f ci_tools/generate-junit-html.xml  # generates the html for the test results. Actually we dont use it anymore
+  - codecov
+  - pylint makefun  # note that at the moment the report is simply lost, we dont transform the result into anything
+# ***documentation***
+  - mkdocs build -f docs/mkdocs.yml
+  - mv reports/junit site/
+  # mkdocs gh-deploy requires special care :
+  # ---grant the possibility to push on the repo---
+  - openssl aes-256-cbc -K $encrypted_8056e8a9ebfc_key -iv $encrypted_8056e8a9ebfc_iv -in ci_tools/github_travis_rsa.enc -out ci_tools/github_travis_rsa -d
+  # If the output file does not exist, that is because the secret is invalid. This can happen in forked repos so do not fail the build
+  - |
+    if [ -s "ci_tools/github_travis_rsa" ]; then
+      chmod 600 ci_tools/github_travis_rsa
+      eval `ssh-agent -s`  # launch the authentication agent
+      ssh-add ci_tools/github_travis_rsa  # register the decrypted key
+      git config user.name "Automatic Publish"
+      git config user.email "sylvain.marie@schneider-electric.com"
+      git remote add gh-remote "${GH_REF}";
+      git fetch gh-remote && git fetch gh-remote gh-pages:gh-pages;  # make sure we have the latest gh-remote
+      # push but only if this is not a build triggered by a pull request
+      # note: here we use the --dirty flag so that mkdocs does not clean the additional reports that we copied in the site
+      if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_PYTHON_VERSION}" = "3.5" ]; then echo "Pushing to github"; PYTHONPATH=makefun/ mkdocs gh-deploy -v --dirty -f docs/mkdocs.yml --remote-name gh-remote; git push gh-remote gh-pages; fi;
+    else
+      echo "File 'ci_tools/github_travis_rsa' has not been created, please check your encrypted repo token in .travis.yml, on the line starting with 'openssl aes-256-cbc...'"
+    fi
+
+deploy:
+  # Deploy on PyPI on tags
+  - provider: pypi
+    user: "smarie"
+    password:
+      secure: "FIVqZqP9kgOQ3/F2wyqEI88o6Ma2ec3o+6hh+Ry89Eqkkxt5zyzpsfxfoAxvLoSD1q2ERS0/aMYr4RHziIWtQXgIAAh7FcqeDj5UKqeDGVWOYHTpEhWlL7DBI2SMa7EM72uPncP9KaMiTE7oZkcIkISIpGU4kN5bvAjEZPMK7Nu9216HWVJyCjC34EkBiRWUX1MrFk8eqLbV7g4oRC8zp0SgQ89ihLAVL1XJRKIKERSHnkh4YCCZQkj3AfUK+6LVuTT+dptI90m5UYVvhAYKX/d6szb+0A94Mxp3u+HcEa93JbMXxMih+EnHD2rDtzGGaKtiCIOMBnTG1GQG7U6wt3Vp71GDqTH3TxxdBKjI8JkamIC72mmVrMGEsl37iWhOyex3uS71akQwgQm7H5fm5+sCqo8EXUmq24B48XL03a+A5EE13EfRSJGuOYdiLVcH9PadFCvjZYvw6HGsF4JgIWA23Sk9eQqiilyqqBEDxw0lJnpMwmv41KOlvxIjeVtBzkOkTslJkgFSzuFWhu2jdGhj+BRY6tqf9jQXi9WlQ2XVF0LgOQrC5sleR9QmlRXqLbRcsOd+wMvV0DExyMH9zuTqeUJhBNVxbTFDvXAyo+kkKK1qcefqG54J7jMrLjV2og2irOJAB5xObiA+0zVlgszKyYTIoq83IH6pU1rtMXM="
+    on:
+      tags: true
+      python: 3.5  #only one of the builds have to be deployed
+      condition: $PYTEST_VERSION = "<3"
+    # server: https://test.pypi.org/legacy/
+    distributions: "sdist bdist_wheel"
+
+  # Create a github release on tags
+  - provider: script
+    script: python ci_tools/github_release.py -s $GITHUB_TOKEN --repo-slug smarie/python-makefun -cf ./docs/changelog.md -d https://smarie.github.io/python-makefun/changelog/ $TRAVIS_TAG
+    skip_cleanup: true
+    on:
+      tags: true
+      python: 3.5  #only one of the builds have to be deployed
+      condition: $PYTEST_VERSION = "<3"
+
+matrix:
+    fast_finish: true
+
+notifications:
+  email:
+    on_success: never  # options: [always|never|change] default: always
