@@ -1,7 +1,6 @@
 language: python
 
-# DO NOT CACHE PIP: we rather use a fresh conda
-# cache: pip
+cache: pip
 
 python:
   - "2.7"
@@ -18,9 +17,6 @@ python:
 env:
   global:
   - GH_REF: git@github.com:smarie/python-makefun.git
-  matrix:
-  - PYTEST_VERSION="<3" PYTEST_HTML_VERSION="==1.9.0"  # indeed recent pytest_html require pytest>=3
-  - PYTEST_VERSION="<4" PYTEST_HTML_VERSION=""
 
 before_install:
   # (a) linux dependencies
@@ -28,31 +24,13 @@ before_install:
   - sudo apt-get install ant
   - sudo apt-get install ant-optional
 
-  # ------------ USE CONDA BECAUSE OTHERWISE WE HAVE VERSION CONFLICTS WITH PYTEST AND ITS PLUGINS ---
-  # (b) install conda - from https://conda.io/docs/user-guide/tasks/use-conda-with-travis-ci.html
-  - echo "downloading miniconda"; if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      sudo wget -q https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-      sudo wget -q https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
-  - echo "installing miniconda to $HOME/miniconda";  bash miniconda.sh -b -p $HOME/miniconda; export PATH="$HOME/miniconda/bin:$PATH"
-  - echo "configuring miniconda"; hash -r; conda config --set always_yes yes --set changeps1 no
-  # - conda update -q conda NO !!!!
-
-  # (c) base conda environment
-  - echo "creating conda environment"; conda create -q -y -n test-environment python=$TRAVIS_PYTHON_VERSION
-  - echo "activating conda environment"; source activate test-environment
-
 install:
-  - conda list
-  - python ci_tools/py_install.py conda ci_tools/requirements-conda.txt
+  - pip list
   - python ci_tools/py_install.py pip ci_tools/requirements-pip.txt
   # travis-specific installs
   - pip install PyGithub  # for ci_tools/github_release.py
   - pip install codecov  # See https://github.com/codecov/example-python.
-  - conda list
-  # WARNING to use the "true" pytest (or py.test) depending on version, "pytest" is NOT the way to go !
-  - python -m pytest --version  #  - pytest --version
+  - pip list
 
 script:
 #  - coverage run tests.py
@@ -104,7 +82,7 @@ deploy:
     on:
       tags: true
       python: 3.5  #only one of the builds have to be deployed
-      condition: $PYTEST_VERSION = "<3"
+      # condition: $PYTEST_VERSION = "<3"
     # server: https://test.pypi.org/legacy/
     distributions: "sdist bdist_wheel"
 
@@ -115,7 +93,7 @@ deploy:
     on:
       tags: true
       python: 3.5  #only one of the builds have to be deployed
-      condition: $PYTEST_VERSION = "<3"
+      # condition: $PYTEST_VERSION = "<3"
 
 matrix:
     fast_finish: true
