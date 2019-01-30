@@ -1,3 +1,4 @@
+from __future__ import print_function
 import re
 import sys
 import itertools
@@ -90,7 +91,8 @@ def create_function(func_signature, func_handler, addsource=True, doc=None, **at
     if s.return_annotation is not s.empty:
         annotations['return'] = s.return_annotation
     for p_name, p in s.parameters.items():
-        annotations[p_name] = p.annotation
+        if p.annotation is not s.empty:
+            annotations[p_name] = p.annotation
         if p.default is not s.empty:
             defaults.append(p.default)
     kwonlydefaults = None
@@ -159,15 +161,16 @@ def _update_signature(func, name, doc=None, annotations=None, defaults=(), kwonl
     :param kw:
     :return:
     """
+    func.__name__ = name
+    func.__doc__ = doc
+    func.__dict__ = kw
+
     func.__defaults__ = defaults
     func.__kwdefaults__ = kwonlydefaults
 
-    func.__name__ = name
-    func.__doc__ = doc
     func.__annotations__ = annotations
-
     func.__module__ = module
-    func.__dict__ = kw
+
 
 
 def _get_callermodule():

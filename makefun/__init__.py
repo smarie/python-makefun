@@ -1,8 +1,8 @@
-from makefun.makefun import create_function
+from makefun.main import create_function
 
 __all__ = [
     # submodules
-    'makefun',
+    'main',
     # symbols
     'create_function'
 ]

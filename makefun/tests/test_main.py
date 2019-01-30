@@ -1,13 +1,29 @@
+import sys
+
+import pytest
+
 from makefun import create_function
 
 
-def test_basic():
+# Python 2 does not support function annotations; Python 3.0-3.4 do not support variable annotations.
+params_type_hints_allowed = sys.version_info.major >= 3 and sys.version_info.minor >= 5
+
+if params_type_hints_allowed:
+    type_hints_variants = [True, False]
+else:
+    type_hints_variants = [False]
+
+
+@pytest.mark.parametrize('params_type_hints', type_hints_variants)
+def test_basic(params_type_hints):
     """
     Tests that we can create a simple dynamic function from a signature string, redirected to a generic handler.
     """
 
-    # let's create a dynamic function with this signature
-    func_signature = "def foo(b: int, a: float = 0)"
+    if params_type_hints:
+        func_signature = "def foo(b: int, a: float = 0)"
+    else:
+        func_signature = "def foo(b, a = 0)"
 
     # this handler will grab the inputs and return them
     def identity_handler(*args, **kwargs):
@@ -21,10 +37,18 @@ def test_basic():
     assert dynamic_fun.__name__ == 'foo'
     assert dynamic_fun.__doc__ == 'test doc'
     assert dynamic_fun.__module__ == test_basic.__module__
-    assert dynamic_fun.__annotations__ == {'a': float, 'b': int}
+    if params_type_hints:
+        assert dynamic_fun.__annotations__ == {'a': float, 'b': int}
+    else:
+        assert dynamic_fun.__annotations__ == {}
     assert dynamic_fun.__defaults__ == (0, )
     assert dynamic_fun.__kwdefaults__ is None
-    assert vars(dynamic_fun) == {'__source__': 'def foo(b: int, a: float = 0):\n    return _call_(b, a)\n'}
+
+    dct = {'__source__': func_signature + ':\n    return _call_(b, a)\n'}
+    if not params_type_hints_allowed:
+        dct['__annotations__'] = dict()
+        dct['__kwdefaults__'] = None
+    assert vars(dynamic_fun) == dct
 
     # try to call it !
     assert dynamic_fun(2) == ((2, 0), {})
