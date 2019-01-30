@@ -7,7 +7,7 @@ pytest  #$PYTEST_VERSION
 pytest-logging  # ==2015.11.4
 
 # --- to generate the reports (see scripts in ci_tools, called by .travis)
-pytest-cov  #==2.6.0  # after 2.6.1 it requires pytest 3.6
+pytest-cov==2.6.0  # after 2.6.1 it requires pytest 3.6
 pytest-html  #$PYTEST_HTML_VERSION
 xunitparser
 
