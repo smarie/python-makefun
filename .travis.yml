@@ -35,7 +35,7 @@ install:
 script:
 #  - coverage run tests.py
   - pip install .
-  - python -c "import os; os.chdir('..'); import makefun; import makefun.plugin"
+  - python -c "import os; os.chdir('..'); import makefun"
 # ***tests***
 #  - coverage run tests.py
 #  - pytest --junitxml=reports/junit/junit.xml --html=reports/junit/report.html --cov-report term-missing --cov=./makefun -v makefun/tests/
