@@ -50,6 +50,7 @@ TODO it seems like an interesting and relatively easy feature to add, among othe
 ## See Also
 
  - [decorator](https://github.com/micheles/decorator), which largely inspired this code
+ - [PEP362 - Function Signature Object](https://www.python.org/dev/peps/pep-0362) 
 
 ### Others
 
