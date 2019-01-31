@@ -1,6 +1,8 @@
 site_name: makefun
 # site_description: 'A short description of my project'
 repo_url: https://github.com/smarie/python-makefun
+docs_dir: .
+site_dir: ../site
 pages:
     - Home: index.md
     # - API reference: api_reference.md
