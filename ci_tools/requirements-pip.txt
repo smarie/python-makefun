@@ -1,7 +1,6 @@
 # --- to execute setup.py whatever the goal
 setuptools_scm
 pytest-runner
-setuptools_scm
 
 # --- to run the tests
 pytest  #$PYTEST_VERSION
