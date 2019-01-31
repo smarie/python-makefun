@@ -94,7 +94,7 @@ def create_function(func_signature, func_handler, inject_as_first_arg=False, add
     if cmt_return_hint is None or len(cmt_return_hint) == 0:
         func_signature = func_signature + ':'
 
-    body = 'def %s\n    return _call_(%s)\n' % (func_signature, p_signature)
+    body = 'def %s\n    return _call_handler_(%s)\n' % (func_signature, p_signature)
 
     # grab information from the caller frame
     frame = _get_callerframe()
@@ -112,7 +112,7 @@ def create_function(func_signature, func_handler, inject_as_first_arg=False, add
         modulename = '?'
         evaldict = dict()
 
-    evaldict['_call_'] = func_handler
+    evaldict['_call_handler_'] = func_handler
 
     # just in case - remove all symbols that could be harmful
     try:
@@ -220,7 +220,7 @@ def _make(funcname, params_names, body, evaldict=None, addsource=False):
     """
     evaldict = evaldict or {}
     for n in params_names:
-        if n in ('_func_', '_call_'):
+        if n in ('_func_', '_call_handler_'):
             raise NameError('%s is overridden in\n%s' % (n, body))
 
     if not body.endswith('\n'):  # newline is needed for old Pythons

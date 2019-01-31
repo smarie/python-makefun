@@ -62,9 +62,9 @@ def test_basic(params_type_hints, with_self_ref):
     if params_type_hints != 1:
         func_signature = func_signature + ":"
     if with_self_ref:
-        src = "def " + func_signature + '\n    return _call_(foo, b=b, a=a)\n'
+        src = "def " + func_signature + '\n    return _call_handler_(foo, b=b, a=a)\n'
     else:
-        src = "def " + func_signature + '\n    return _call_(b=b, a=a)\n'
+        src = "def " + func_signature + '\n    return _call_handler_(b=b, a=a)\n'
 
     dct = {'__source__': src}
     if not params_type_hints_allowed:

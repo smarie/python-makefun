@@ -4,7 +4,7 @@ from makefun import create_function
 
 
 # Python 2 does not support function annotations; Python 3.0-3.4 do not support variable annotations.
-python_version = sys.version_info.major >= 3
+python_version = sys.version_info.major
 
 
 def test_create_facades():
