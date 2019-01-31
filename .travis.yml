@@ -26,6 +26,8 @@ before_install:
 
 install:
   - pip list
+  # needs to be installed beforehand
+  - pip install setuptools_scm
   - python ci_tools/py_install.py pip ci_tools/requirements-pip.txt
   # travis-specific installs
   - pip install PyGithub  # for ci_tools/github_release.py
