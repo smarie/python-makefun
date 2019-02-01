@@ -49,6 +49,8 @@ def create_function(func_signature, func_handler, func_name=None,
         func_name, func_signature, func_signature_str = get_signature_from_string(func_signature, evaldict)
 
     else:
+        if func_name is None:
+            raise ValueError("a non-None func_name should be provided when a `Signature` is provided")
         # create the signature string
         func_signature_str = func_name + str(func_signature) + ":"
 
