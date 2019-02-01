@@ -30,9 +30,9 @@ def test_basic(params_type_hints, with_self_ref):
                          "    ):\n    # type: (...) -> Any"
     elif params_type_hints == 2:
         from typing import Any
-        func_signature = "foo(b: int, a: float = 0) -> Any"
+        func_signature = "foo(b: int, a: float=0) -> Any"
     else:
-        func_signature = "foo(b, a = 0)"
+        func_signature = "foo(b, a=0)"
 
     # this handler will grab the inputs and return them
     if with_self_ref:

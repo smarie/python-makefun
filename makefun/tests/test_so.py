@@ -32,8 +32,13 @@ def test_create_facades():
             assert f.__name__ == f_name
             # try to execute
             args, kwargs = f(25, a=12)
-            assert args == (25, )
-            if f_name != "func3":
-                assert kwargs == dict(a=12)
-            else:
-                assert kwargs == dict(a=12, d=None)
+
+            if f_name == "func1":
+                assert args == (), f_name + ' args test failed'
+                assert kwargs == dict(b=25, a=12), f_name + ' kwargs test failed'
+            elif f_name == "func2":
+                assert args == (25,), f_name + ' args test failed'
+                assert kwargs == dict(a=12), f_name + ' kwargs test failed'
+            elif f_name == "func3":
+                assert args == (), f_name + ' args test failed'
+                assert kwargs == dict(c=25, a=12, d=None), f_name + ' kwargs test failed'
