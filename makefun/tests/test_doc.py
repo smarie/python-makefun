@@ -28,7 +28,7 @@ def test_from_string():
 
     # first check the source code
     ref_src = "def foo(b, a=0):\n    return _call_handler_(b=b, a=a)\n"
-    print(dynamic_fun.__source__)
+    print("Generated Source :\n" + dynamic_fun.__source__)
     assert dynamic_fun.__source__ == ref_src
 
     # then the behaviour
@@ -49,29 +49,39 @@ def test_from_string():
 def test_from_sig():
     """ Tests that we can create a function from a Signature object """
 
-    # define the signature from an existing function
     def foo(b, a=0):
-        pass
-    func_signature = signature(foo)
+        print("foo called: b=%s, a=%s" % (b, a))
+        return b, a
+
+    # capture the name and signature of existing function `foo`
     func_name = foo.__name__
+    original_func_sig = signature(foo)
+    print("Original Signature: %s" % original_func_sig)
+
+    # modify the signature to add a new parameter
+    params = list(original_func_sig.parameters.values())
+    params.insert(0, Parameter('z', kind=Parameter.POSITIONAL_OR_KEYWORD))
+    func_sig = original_func_sig.replace(parameters=params)
+    print("New Signature: %s" % func_sig)
 
     # define the handler that should be called
-    def my_handler(*args, **kwargs):
-        """This docstring will be used in the generated function by default"""
-        print("my_handler called !")
-        return args, kwargs
+    def my_handler(z, *args, **kwargs):
+        print("my_handler called ! z=%s" % z)
+        # call the foo function
+        output = foo(*args, **kwargs)
+        # return augmented output
+        return z, output
 
     # create the dynamic function
-    dynamic_fun = create_function(func_signature, my_handler, func_name=func_name)
+    dynamic_fun = create_function(func_sig, my_handler, func_name=func_name)
 
-    # call it and check
-    args, kwargs = dynamic_fun(2)
-    assert args == ()
-    assert kwargs == {'a': 0, 'b': 2}
-
-    ref_src = "def foo(b, a=0):\n    return _call_handler_(b=b, a=a)\n"
-    print(dynamic_fun.__source__)
+    # check the source code
+    ref_src = "def foo(z, b, a=0):\n    return _call_handler_(z=z, b=b, a=a)\n"
+    print("Generated Source :\n" + dynamic_fun.__source__)
     assert dynamic_fun.__source__ == ref_src
+
+    # then the behaviour
+    assert dynamic_fun(3, 2) == (3, (2, 0))
 
 
 def test_injection():
@@ -89,3 +99,27 @@ def test_injection():
 
     func1(1, 2)
     func2(1, 2)
+
+
+def test_var_length():
+    """Demonstrates how variable-length arguments are passed to the handler """
+
+    # define the handler that should be called
+    def my_handler(*args, **kwargs):
+        """This docstring will be used in the generated function by default"""
+        print("my_handler called !")
+        return args, kwargs
+
+    func_signature = "foo(a=0, *args, **kwargs)"
+    dynamic_fun = create_function(func_signature, my_handler)
+    print(dynamic_fun.__source__)
+    assert dynamic_fun(0, 1) == ((1,), {'a': 0})
+
+
+def test_positional_only():
+    """Tests that as of today positional-only signatures translate to bad strings """
+
+    params = [Parameter('a', kind=Parameter.POSITIONAL_ONLY),
+              Parameter('b', kind=Parameter.POSITIONAL_OR_KEYWORD)]
+
+    assert str(Signature(parameters=params)) in {"(<a>, b)", "(a, /, b)"}
