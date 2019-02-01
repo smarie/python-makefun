@@ -1,5 +1,11 @@
 # Changelog
 
+### 0.3.0 - Ability to generate functions from `Signature`
+
+Functions can now be created from a `Signature` object, in addition to string signatures. This unlocks many useful use cases, among easily creating function wrappers. Note: the inner function that provides this feature is `get_signature_from_string`. Fixes [#8](https://github.com/smarie/python-makefun/issues/8)
+
+Improved design by getting rid of the regular expression parser to check parameters definition. This assumes that the compiler will correctly raise exceptions when a string signature is not correct, and that `inspect.signature` or `funcsigs.signature` works correctly at detecting all the parameter kinds and annotations on the resulting function. It seems like a fair assumption... Fixes [#9](https://github.com/smarie/python-makefun/issues/9).
+
 ### 0.2.0 - Various new features and improvements
 
 `create_function`:
