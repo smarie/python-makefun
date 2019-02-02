@@ -130,8 +130,43 @@ foo called: b=2, a=0
 
 This way you can therefore easily create function wrappers with different signatures: not only adding, but also removing parameters, changing their kind (forcing keyword-only for example), etc. The possibilities are as numerous as the capabilities of the `Signature` objects.
 
+Finally note that you can pass a function instead of a `Signature` object. The signature of this function will be used. This is particularly convenient if you wish to create a function wrapper, that is keeping the same signature than the wrapped function.
 
-### 3- Advanced topics
+### 3- Changing the signature of a function
+
+A goodie decorator is also provided: `@with_signature`. It accepts a single argument that has exactly the same guidelines than the `func_signature` argument of `create_function`. It can be used to quickly change the signature of a function:
+
+```python
+from makefun import with_signature
+
+@with_signature("foo(a, b)")
+def foo(*args, **kwargs):
+    # ...
+```
+
+Or to quickly create a function wrapper using the same signature than the wrapped function:
+
+```python
+from makefun import with_signature
+
+# imagine that we want to wrap this function f
+# so as to add some prints before calling
+def f(a, b):
+    return a + b
+
+# create our wrapper: it will have the same signature than f
+@with_signature(f)
+def f_wrapper(*args, **kwargs):
+    # first print something interesting
+    print('hello')
+    # then call f as usual
+    return f(*args, **kwargs)
+
+f_wrapper(1, 2)  # prints `'hello` and returns 1 + 2 
+```
+ 
+
+### 4- Advanced topics
 
 #### Variable-length, Positional-only and Keyword-only
 
