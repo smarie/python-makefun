@@ -1,5 +1,11 @@
 # Changelog
 
+### 0.4.0 - New `@with_signature` decorator, and `create_function` accepts functions
+
+New decorator `@with_signature` to change the signature of a callable. Fixes [#3](https://github.com/smarie/python-makefun/issues/3)
+
+`create_function` now accepts that a function be passed as a signature template. Fixes [#10](https://github.com/smarie/python-makefun/issues/10)
+
 ### 0.3.0 - Ability to generate functions from `Signature`
 
 Functions can now be created from a `Signature` object, in addition to string signatures. This unlocks many useful use cases, among easily creating function wrappers. Note: the inner function that provides this feature is `get_signature_from_string`. Fixes [#8](https://github.com/smarie/python-makefun/issues/8)
