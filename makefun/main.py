@@ -81,9 +81,9 @@ def create_function(func_signature, func_handler, func_name=None,
         doc = getattr(func_handler, '__doc__', None)
 
     # update the signature
-    _update_signature(f, name=func_name, doc=doc, annotations=annotations,
-                      defaults=tuple(defaults), kwonlydefaults=kwonlydefaults,
-                      module=modulename, **attrs)
+    _update_fields(f, name=func_name, doc=doc, annotations=annotations,
+                   defaults=tuple(defaults), kwonlydefaults=kwonlydefaults,
+                   module=modulename, **attrs)
 
     return f
 
@@ -259,6 +259,7 @@ def protect_eval_dict(evaldict, func_name, params_names):
 
     return evaldict
 
+
 # Atomic get-and-increment provided by the GIL
 _compile_count = itertools.count()
 
@@ -300,7 +301,7 @@ def _make(funcname, params_names, body, evaldict=None):
     return func
 
 
-def _update_signature(func, name, doc=None, annotations=None, defaults=(), kwonlydefaults=None, module=None, **kw):
+def _update_fields(func, name, doc=None, annotations=None, defaults=(), kwonlydefaults=None, module=None, **kw):
     """
     Update the signature of func with the provided information
 
