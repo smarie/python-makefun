@@ -10,22 +10,33 @@ except ImportError:
     from funcsigs import signature, Signature, Parameter
 
 
+try: # python 3.5+
+    from typing import Callable, Any, Union
+except ImportError:
+    pass
+
+
 # macroscopic signature strings checker (we do not look inside params, `signature` will do it for us)
 FUNC_DEF = re.compile('(?s)^\s*(?P<funcname>[_\w][_\w\d]*)\s*'
                       '\(\s*(?P<params>.*?)\s*\)\s*'
                       '((?P<typed_return_hint>->\s*.+)|:\s*#\s*(?P<comment_return_hint>.+))*$')
 
 
-def create_function(func_signature, func_handler, func_name=None,
-                     inject_as_first_arg=False, addsource=True, doc=None, **attrs):
+def create_function(func_signature,             # type: Union[str, Signature, Callable[[Any], Any]]
+                    func_handler,               # type: Callable[[Any], Any]
+                    func_name=None,             # type: str
+                    inject_as_first_arg=False,  # type: bool
+                    addsource=True,             # type: bool
+                    doc=None,                   # type: str
+                    **attrs):
     """
     Creates a function with signature <func_signature> that will call <func_handler> with its arguments in order
     when called.
 
-    :param func_signature: either a string without def such as "foo(a, b: int, *args, **kwargs)" or a `Signature`
-        object, for example from the output of `inspect.signature` or from the `funcsigs.signature` backport. Note that
-        these objects can be created and edited too. If this is a `Signature`, then a non-none `func_name` should be
-        provided.
+    :param func_signature: either a string without 'def' such as "foo(a, b: int, *args, **kwargs)", a callable, or a
+        `Signature` object, for example from the output of `inspect.signature` or from the `funcsigs.signature`
+        backport. Note that these objects can be created and edited too. If this is a `Signature`, then a non-none
+        `func_name` should be provided. If this is a string, `func_name` should not be provided.
     :param func_handler:
     :param inject_as_first_arg: if True, the created function will be injected as the first positional argument of the
         function handler. This can be handy in case the handler is shared between several facades and needs to know
@@ -41,18 +52,34 @@ def create_function(func_signature, func_handler, func_name=None,
     evaldict, modulename = extract_module_and_evaldict(frame)
 
     # input signature handling
-    if not isinstance(func_signature, Signature):
+    if isinstance(func_signature, str):
+        # func_name should not be provided
         if func_name is not None:
             raise ValueError("func_name should not be provided when the signature is provided as a string")
 
         # transform the string into a Signature and make sure the string contains ":"
         func_name, func_signature, func_signature_str = get_signature_from_string(func_signature, evaldict)
 
-    else:
+    elif isinstance(func_signature, Signature):
+        # func name should be provided
         if func_name is None:
             raise ValueError("a non-None func_name should be provided when a `Signature` is provided")
+
         # create the signature string
         func_signature_str = func_name + str(func_signature) + ":"
+
+    elif callable(func_signature):
+        # grab the func name
+        if func_name is None:
+            func_name = func_signature.__name__
+
+        # inspect the signature
+        func_signature = signature(func_signature)
+
+        # create the signature string
+        func_signature_str = func_name + str(func_signature) + ":"
+    else:
+        raise TypeError("Invalid type for `func_signature`: %s" % type(func_signature))
 
     # extract all information needed from the `Signature`
     posonly_names, kwonly_names, varpos_names, varkw_names, unrestricted_names = get_signature_params(func_signature)
