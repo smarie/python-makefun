@@ -331,3 +331,17 @@ def _get_callerframe():
         frame = None
 
     return frame
+
+
+def with_signature(func_signature  # type: Union[str, Signature]
+                   ):
+    """
+    A decorator for functions, to change their signature. The new signature should be compliant with the old one.
+
+    :param func_signature:  the new signature of the decorated function. See `create_function` for details.
+    :return:
+    """
+    def replace_f(f):
+        return create_function(func_signature, f)
+
+    return replace_f
