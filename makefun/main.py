@@ -371,7 +371,7 @@ def with_signature(func_signature  # type: Union[str, Signature]
     :return:
     """
     def replace_f(f):
-        return create_function(func_signature, f)
+        return create_function(func_signature, f, func_name=f.__name__)
 
     return replace_f
 
