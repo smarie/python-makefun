@@ -1,5 +1,11 @@
 # Changelog
 
+### 0.5.0 - New helper function, and bugfix
+
+New helper function `remove_signature_parameters`.
+
+Fixed issue with `@with_signature` when argument is a `Signature`. Fixes [#11](https://github.com/smarie/python-makefun/issues/11) 
+
 ### 0.4.0 - New `@with_signature` decorator, and `create_function` accepts functions
 
 New decorator `@with_signature` to change the signature of a callable. Fixes [#3](https://github.com/smarie/python-makefun/issues/3)
