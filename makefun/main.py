@@ -2,6 +2,7 @@ from __future__ import print_function
 import re
 import sys
 import itertools
+from collections import OrderedDict
 from copy import copy
 
 try:  # python 3.3+
@@ -373,3 +374,18 @@ def with_signature(func_signature  # type: Union[str, Signature]
         return create_function(func_signature, f)
 
     return replace_f
+
+
+def remove_signature_parameters(s, *param_names):
+    """
+    Removes the provided parameters from the signature s.
+
+
+    :param s:
+    :param param_names: a list of parameter names to remove
+    :return:
+    """
+    params = OrderedDict(s.parameters.items())
+    for param_name in param_names:
+        del params[param_name]
+    return s.replace(parameters=params.values())
