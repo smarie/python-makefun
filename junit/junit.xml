@@ -1,1 +1,32 @@
-<?xml version="1.0" encoding="utf-8"?><testsuite errors="0" failures="0" name="pytest" skips="0" tests="2" time="0.083"><testcase classname="makefun.tests.test_main" file="makefun/tests/test_main.py" line="16" name="test_basic[True]" time="0.0022039413452148438"></testcase><testcase classname="makefun.tests.test_main" file="makefun/tests/test_main.py" line="16" name="test_basic[False]" time="0.0018341541290283203"></testcase></testsuite>
+<?xml version="1.0" encoding="utf-8"?><testsuite errors="0" failures="0" name="pytest" skips="1" tests="19" time="0.265"><testcase classname="makefun.tests.test_create_from_signature" file="makefun/tests/test_create_from_signature.py" line="16" name="test_positional_only" time="0.0020592212677001953"><system-err>Error in generated code:
+def foo(a, /, *args, **kwargs):
+    return _call_handler_(a, *args, **kwargs)
+
+</system-err></testcase><testcase classname="makefun.tests.test_create_from_string" file="makefun/tests/test_create_from_string.py" line="18" name="test_basic[type_hints=False-self_ref=True]" time="0.0022656917572021484"></testcase><testcase classname="makefun.tests.test_create_from_string" file="makefun/tests/test_create_from_string.py" line="18" name="test_basic[type_hints=False-self_ref=False]" time="0.002088308334350586"></testcase><testcase classname="makefun.tests.test_create_from_string" file="makefun/tests/test_create_from_string.py" line="18" name="test_basic[type_hints=1-self_ref=True]" time="0.002071380615234375"></testcase><testcase classname="makefun.tests.test_create_from_string" file="makefun/tests/test_create_from_string.py" line="18" name="test_basic[type_hints=1-self_ref=False]" time="0.0022280216217041016"></testcase><testcase classname="makefun.tests.test_create_from_string" file="makefun/tests/test_create_from_string.py" line="18" name="test_basic[type_hints=2-self_ref=True]" time="0.0018281936645507812"></testcase><testcase classname="makefun.tests.test_create_from_string" file="makefun/tests/test_create_from_string.py" line="18" name="test_basic[type_hints=2-self_ref=False]" time="0.0020606517791748047"></testcase><testcase classname="makefun.tests.test_create_from_string" file="makefun/tests/test_create_from_string.py" line="98" name="test_type_comments" time="0.0008056163787841797"><skipped message="This test is known to fail because inspect.signature does not detect comment type hints" type="pytest.skip">makefun/tests/test_create_from_string.py:98: &lt;py._xmlgen.raw object at 0x7f6a3ee7c278&gt;</skipped></testcase><testcase classname="makefun.tests.test_create_from_string" file="makefun/tests/test_create_from_string.py" line="117" name="test_arguments[case_simple]" time="0.0018956661224365234"></testcase><testcase classname="makefun.tests.test_create_from_string" file="makefun/tests/test_create_from_string.py" line="117" name="test_arguments[case_simple_with_star]" time="0.0018315315246582031"></testcase><testcase classname="makefun.tests.test_create_from_string" file="makefun/tests/test_create_from_string.py" line="117" name="test_arguments[case_simple_with_star_args1]" time="0.0018651485443115234"></testcase><testcase classname="makefun.tests.test_create_from_string" file="makefun/tests/test_create_from_string.py" line="117" name="test_arguments[case_simple_with_star_args2]" time="0.0017859935760498047"></testcase><testcase classname="makefun.tests.test_create_from_string" file="makefun/tests/test_create_from_string.py" line="117" name="test_arguments[case_with_type_comments_and_newlines]" time="0.0019061565399169922"></testcase><testcase classname="makefun.tests.test_doc" file="makefun/tests/test_doc.py" line="13" name="test_from_string" time="0.0020089149475097656"><system-out>Generated Source :
+def foo(b, a=0):
+    return _call_handler_(b=b, a=a)
+
+my_handler called !
+def foo(b, *, a=0, **kwargs):
+    return _call_handler_(b=b, a=a, **kwargs)
+
+</system-out></testcase><testcase classname="makefun.tests.test_doc" file="makefun/tests/test_doc.py" line="48" name="test_from_sig" time="0.0016009807586669922"><system-out>Original Signature: (b, a=0)
+New Signature: (z, b, a=0)
+Generated Source :
+def foo(z, b, a=0):
+    return _call_handler_(z=z, b=b, a=a)
+
+my_handler called ! z=3
+foo called: b=2, a=0
+</system-out></testcase><testcase classname="makefun.tests.test_doc" file="makefun/tests/test_doc.py" line="86" name="test_injection" time="0.001997232437133789"><system-out>This is generic handler called by func1
+called from func1 !
+This is generic handler called by func2
+</system-out></testcase><testcase classname="makefun.tests.test_doc" file="makefun/tests/test_doc.py" line="103" name="test_var_length" time="0.0015718936920166016"><system-out>def foo(a=0, *args, **kwargs):
+    return _call_handler_(a=a, *args, **kwargs)
+
+my_handler called !
+</system-out></testcase><testcase classname="makefun.tests.test_doc" file="makefun/tests/test_doc.py" line="118" name="test_positional_only" time="0.0011072158813476562"></testcase><testcase classname="makefun.tests.test_so" file="makefun/tests/test_so.py" line="9" name="test_create_facades" time="0.002181529998779297"><system-out>This is generic handler called by func1
+called from func1 !
+This is generic handler called by func2
+This is generic handler called by func3
+</system-out></testcase></testsuite>
