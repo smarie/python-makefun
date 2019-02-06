@@ -401,8 +401,7 @@ def with_signature(func_signature,   # type: Union[str, Signature]
 
 def remove_signature_parameters(s, *param_names):
     """
-    Removes the provided parameters from the signature s.
-
+    Removes the provided parameters from the signature s (returns a new signature instance).
 
     :param s:
     :param param_names: a list of parameter names to remove
@@ -412,3 +411,32 @@ def remove_signature_parameters(s, *param_names):
     for param_name in param_names:
         del params[param_name]
     return s.replace(parameters=params.values())
+
+
+def add_signature_parameters(s, first=None, last=None):
+    """
+    Adds the provided parameters to the signature s (returns a new signature instance).
+
+    :param s:
+    :param first: a list of `Parameter` instances to be added at the beginning of the parameter's list
+    :param last: a list of `Parameter` instances to be added at the end of the parameter's list
+    :return:
+    """
+    params = OrderedDict(s.parameters.items())
+    lst = list(params.values())
+
+    # prepend
+    for param in first:
+        if param in params:
+            raise ValueError("Parameter with name '%s' is present twice in the signature to create" % param.name)
+        else:
+            lst.insert(0, param)
+
+    # append
+    for param in last:
+        if param in params:
+            raise ValueError("Parameter with name '%s' is present twice in the signature to create" % param.name)
+        else:
+            lst.append(param)
+
+    return s.replace(parameters=lst)
