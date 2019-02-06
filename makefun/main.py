@@ -29,6 +29,7 @@ def create_function(func_signature,             # type: Union[str, Signature, Ca
                     inject_as_first_arg=False,  # type: bool
                     addsource=True,             # type: bool
                     doc=None,                   # type: str
+                    modulename=None,            # type: str
                     **attrs):
     """
     Creates a function with signature <func_signature> that will call <func_handler> with its arguments in order
@@ -45,7 +46,11 @@ def create_function(func_signature,             # type: Union[str, Signature, Ca
     :param func_name: mandatory if func_signature is a `Signature` object, indeed these objects do not contain any name.
     :param addsource: a boolean indicating if a '__source__' annotation should be added to the generated function
         (default: True)
-    :param doc: if None (default), the doc of func_handler will be used. Otherwise a string representing the docstring.
+    :param doc: a string representing the docstring that will be used to set the __doc__ attribute on the generated
+        function. If None (default), the doc of func_handler will be used.
+    :param modulename: the name of the module to be set on the function (under __module__ ). If None (default), the
+        caller module name will be used.
+    :param attrs: other keyword attributes that should be set on the function
     :return:
     """
     # grab context from the caller frame
@@ -55,7 +60,8 @@ def create_function(func_signature,             # type: Union[str, Signature, Ca
         frame = _get_callerframe(offset=1)
     except KeyError:
         frame = _get_callerframe()
-    evaldict, modulename = extract_module_and_evaldict(frame)
+    evaldict, _modulename = extract_module_and_evaldict(frame)
+    modulename = modulename if modulename is not None else _modulename
 
     # input signature handling
     if isinstance(func_signature, str):
@@ -367,10 +373,11 @@ def _get_callerframe(offset=0):
     return frame
 
 
-def with_signature(func_signature,  # type: Union[str, Signature]
-                   func_name=None,  # type: str
-                   addsource=True,  # type: bool
-                   doc=None,        # type: str
+def with_signature(func_signature,   # type: Union[str, Signature]
+                   func_name=None,   # type: str
+                   addsource=True,   # type: bool
+                   doc=None,         # type: str
+                   modulename=None,  # type: str
                    **attrs
                    ):
     """
@@ -384,6 +391,7 @@ def with_signature(func_signature,  # type: Union[str, Signature]
                                func_name=func_name if func_name is not None else f.__name__,
                                addsource=addsource,
                                doc=doc,
+                               modulename=modulename,
                                _with_sig_=True,  # special trick to tell create_function that we're @with_signature
                                **attrs
                                )
