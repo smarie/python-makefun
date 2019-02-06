@@ -363,7 +363,10 @@ def _get_callerframe():
 
 
 def with_signature(func_signature,  # type: Union[str, Signature]
-                   func_name=None   # type: str
+                   func_name=None,  # type: str
+                   addsource=True,  # type: bool
+                   doc=None,        # type: str
+                   **attrs
                    ):
     """
     A decorator for functions, to change their signature. The new signature should be compliant with the old one.
@@ -372,7 +375,12 @@ def with_signature(func_signature,  # type: Union[str, Signature]
     :return:
     """
     def replace_f(f):
-        return create_function(func_signature, f, func_name=func_name if func_name is not None else f.__name__)
+        return create_function(func_signature, f,
+                               func_name=func_name if func_name is not None else f.__name__,
+                               addsource=addsource,
+                               doc=doc,
+                               **attrs
+                               )
 
     return replace_f
 
