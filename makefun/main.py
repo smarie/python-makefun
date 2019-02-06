@@ -49,7 +49,12 @@ def create_function(func_signature,             # type: Union[str, Signature, Ca
     :return:
     """
     # grab context from the caller frame
-    frame = _get_callerframe()
+    try:
+        attrs.pop('_with_sig_')
+        # called from `@with_signature`
+        frame = _get_callerframe(offset=1)
+    except KeyError:
+        frame = _get_callerframe()
     evaldict, modulename = extract_module_and_evaldict(frame)
 
     # input signature handling
@@ -353,9 +358,9 @@ def _update_fields(func, name, doc=None, annotations=None, defaults=(), kwonlyde
     func.__module__ = module
 
 
-def _get_callerframe():
+def _get_callerframe(offset=0):
     try:
-        frame = sys._getframe(2)
+        frame = sys._getframe(2 + offset)
     except AttributeError:  # for IronPython and similar implementations
         frame = None
 
@@ -379,6 +384,7 @@ def with_signature(func_signature,  # type: Union[str, Signature]
                                func_name=func_name if func_name is not None else f.__name__,
                                addsource=addsource,
                                doc=doc,
+                               _with_sig_=True,  # special trick to tell create_function that we're @with_signature
                                **attrs
                                )
 
