@@ -28,6 +28,7 @@ def create_function(func_signature,             # type: Union[str, Signature, Ca
                     func_name=None,             # type: str
                     inject_as_first_arg=False,  # type: bool
                     addsource=True,             # type: bool
+                    addhandler=True,            # type: bool
                     doc=None,                   # type: str
                     modulename=None,            # type: str
                     **attrs):
@@ -45,6 +46,8 @@ def create_function(func_signature,             # type: Union[str, Signature, Ca
         from which context it was called. Default=False
     :param func_name: mandatory if func_signature is a `Signature` object, indeed these objects do not contain any name.
     :param addsource: a boolean indicating if a '__source__' annotation should be added to the generated function
+        (default: True)
+    :param addhandler: a boolean indicating if a '__call_handler__' annotation should be added to the generated function
         (default: True)
     :param doc: a string representing the docstring that will be used to set the __doc__ attribute on the generated
         function. If None (default), the doc of func_handler will be used.
@@ -114,6 +117,10 @@ def create_function(func_signature,             # type: Union[str, Signature, Ca
     # add the source annotation if needed
     if addsource:
         attrs['__source__'] = body
+
+    # add the handler if needed
+    if addhandler:
+        attrs['__call_handler__'] = func_handler
 
     # by default the doc is the one from the provided handler
     if doc is None:
@@ -376,6 +383,7 @@ def _get_callerframe(offset=0):
 def with_signature(func_signature,   # type: Union[str, Signature]
                    func_name=None,   # type: str
                    addsource=True,   # type: bool
+                   addhandler=True,  # type: bool
                    doc=None,         # type: str
                    modulename=None,  # type: str
                    **attrs
@@ -383,7 +391,21 @@ def with_signature(func_signature,   # type: Union[str, Signature]
     """
     A decorator for functions, to change their signature. The new signature should be compliant with the old one.
 
-    :param func_signature:  the new signature of the decorated function. See `create_function` for details.
+    :param func_signature: the new signature of the decorated function. either a string without 'def' such as
+        "foo(a, b: int, *args, **kwargs)", a callable, or a `Signature` object, for example from the output of
+        `inspect.signature` or from the `funcsigs.signature` backport. Note that these objects can be created and
+        edited too. If this is a `Signature`, then a non-none `func_name` should be provided. If this is a string,
+        `func_name` should not be provided.
+    :param func_name: mandatory if func_signature is a `Signature` object, indeed these objects do not contain any name.
+    :param addsource: a boolean indicating if a '__source__' annotation should be added to the generated function
+        (default: True)
+    :param addhandler: a boolean indicating if a '__call_handler__' annotation should be added to the generated function
+        (default: True)
+    :param doc: a string representing the docstring that will be used to set the __doc__ attribute on the generated
+        function. If None (default), the doc of func_handler will be used.
+    :param modulename: the name of the module to be set on the function (under __module__ ). If None (default), the
+        caller module name will be used.
+    :param attrs: other keyword attributes that should be set on the function
     :return:
     """
     def replace_f(f):
@@ -391,6 +413,7 @@ def with_signature(func_signature,   # type: Union[str, Signature]
                                func_handler=f,
                                func_name=func_name if func_name is not None else f.__name__,
                                addsource=addsource,
+                               addhandler=addhandler,
                                doc=doc,
                                modulename=modulename,
                                _with_sig_=True,  # special trick to tell create_function that we're @with_signature
