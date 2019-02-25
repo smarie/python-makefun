@@ -1,5 +1,7 @@
 # Changelog
 
+### 1.0.1 - minor: fixed PyPi doc
+
 ### 1.0.0 - New parameters, new goodie, and bugfix
 
 `@with_signature` :
