@@ -6,7 +6,7 @@ except ImportError:
     from funcsigs import signature, Signature, Parameter
 
 
-from makefun import create_function
+from makefun import create_function, add_signature_parameters, remove_signature_parameters
 
 python_version = sys.version_info.major
 
@@ -82,6 +82,23 @@ def test_from_sig():
 
     # then the behaviour
     assert dynamic_fun(3, 2) == (3, (2, 0))
+
+
+def test_helper_functions():
+    """ Tests that the signature modification helpers work """
+    def foo(b, c, a=0):
+        pass
+
+    # original signature
+    original_func_sig = signature(foo)
+    assert str(original_func_sig) == '(b, c, a=0)'
+
+    # let's modify it
+    func_sig = add_signature_parameters(original_func_sig,
+                                        first=(Parameter('z', Parameter.POSITIONAL_OR_KEYWORD),),
+                                        last=(Parameter('o', Parameter.POSITIONAL_OR_KEYWORD, default=True),))
+    func_sig = remove_signature_parameters(func_sig, 'b', 'a')
+    assert str(func_sig) == '(z, c, o=True)'
 
 
 def test_injection():
