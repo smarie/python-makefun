@@ -132,9 +132,46 @@ This way you can therefore easily create function wrappers with different signat
 
 Finally note that you can pass a function instead of a `Signature` object. The signature of this function will be used. This is particularly convenient if you wish to create a function wrapper, that is keeping the same signature than the wrapped function.
 
+#### Signature mod helpers
+
+Two helper functions are provided in this toolbox to make it a bit easier for you to edit `Signature` objects:
+ 
+ - `remove_signature_parameters` creates a new signature from an existing one by removing all parameters corresponding to the names provided
+ - `add_signature_parameters` prepends the `Parameter`s provided in its `first=` argument, and appends the ones provided in its `last` argument 
+
+```python
+from makefun import add_signature_parameters, remove_signature_parameters
+
+def foo(b, c, a=0):
+    pass
+
+# original signature
+original_func_sig = signature(foo)
+print("original signature: %s%s" % (foo.__name__, original_func_sig))
+
+# let's modify it
+func_sig = add_signature_parameters(original_func_sig,
+                first=(Parameter('z', kind=Parameter.POSITIONAL_OR_KEYWORD),),
+                last=(Parameter('o', kind=Parameter.POSITIONAL_OR_KEYWORD, 
+                                     default=True),))
+func_sig = remove_signature_parameters(func_sig, 'b', 'a')
+print("modified signature: %s%s" % (foo.__name__, original_func_sig))
+```
+
+yields
+
+```bash
+original signature: foo(b, c, a=0)
+modified signature: foo(z, c, o=True)
+```
+
+No rocket science here, but they might save you a few lines of code if your use-case is not too specific.
+
 ### 3- Changing the signature of a function
 
-A goodie decorator is also provided: `@with_signature`. It accepts a single argument that has exactly the same guidelines than the `func_signature` argument of `create_function`. It can be used to quickly change the signature of a function:
+A goodie decorator is also provided: `@with_signature`. It has the same arguments than `create_function`, except `func_handler`: calls will be handled by the decorated function directly. 
+
+It can be used to quickly change the signature of a function:
 
 ```python
 from makefun import with_signature
@@ -144,13 +181,12 @@ def foo(*args, **kwargs):
     # ...
 ```
 
-Or to quickly create a function wrapper using the same signature than the wrapped function:
+Or to create a signature-preserving function wrapper, exactly like `@functools.wraps` but with the signature-preserving feature:
 
 ```python
 from makefun import with_signature
 
-# imagine that we want to wrap this function f
-# so as to add some prints before calling
+# we want to wrap this function f to add some prints before calls
 def f(a, b):
     return a + b
 
@@ -164,7 +200,7 @@ def f_wrapper(*args, **kwargs):
 
 f_wrapper(1, 2)  # prints `'hello` and returns 1 + 2 
 ```
- 
+
 
 ### 4- Advanced topics
 
