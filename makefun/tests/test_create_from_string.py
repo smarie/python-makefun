@@ -68,7 +68,7 @@ def test_basic(params_type_hints, with_self_ref):
     else:
         src = "def " + func_signature + '\n    return _call_handler_(b=b, a=a)\n'
 
-    dct = {'__source__': src}
+    dct = {'__source__': src, '__call_handler__': identity_handler}
     if not params_type_hints_allowed:
         dct['__annotations__'] = dict()
         dct['__kwdefaults__'] = None
