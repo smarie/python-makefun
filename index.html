@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-3.3.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.0.1">
     
     
       
@@ -40,12 +40,12 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/application.572ca0f0.css">
+      <link rel="stylesheet" href="assets/stylesheets/application.982221ab.css">
       
       
     
     
-      <script src="assets/javascripts/modernizr.962652e9.js"></script>
+      <script src="assets/javascripts/modernizr.1f0bcf2b.js"></script>
     
     
       
@@ -115,22 +115,19 @@
       <div class="md-flex__cell md-flex__cell--stretch">
         <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
           
-            
-              <span class="md-header-nav__topic">
-                makefun
-              </span>
-              <span class="md-header-nav__topic">
-                Home
-              </span>
-            
+            <span class="md-header-nav__topic">
+              makefun
+            </span>
+            <span class="md-header-nav__topic">
+              Home
+            </span>
           
         </div>
       </div>
       <div class="md-flex__cell md-flex__cell--shrink">
         
+          <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
           
-            <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
-            
 <div class="md-search" data-md-component="search" role="dialog">
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
@@ -153,7 +150,6 @@
     </div>
   </div>
 </div>
-          
         
       </div>
       
@@ -164,20 +160,18 @@
 
   
 
-
-  <a href="https://github.com/smarie/python-makefun/" title="Go to repository" class="md-source" data-md-source="github">
-    
-      <div class="md-source__icon">
-        <svg viewBox="0 0 24 24" width="24" height="24">
-          <use xlink:href="#__github" width="24" height="24"></use>
-        </svg>
-      </div>
-    
-    <div class="md-source__repository">
-      GitHub
+<a href="https://github.com/smarie/python-makefun/" title="Go to repository" class="md-source" data-md-source="github">
+  
+    <div class="md-source__icon">
+      <svg viewBox="0 0 24 24" width="24" height="24">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
     </div>
-  </a>
-
+  
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
           </div>
         </div>
       
@@ -213,20 +207,18 @@
 
   
 
-
-  <a href="https://github.com/smarie/python-makefun/" title="Go to repository" class="md-source" data-md-source="github">
-    
-      <div class="md-source__icon">
-        <svg viewBox="0 0 24 24" width="24" height="24">
-          <use xlink:href="#__github" width="24" height="24"></use>
-        </svg>
-      </div>
-    
-    <div class="md-source__repository">
-      GitHub
+<a href="https://github.com/smarie/python-makefun/" title="Go to repository" class="md-source" data-md-source="github">
+  
+    <div class="md-source__icon">
+      <svg viewBox="0 0 24 24" width="24" height="24">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
     </div>
-  </a>
-
+  
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
     </div>
   
   <ul class="md-nav__list" data-md-scrollfix>
@@ -302,6 +294,19 @@
   <a href="#2-creating-functions-from-signature-objects" title="2- Creating functions from Signature objects" class="md-nav__link">
     2- Creating functions from Signature objects
   </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#signature-mod-helpers" title="Signature mod helpers" class="md-nav__link">
+    Signature mod helpers
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -467,6 +472,19 @@
   <a href="#2-creating-functions-from-signature-objects" title="2- Creating functions from Signature objects" class="md-nav__link">
     2- Creating functions from Signature objects
   </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#signature-mod-helpers" title="Signature mod helpers" class="md-nav__link">
+    Signature mod helpers
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -686,8 +704,41 @@ foo called: b=2, a=0
 
 <p>This way you can therefore easily create function wrappers with different signatures: not only adding, but also removing parameters, changing their kind (forcing keyword-only for example), etc. The possibilities are as numerous as the capabilities of the <code>Signature</code> objects.</p>
 <p>Finally note that you can pass a function instead of a <code>Signature</code> object. The signature of this function will be used. This is particularly convenient if you wish to create a function wrapper, that is keeping the same signature than the wrapped function.</p>
+<h4 id="signature-mod-helpers">Signature mod helpers<a class="headerlink" href="#signature-mod-helpers" title="Permanent link">&para;</a></h4>
+<p>Two helper functions are provided in this toolbox to make it a bit easier for you to edit <code>Signature</code> objects:</p>
+<ul>
+<li><code>remove_signature_parameters</code> creates a new signature from an existing one by removing all parameters corresponding to the names provided</li>
+<li><code>add_signature_parameters</code> prepends the <code>Parameter</code>s provided in its <code>first=</code> argument, and appends the ones provided in its <code>last</code> argument </li>
+</ul>
+<div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">makefun</span> <span class="kn">import</span> <span class="n">add_signature_parameters</span><span class="p">,</span> <span class="n">remove_signature_parameters</span>
+
+<span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="c1"># original signature</span>
+<span class="n">original_func_sig</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;original signature: </span><span class="si">%s%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">foo</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">original_func_sig</span><span class="p">))</span>
+
+<span class="c1"># let&#39;s modify it</span>
+<span class="n">func_sig</span> <span class="o">=</span> <span class="n">add_signature_parameters</span><span class="p">(</span><span class="n">original_func_sig</span><span class="p">,</span>
+                <span class="n">first</span><span class="o">=</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Parameter</span><span class="o">.</span><span class="n">POSITIONAL_OR_KEYWORD</span><span class="p">),),</span>
+                <span class="n">last</span><span class="o">=</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Parameter</span><span class="o">.</span><span class="n">POSITIONAL_OR_KEYWORD</span><span class="p">,</span> 
+                                     <span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">),))</span>
+<span class="n">func_sig</span> <span class="o">=</span> <span class="n">remove_signature_parameters</span><span class="p">(</span><span class="n">func_sig</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;modified signature: </span><span class="si">%s%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">foo</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">original_func_sig</span><span class="p">))</span>
+</pre></div>
+
+
+<p>yields</p>
+<div class="codehilite"><pre><span></span>original signature: foo<span class="o">(</span>b, c, <span class="nv">a</span><span class="o">=</span><span class="m">0</span><span class="o">)</span>
+modified signature: foo<span class="o">(</span>z, c, <span class="nv">o</span><span class="o">=</span>True<span class="o">)</span>
+</pre></div>
+
+
+<p>No rocket science here, but they might save you a few lines of code if your use-case is not too specific.</p>
 <h3 id="3-changing-the-signature-of-a-function">3- Changing the signature of a function<a class="headerlink" href="#3-changing-the-signature-of-a-function" title="Permanent link">&para;</a></h3>
-<p>A goodie decorator is also provided: <code>@with_signature</code>. It accepts a single argument that has exactly the same guidelines than the <code>func_signature</code> argument of <code>create_function</code>. It can be used to quickly change the signature of a function:</p>
+<p>A goodie decorator is also provided: <code>@with_signature</code>. It has the same arguments than <code>create_function</code>, except <code>func_handler</code>: calls will be handled by the decorated function directly. </p>
+<p>It can be used to quickly change the signature of a function:</p>
 <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">makefun</span> <span class="kn">import</span> <span class="n">with_signature</span>
 
 <span class="nd">@with_signature</span><span class="p">(</span><span class="s2">&quot;foo(a, b)&quot;</span><span class="p">)</span>
@@ -696,11 +747,10 @@ foo called: b=2, a=0
 </pre></div>
 
 
-<p>Or to quickly create a function wrapper using the same signature than the wrapped function:</p>
+<p>Or to create a signature-preserving function wrapper, exactly like <code>@functools.wraps</code> but with the signature-preserving feature:</p>
 <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">makefun</span> <span class="kn">import</span> <span class="n">with_signature</span>
 
-<span class="c1"># imagine that we want to wrap this function f</span>
-<span class="c1"># so as to add some prints before calling</span>
+<span class="c1"># we want to wrap this function f to add some prints before calls</span>
 <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
 
@@ -854,15 +904,13 @@ This is generic handler called by func2
           Material for MkDocs</a>
       </div>
       
-        
-      
     </div>
   </div>
 </footer>
       
     </div>
     
-      <script src="assets/javascripts/application.a353778b.js"></script>
+      <script src="assets/javascripts/application.b806dc00.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"."}})</script>
       
