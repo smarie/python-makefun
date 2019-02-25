@@ -373,6 +373,8 @@ def _update_fields(func, name, doc=None, annotations=None, defaults=(), kwonlyde
 
 def _get_callerframe(offset=0):
     try:
+        # inspect.stack and inspect.currentframe are extremely slow, the fastest is sys._getframe.
+        # See https://gist.github.com/JettJones/c236494013f22723c1822126df944b12
         frame = sys._getframe(2 + offset)
     except AttributeError:  # for IronPython and similar implementations
         frame = None
@@ -437,7 +439,7 @@ def remove_signature_parameters(s, *param_names):
     return s.replace(parameters=params.values())
 
 
-def add_signature_parameters(s, first=None, last=None):
+def add_signature_parameters(s, first=(), last=()):
     """
     Adds the provided parameters to the signature s (returns a new signature instance).
 
