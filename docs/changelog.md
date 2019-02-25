@@ -1,5 +1,25 @@
 # Changelog
 
+### 1.0.0 - New parameters, new goodie, and bugfix
+
+`@with_signature` :
+
+ - now exposes all options of `create_function`. Fixed [#12](https://github.com/smarie/python-makefun/issues/12).
+ - now correctly sets the module name by default. Fixes [#13](https://github.com/smarie/python-makefun/issues/13)
+ - now accepts `None` as the new `func_signature` to declare that the signature is identical to the decorated function. This can be handy to just change the docstring or module name of a function for example. Fixes [#15](https://github.com/smarie/python-makefun/issues/15)
+
+
+`create_function` and `@with_signature`:
+
+ - New `modulename` parameter to override the module name. Fixes [#14](https://github.com/smarie/python-makefun/issues/14)
+ - the handler is now available as a field of the generated function (under `__call_handler__`). New `addhandler` parameter (default: True) controls this behaviour. Fixes [#16](https://github.com/smarie/python-makefun/issues/16)
+
+
+Misc:
+
+ - New goodie to manipulate signatures: `add_signature_parameters`.
+ - Fixed dependencies for documentation auto-build.
+
 ### 0.5.0 - New helper function, and bugfix
 
 New helper function `remove_signature_parameters`.
