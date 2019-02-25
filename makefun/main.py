@@ -453,14 +453,14 @@ def add_signature_parameters(s, first=(), last=()):
 
     # prepend
     for param in first:
-        if param in params:
+        if param.name in params:
             raise ValueError("Parameter with name '%s' is present twice in the signature to create" % param.name)
         else:
             lst.insert(0, param)
 
     # append
     for param in last:
-        if param in params:
+        if param.name in params:
             raise ValueError("Parameter with name '%s' is present twice in the signature to create" % param.name)
         else:
             lst.append(param)
