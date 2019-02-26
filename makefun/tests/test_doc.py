@@ -1,4 +1,5 @@
 import sys
+import pytest
 
 try:  # python 3.3+
     from inspect import signature, Signature, Parameter
@@ -6,7 +7,7 @@ except ImportError:
     from funcsigs import signature, Signature, Parameter
 
 
-from makefun import create_function, add_signature_parameters, remove_signature_parameters
+from makefun import create_function, add_signature_parameters, remove_signature_parameters, with_signature
 
 python_version = sys.version_info.major
 
@@ -140,3 +141,38 @@ def test_positional_only():
               Parameter('b', kind=Parameter.POSITIONAL_OR_KEYWORD)]
 
     assert str(Signature(parameters=params)) in {"(<a>, b)", "(a, /, b)"}
+
+
+def test_with_signature():
+    """ Tests that @with_signature works as expected """
+    @with_signature("foo(a)")
+    def foo(**kwargs):
+        return 'hello'
+
+    with pytest.raises(TypeError):
+        foo()
+
+    assert str(signature(foo)) == "(a)"
+    assert foo('dummy') == 'hello'
+
+
+def test_with_signature_wrapper(capsys):
+    # we want to wrap this function f to add some prints before calls
+    def f(a, b):
+        return a + b
+
+    # create our wrapper: it will have the same signature than f
+    @with_signature(f)
+    def f_wrapper(*args, **kwargs):
+        # first print something interesting
+        print('hello')
+        # then call f as usual
+        return f(*args, **kwargs)
+
+    assert f_wrapper(1, 2) == 3  # prints `'hello` and returns 1 + 2
+
+    captured = capsys.readouterr()
+    with capsys.disabled():
+        print(captured.out)
+
+    assert captured.out == "hello\n"

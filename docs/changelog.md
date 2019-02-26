@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.0.2 - Fixed `@with_signature`
+
+Now a string signature can be provided to `@with_signature` without problem. Fixed [#17](https://github.com/smarie/python-makefun/issues/17).
+
 ### 1.0.1 - minor: fixed PyPi doc
 
 ### 1.0.0 - New parameters, new goodie, and bugfix
