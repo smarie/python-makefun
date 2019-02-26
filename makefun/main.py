@@ -373,9 +373,13 @@ def _update_fields(func, name, doc=None, annotations=None, defaults=(), kwonlyde
 
 def _get_callerframe(offset=0):
     try:
-        # inspect.stack and inspect.currentframe are extremely slow, the fastest is sys._getframe.
+        # inspect.stack is extremely slow, the fastest is sys._getframe or inspect.currentframe().
         # See https://gist.github.com/JettJones/c236494013f22723c1822126df944b12
         frame = sys._getframe(2 + offset)
+        # frame = currentframe()
+        # for _ in range(2 + offset):
+        #     frame = frame.f_back
+
     except AttributeError:  # for IronPython and similar implementations
         frame = None
 
