@@ -10,8 +10,21 @@ try:  # python 3.3+
 except ImportError:
     from funcsigs import signature, Signature, Parameter
 
+try:
+    from inspect import iscoroutinefunction
+except ImportError:
+    # let's assume there are no coroutine functions in old Python
+    def iscoroutinefunction(f):
+        return False
 
-try: # python 3.5+
+try:
+    from inspect import isgeneratorfunction
+except ImportError:
+    # assume no generator function in old Python versions
+    def isgeneratorfunction():
+        return False
+
+try:  # python 3.5+
     from typing import Callable, Any, Union
 except ImportError:
     pass
@@ -107,7 +120,54 @@ def create_function(func_signature,             # type: Union[str, Signature, Ca
     params_str = ', '.join(assignments)
     if inject_as_first_arg:
         params_str = "%s, %s" % (func_name, params_str)
-    body = 'def %s\n    return _call_handler_(%s)\n' % (func_signature_str, params_str)
+
+    if (3, 5) <= sys.version_info < (3, 6):
+        # with Python 3.5 isgeneratorfunction returns True for all coroutines
+        # however we know that it is NOT possible to have a generator
+        # coroutine in python 3.5: PEP525 was not there yet
+        generatorcaller = isgeneratorfunction(func_handler) and not iscoroutinefunction(func_handler)
+    else:
+        generatorcaller = isgeneratorfunction(func_handler)
+
+    if generatorcaller:
+        if sys.version_info >= (3, 3):
+            body = "def %s\n    yield from _call_handler_(%s)\n" % (func_signature_str, params_str)
+        else:
+            # from PEP380 - see https://www.python.org/dev/peps/pep-0380/#formal-semantics
+            # note: we removed a few lines so that StopIteration exceptions are re-raised
+            body = """def %s
+    _i = iter(_call_handler_(%s))    # initialize the generator
+    _y = next(_i)                    # first iteration
+    while 1:
+        try:
+            _s = yield _y            # yield the first output and retrieve the new input
+        except GeneratorExit as _e:  # ---generator exit error---
+            try:
+                _m = _i.close        # if there is a close method
+            except AttributeError:
+                pass               
+            else:
+                _m()                 # use it first
+            raise _e                 # then re-raise exception
+        except BaseException as _e:  # ---other exception
+            _x = sys.exc_info()      # if captured exception, grab info
+            try:
+                _m = _i.throw        # if there is a throw method
+            except AttributeError:
+                raise _e             # otherwise re-raise
+            else:
+                _y = _m(*_x)         # use it 
+        else:                        # --- nominal case: the new input was received
+            # if _s is None:       
+            #     _y = next(_i)
+            # else:
+            _y = _i.send(_s)     # let the implementation decide if None means "no new input" or "new input = None"
+""" % (func_signature_str, params_str)
+    else:
+        body = "def %s\n    return _call_handler_(%s)\n" % (func_signature_str, params_str)
+
+    if iscoroutinefunction(func_handler):
+        body = ("async " + body).replace('return', 'return await')
 
     # create the function by compiling code, mapping the `_call_handler_` symbol to `func_handler`
     protect_eval_dict(evaldict, func_name, params_names)
