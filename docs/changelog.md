@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.1.0 - Support for generators and coroutines
+
+Now `create_function` and `@with_signature` create the same kind of function than the handler. So if it is a generator, a generator-based coroutine, or an async coroutine, the generated function will adapt. Fixes [#6](https://github.com/smarie/python-makefun/issues/6).
+
 ### 1.0.2 - Fixed `@with_signature`
 
 Now a string signature can be provided to `@with_signature` without problem. Fixed [#17](https://github.com/smarie/python-makefun/issues/17).
