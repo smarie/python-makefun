@@ -204,6 +204,59 @@ f_wrapper(1, 2)  # prints `'hello` and returns 1 + 2
 
 ### 4- Advanced topics
 
+#### Generators, Coroutines, and Asyncio
+
+`create_function` and `@with_signature` will automatically create a generator if your function handler is a generator:
+
+```python
+# define the handler that should be called
+def my_generator_handler(b, a=0):
+    for i in range(a, b):
+        yield i * i
+
+# create the dynamic function
+dynamic_fun = create_function("foo(a, b)", my_generator_handler)
+
+# verify that the new function is a generator and behaves as such
+assert isgeneratorfunction(dynamic_fun)
+assert list(dynamic_fun(1, 4)) == [1, 4, 9]
+```
+
+The same goes for generator-based coroutines:
+
+```python
+# define the handler that should be called
+def my_gencoroutine_handler(first_msg):
+    second_msg = (yield first_msg)
+    yield second_msg
+
+# create the dynamic function
+dynamic_fun = create_function("foo(first_msg='hello')", my_gencoroutine_handler)
+
+# verify that the new function is a generator-based coroutine and behaves correctly
+cor = dynamic_fun('hi')
+assert next(cor) == 'hi'
+assert cor.send('chaps') == 'chaps'
+cor.send('ola')  # raises StopIteration
+```
+
+and asyncio coroutines as well
+
+```python
+# define the handler that should be called
+async def my_native_coroutine_handler(sleep_time):
+    await sleep(sleep_time)
+    return sleep_time
+
+# create the dynamic function
+dynamic_fun = create_function("foo(sleep_time=2)", my_native_coroutine_handler)
+
+# verify that the new function is a native coroutine and behaves correctly
+from asyncio import get_event_loop
+out = get_event_loop().run_until_complete(dynamic_fun(5))
+assert out == 5
+```
+
 #### Variable-length, Positional-only and Keyword-only
 
 By default, all arguments (including the ones which fell back to default values) will be passed to the handler. You can see it by printing the `__source__` field of the generated function:
