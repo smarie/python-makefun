@@ -326,6 +326,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#generators-coroutines-and-asyncio" title="Generators, Coroutines, and Asyncio" class="md-nav__link">
+    Generators, Coroutines, and Asyncio
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#variable-length-positional-only-and-keyword-only" title="Variable-length, Positional-only and Keyword-only" class="md-nav__link">
     Variable-length, Positional-only and Keyword-only
   </a>
@@ -502,6 +509,13 @@
   
     <nav class="md-nav">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#generators-coroutines-and-asyncio" title="Generators, Coroutines, and Asyncio" class="md-nav__link">
+    Generators, Coroutines, and Asyncio
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#variable-length-positional-only-and-keyword-only" title="Variable-length, Positional-only and Keyword-only" class="md-nav__link">
@@ -767,6 +781,55 @@ modified signature: foo<span class="o">(</span>z, c, <span class="nv">o</span><s
 
 
 <h3 id="4-advanced-topics">4- Advanced topics<a class="headerlink" href="#4-advanced-topics" title="Permanent link">&para;</a></h3>
+<h4 id="generators-coroutines-and-asyncio">Generators, Coroutines, and Asyncio<a class="headerlink" href="#generators-coroutines-and-asyncio" title="Permanent link">&para;</a></h4>
+<p><code>create_function</code> and <code>@with_signature</code> will automatically create a generator if your function handler is a generator:</p>
+<div class="codehilite"><pre><span></span><span class="c1"># define the handler that should be called</span>
+<span class="k">def</span> <span class="nf">my_generator_handler</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">i</span> <span class="o">*</span> <span class="n">i</span>
+
+<span class="c1"># create the dynamic function</span>
+<span class="n">dynamic_fun</span> <span class="o">=</span> <span class="n">create_function</span><span class="p">(</span><span class="s2">&quot;foo(a, b)&quot;</span><span class="p">,</span> <span class="n">my_generator_handler</span><span class="p">)</span>
+
+<span class="c1"># verify that the new function is a generator and behaves as such</span>
+<span class="k">assert</span> <span class="n">isgeneratorfunction</span><span class="p">(</span><span class="n">dynamic_fun</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">list</span><span class="p">(</span><span class="n">dynamic_fun</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span> <span class="o">==</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">]</span>
+</pre></div>
+
+
+<p>The same goes for generator-based coroutines:</p>
+<div class="codehilite"><pre><span></span><span class="c1"># define the handler that should be called</span>
+<span class="k">def</span> <span class="nf">my_gencoroutine_handler</span><span class="p">(</span><span class="n">first_msg</span><span class="p">):</span>
+    <span class="n">second_msg</span> <span class="o">=</span> <span class="p">(</span><span class="k">yield</span> <span class="n">first_msg</span><span class="p">)</span>
+    <span class="k">yield</span> <span class="n">second_msg</span>
+
+<span class="c1"># create the dynamic function</span>
+<span class="n">dynamic_fun</span> <span class="o">=</span> <span class="n">create_function</span><span class="p">(</span><span class="s2">&quot;foo(first_msg=&#39;hello&#39;)&quot;</span><span class="p">,</span> <span class="n">my_gencoroutine_handler</span><span class="p">)</span>
+
+<span class="c1"># verify that the new function is a generator-based coroutine and behaves correctly</span>
+<span class="n">cor</span> <span class="o">=</span> <span class="n">dynamic_fun</span><span class="p">(</span><span class="s1">&#39;hi&#39;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">next</span><span class="p">(</span><span class="n">cor</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;hi&#39;</span>
+<span class="k">assert</span> <span class="n">cor</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;chaps&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;chaps&#39;</span>
+<span class="n">cor</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;ola&#39;</span><span class="p">)</span>  <span class="c1"># raises StopIteration</span>
+</pre></div>
+
+
+<p>and asyncio coroutines as well</p>
+<div class="codehilite"><pre><span></span><span class="c1"># define the handler that should be called</span>
+<span class="n">async</span> <span class="k">def</span> <span class="nf">my_native_coroutine_handler</span><span class="p">(</span><span class="n">sleep_time</span><span class="p">):</span>
+    <span class="n">await</span> <span class="n">sleep</span><span class="p">(</span><span class="n">sleep_time</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sleep_time</span>
+
+<span class="c1"># create the dynamic function</span>
+<span class="n">dynamic_fun</span> <span class="o">=</span> <span class="n">create_function</span><span class="p">(</span><span class="s2">&quot;foo(sleep_time=2)&quot;</span><span class="p">,</span> <span class="n">my_native_coroutine_handler</span><span class="p">)</span>
+
+<span class="c1"># verify that the new function is a native coroutine and behaves correctly</span>
+<span class="kn">from</span> <span class="nn">asyncio</span> <span class="kn">import</span> <span class="n">get_event_loop</span>
+<span class="n">out</span> <span class="o">=</span> <span class="n">get_event_loop</span><span class="p">()</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">dynamic_fun</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="k">assert</span> <span class="n">out</span> <span class="o">==</span> <span class="mi">5</span>
+</pre></div>
+
+
 <h4 id="variable-length-positional-only-and-keyword-only">Variable-length, Positional-only and Keyword-only<a class="headerlink" href="#variable-length-positional-only-and-keyword-only" title="Permanent link">&para;</a></h4>
 <p>By default, all arguments (including the ones which fell back to default values) will be passed to the handler. You can see it by printing the <code>__source__</code> field of the generated function:</p>
 <div class="codehilite"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">dynamic_fun</span><span class="o">.</span><span class="n">__source__</span><span class="p">)</span>
