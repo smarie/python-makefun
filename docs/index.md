@@ -136,9 +136,8 @@ Finally note that you can pass a function instead of a `Signature` object. The s
 
 #### Signature mod helpers
 
-Three helper functions are provided in this toolbox to make it a bit easier for you to edit `Signature` objects:
+Two helper functions are provided in this toolbox to make it a bit easier for you to edit `Signature` objects:
  
- - `signature` is an alias for whatever `signature` is available (the one from `inspect` in python 3.3+ or the one from `funcsigs` otherwise). It makes it easier for your code to be python 2/3 compliant.
  - `remove_signature_parameters` creates a new signature from an existing one by removing all parameters corresponding to the names provided
  - `add_signature_parameters` prepends the `Parameter`s provided in its `first=` argument, and appends the ones provided in its `last` argument 
 

@@ -176,9 +176,3 @@ def test_with_signature_wrapper(capsys):
         print(captured.out)
 
     assert captured.out == "hello\n"
-
-
-def test_signature_alias():
-    """ Tests that the signature alias works as expected """
-    from makefun import signature as s
-    assert s == signature
