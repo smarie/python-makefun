@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.1.1 - `@with_signature` fix
+
+`inject_as_first_arg` was missing from `@with_signature`, added it. Fixed [#18](https://github.com/smarie/python-makefun/issues/18).
+
 ### 1.1.0 - Support for generators and coroutines
 
 Now `create_function` and `@with_signature` create the same kind of function than the handler. So if it is a generator, a generator-based coroutine, or an async coroutine, the generated function will adapt. Fixes [#6](https://github.com/smarie/python-makefun/issues/6).
