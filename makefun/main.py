@@ -446,12 +446,13 @@ def _get_callerframe(offset=0):
     return frame
 
 
-def with_signature(func_signature,   # type: Union[str, Signature]
-                   func_name=None,   # type: str
-                   addsource=True,   # type: bool
-                   addhandler=True,  # type: bool
-                   doc=None,         # type: str
-                   modulename=None,  # type: str
+def with_signature(func_signature,             # type: Union[str, Signature]
+                   func_name=None,             # type: str
+                   inject_as_first_arg=False,  # type: bool
+                   addsource=True,             # type: bool
+                   addhandler=True,            # type: bool
+                   doc=None,                   # type: str
+                   modulename=None,            # type: str
                    **attrs
                    ):
     """
@@ -479,6 +480,7 @@ def with_signature(func_signature,   # type: Union[str, Signature]
                                func_handler=f,
                                func_name=func_name if func_name is not None
                                          else (None if isinstance(func_signature, str) else f.__name__),
+                               inject_as_first_arg=inject_as_first_arg,
                                addsource=addsource,
                                addhandler=addhandler,
                                doc=doc,
