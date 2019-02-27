@@ -2,17 +2,19 @@ language: python
 
 cache: pip
 
-python:
-  - "2.7"
-  - "3.5"
-  - "3.6"
-#  - "3.7"  NOT AVAILABLE ON TRAVIS YET..
-#  - "3.7-dev" # 3.7 development branch
-#  - "nightly" # currently points to 3.7-dev
-# PyPy versions
-#  - "pypy"  # PyPy2 2.5.0
-#  - "pypy3" # Pypy3 2.4.0
-#  - "pypy-5.3.1"
+matrix:
+  fast_finish: true
+  include:
+    - python: 2.6
+    - python: 2.7
+    - python: 3.2
+    - python: 3.3
+    - python: 3.4
+    - python: 3.5
+    - python: 3.6
+    - python: 3.7
+      dist: xenial
+      sudo: true
 
 env:
   global:
@@ -96,9 +98,6 @@ deploy:
       tags: true
       python: 3.5  #only one of the builds have to be deployed
       # condition: $PYTEST_VERSION = "<3"
-
-matrix:
-    fast_finish: true
 
 notifications:
   email:
