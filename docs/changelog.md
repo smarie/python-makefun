@@ -1,5 +1,11 @@
 # Changelog
 
+### 1.1.2 - Fixes
+
+Fixed `isgeneratorfunction` for old python versions, see [decorator#63](https://github.com/micheles/decorator/pull/63).
+
+Python<3.3-specific function body is now not loaded at all if not needed.
+
 ### 1.1.1 - `@with_signature` fix
 
 `inject_as_first_arg` was missing from `@with_signature`, added it. Fixed [#18](https://github.com/smarie/python-makefun/issues/18).
