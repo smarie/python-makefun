@@ -21,7 +21,7 @@ try:
     from inspect import isgeneratorfunction
 except ImportError:
     # assume no generator function in old Python versions
-    def isgeneratorfunction():
+    def isgeneratorfunction(f):
         return False
 
 try:  # python 3.5+
