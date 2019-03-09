@@ -1,5 +1,10 @@
 # Changelog
 
+### 1.2.0 - `@with_signature` supports `None`
+
+`None` can be used as the desired signature of `@with_signature`. This indicated that the user does not want to create a new function but only wants to update the metadata. Fixes [#20](https://github.com/smarie/python-makefun/issues/20).
+
+
 ### 1.1.2 - Fixes
 
 Fixed `isgeneratorfunction` for old python versions, see [decorator#63](https://github.com/micheles/decorator/pull/63).
