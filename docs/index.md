@@ -203,6 +203,15 @@ def f_wrapper(*args, **kwargs):
 f_wrapper(1, 2)  # prints `'hello` and returns 1 + 2 
 ```
 
+Finally, you can use `None` as signature to indicate that you just want to update the metadata (`func_name`, `doc`, `modulename`) without creating any wrapper:
+
+```python
+@with_signature(None, func_name='f')
+def foo(a):
+    return a
+
+assert foo.__name__ == 'f'
+```
 
 ### 4- Advanced topics
 

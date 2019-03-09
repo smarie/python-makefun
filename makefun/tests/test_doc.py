@@ -156,6 +156,22 @@ def test_with_signature():
     assert foo('dummy') == 'hello'
 
 
+def test_with_signature_none():
+    """"""
+
+    def foo(a):
+        return a
+
+    new = with_signature(None, func_name='f')(foo)
+
+    assert new('hello') == 'hello'
+    assert str(signature(new)) == "(a)"
+
+    # check that the object was not wrapped
+    assert new == foo
+    assert new.__name__ == 'f'
+
+
 def test_with_signature_wrapper(capsys):
     # we want to wrap this function f to add some prints before calls
     def f(a, b):
