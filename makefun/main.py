@@ -430,11 +430,16 @@ def with_signature(func_signature,             # type: Union[str, Signature]
     """
     A decorator for functions, to change their signature. The new signature should be compliant with the old one.
 
-    :param func_signature: the new signature of the decorated function. either a string without 'def' such as
+    If `func_signature` is set to `None`, then no new function is created: this simply applies the new metadata (name,
+    doc, modulename) to the decorated function. `addsource`, `addhandler` and `inject_as_first_arg` should not be set
+    in this case.
+
+    :param func_signature: the new signature of the decorated function. Either a string without 'def' such as
         "foo(a, b: int, *args, **kwargs)", a callable, or a `Signature` object, for example from the output of
         `inspect.signature` or from the `funcsigs.signature` backport. Note that these objects can be created and
-        edited too. If this is a `Signature`, then a non-none `func_name` should be provided. If this is a string,
-        `func_name` should not be provided.
+        edited too. If this is a `Signature`, then a non-None `func_name` should be provided. If this is a string,
+        `func_name` should not be provided. Finally `None` can be provided to indicate that user wants to only change
+        the medatadata (func_name, doc, modulename) but without generating a new function.
     :param func_name: mandatory if func_signature is a `Signature` object, indeed these objects do not contain any name.
     :param addsource: a boolean indicating if a '__source__' annotation should be added to the generated function
         (default: True)
@@ -447,19 +452,35 @@ def with_signature(func_signature,             # type: Union[str, Signature]
     :param attrs: other keyword attributes that should be set on the function
     :return:
     """
-    def replace_f(f):
-        return create_function(func_signature=func_signature if func_signature is not None else f,
-                               func_handler=f,
-                               func_name=func_name if func_name is not None
-                                         else (None if isinstance(func_signature, str) else f.__name__),
-                               inject_as_first_arg=inject_as_first_arg,
-                               addsource=addsource,
-                               addhandler=addhandler,
-                               doc=doc,
-                               modulename=modulename,
-                               _with_sig_=True,  # special trick to tell create_function that we're @with_signature
-                               **attrs
-                               )
+    if func_signature is None:
+        # make sure that user does not provide non-default other args
+        if inject_as_first_arg or not addsource or not addhandler or len(attrs) > 0:
+            raise ValueError("If `func_signature=None` no new signature will be generated so only `func_name`, "
+                             "`modulename` and `doc` should be provided, to modify the metadata.")
+        else:
+            def replace_f(f):
+                # manually apply all the metadata, but do not generate code - that's useless
+                if func_name is not None:
+                    f.__name__ = func_name
+                if doc is not None:
+                    f.__doc__ = doc
+                if modulename is not None:
+                    f.__module__ = modulename
+                return f
+    else:
+        def replace_f(f):
+            return create_function(func_signature=func_signature if func_signature is not None else f,
+                                   func_handler=f,
+                                   func_name=func_name if func_name is not None
+                                             else (None if isinstance(func_signature, str) else f.__name__),
+                                   inject_as_first_arg=inject_as_first_arg,
+                                   addsource=addsource,
+                                   addhandler=addhandler,
+                                   doc=doc,
+                                   modulename=modulename,
+                                   _with_sig_=True,  # special trick to tell create_function that we're @with_signature
+                                   **attrs
+                                   )
 
     return replace_f
 
