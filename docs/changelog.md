@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.4.0 - Non-representable default values are now handled correctly
+
+When a non-representable default value was used in the signature to generate, the code failed with a `SyntaxError`. This case is now correctly handled, by storing the corresponding variable in the generated function's context. Fixes [#23](https://github.com/smarie/python-makefun/issues/23).
+
 ### 1.3.0 - Aliases for signature-preserving wrapper scenarios
 
  - Now providing a `@wraps`, equivalent of `functools.wraps`; and a `create_wrapper` equivalent of `functools.update_wrapper`. Fixes [#21](https://github.com/smarie/python-makefun/issues/21)
