@@ -1,23 +1,33 @@
 # makefun
 
-*Small library to dynamically create python functions.*
+*Dynamically create python functions with a proper signature.*
 
 [![Python versions](https://img.shields.io/pypi/pyversions/makefun.svg)](https://pypi.python.org/pypi/makefun/) [![Build Status](https://travis-ci.org/smarie/python-makefun.svg?branch=master)](https://travis-ci.org/smarie/python-makefun) [![Tests Status](https://smarie.github.io/python-makefun/junit/junit-badge.svg?dummy=8484744)](https://smarie.github.io/python-makefun/junit/report.html) [![codecov](https://codecov.io/gh/smarie/python-makefun/branch/master/graph/badge.svg)](https://codecov.io/gh/smarie/python-makefun)
 
 [![Documentation](https://img.shields.io/badge/doc-latest-blue.svg)](https://smarie.github.io/python-makefun/) [![PyPI](https://img.shields.io/pypi/v/makefun.svg)](https://pypi.python.org/pypi/makefun/) [![Downloads](https://pepy.tech/badge/makefun)](https://pepy.tech/project/makefun) [![Downloads per week](https://pepy.tech/badge/makefun/week)](https://pepy.tech/project/makefun) [![GitHub stars](https://img.shields.io/github/stars/smarie/python-makefun.svg)](https://github.com/smarie/python-makefun/stargazers)
 
-This library was largely inspired by [`decorator`](https://github.com/micheles/decorator), and created mainly to cover [this case](https://github.com/micheles/decorator/pull/58) where the need was to create a function wrapper with a different (but close) signature than the wrapped function.
+`makefun` help you create functions dynamically, with the signature of your choice. It was largely inspired by [`decorator`](https://github.com/micheles/decorator), and created mainly to cover [one of its limitations](https://github.com/micheles/decorator/pull/58). Thanks [`micheles`](https://github.com/micheles) for this great piece of work!
 
-`makefun` help you create functions dynamically, with accurate and complete signature. The typical use cases are
+The typical use cases are:
 
- - you want to create a function `g` with a signature that is derived from the signature of a function `f` provided at runtime (for example the signature of a user-entered function). For example `g` has the same signature than `f`, or has one additional parameter, etc.
+ - creating [**signature-preserving function wrappers**](#signature-preserving-function-wrappers) - just like `functools.wraps` but with accurate `TypeError` exception raising when user-provided arguments are wrong, and with a very convenient way to access argument values.
+
+ - creating **function wrappers that have more or less arguments** that the function they wrap. A bit like `functools.partial` but a lot more flexible and friendly for your users. For example, I use it in [my pytest plugins](https://github.com/smarie/OVERVIEW#tests) to add a `requests` parameter to users' tests or fixtures when they do not already have it.
+
+ - more generally, creating **functions with a signature derived from a reference signature**,
  
- - you want to wrap a function `f` provided at runtime, into some code of your own, and you want to expose the wrapper with the same signature (e.g. to create a function proxy) or with a derived signature (one more argument, etc.)
+ - or even creating **functions with a signature completely defined at runtime**.
 
-It currently supports two ways to define the signature of the created function
 
+It currently supports three ways to define the signature of the created function
+
+ - from a given reference function, e.g. `foo`
  - from strings, e.g. `'foo(a, b=1)'`
- - from `Signature` objects, either manually created, or obtained from use of the `inspect.signature` (or its backport `funcsigs.signature`) method.
+ - from `Signature` objects, either manually created, or obtained by using the `inspect.signature` (or its backport `funcsigs.signature`) method.
+
+
+!!! note "creating signature-preserving decorators"
+    Creating decorators and creating signature-preserving function wrappers are two independent problems. `makefun` is solely focused on the second problem. If you wish to solve the first problem you can look at [`decopatch`](https://smarie.github.io/python-decopatch/). It provides a compact syntax, relying on `makefun`, if you wish to tackle both at once.
 
 
 ## Installing
@@ -28,38 +38,82 @@ It currently supports two ways to define the signature of the created function
 
 ## Usage
 
-### 1- Creating functions from string signatures
+### 1- Ex-nihilo creation
 
-This example shows how you can dynamically create a function `foo(b, a=0)` that will redirect all of its calls to `my_handler`.
+Let's create a function `foo(b, a=0)` implemented by `func_impl`. The easiest way to provide the signature is as a `str`:
 
 ```python
 from makefun import create_function
 
-# define the signature. Note: no 'def' keyword here!
-func_signature = "foo(b, a=0)"
+# (1) define the signature. Warning: do not put 'def' keyword here!
+func_sig = "foo(b, a=0)"
 
-# define the handler that should be called
-def my_handler(*args, **kwargs):
+# (2) define the function implementation
+def func_impl(*args, **kwargs):
     """This docstring will be used in the generated function by default"""
-    print("my_handler called !")
+    print("func_impl called !")
     return args, kwargs
 
-# create the dynamic function
-dynamic_fun = create_function(func_signature, my_handler)
-
-# call it and check outputs
-args, kwargs = dynamic_fun(2)
-assert args == ()
-assert kwargs == {'a': 0, 'b': 2}
+# (3) create the dynamic function
+gen_func = create_function(func_sig, func_impl)
 ```
 
-#### PEP484 type hints support
+We can test it:
+
+```python
+>>> args, kwargs = gen_func(2)
+func_impl called !
+>>> assert args == ()
+>>> assert kwargs == {'a': 0, 'b': 2}
+```
+
+You can also:
+
+ * override the function name, docstring and module name if you pass a non-None `func_name`, `doc` and `modulename` argument
+ * add other attributes on the generated function if you pass additional keyword arguments
+
+See `help(create_function)` for details.
+
+
+#### Arguments mapping
+
+We can see above that `args` is empty, even if we called `gen_func` with a positional argument. This is completely normal: this is because the created function does not expose `(*args, **kwargs)` but exposes the desired signature `(b, a=0)`. So as for usual python function calls, we lose the information about what was provided as positional and what was provided as keyword. You can try it yourself: write a function `def foo(b, a=0)` and now try to guess from the function body what was provided as positional, and what was provided as keyword...
+ 
+This behaviour is actually a great feature because it makes it much easier to develop the `func_impl`! Indeed, except if your desired signature contains *positional-only* (not yet available as of python 3.7) or *var-positional* (e.g. `*args`) arguments, you will **always** find all named arguments in `**kwargs`.
+ 
+
+#### More compact syntax
+
+You can use the `@with_signature` decorator to perform exactly the same things than `create_function`, but in a more compact way:
+
+```python
+from makefun import with_signature
+
+@with_signature("foo(b, a=0)")
+def gen_func(*args, **kwargs):
+    """This docstring will be used in the generated function by default"""
+    print("func_impl called !")
+    return args, kwargs
+```
+
+It also has the capability to take `None` as a signature, if you just want to update the metadata (`func_name`, `doc`, `modulename`) without creating any function:
+
+```python
+@with_signature(None, func_name='f')
+def foo(a):
+    return a
+
+assert foo.__name__ == 'f'
+```
+
+See `help(with_signature)` for details.
+
+#### PEP484 type hints in `str`
 
 PEP484 type hints are supported in string function definitions:
 
 ```python
-func_signature = "foo(b: int, a: float = 0) -> str"
-dynamic_fun = create_function(func_signature, my_handler)
+func_sig = "foo(b: int, a: float = 0) -> str"
 ```
 
 PEP484 type comments are also supported:
@@ -71,53 +125,138 @@ foo(b,      # type: int
     ):
     # type: (...) -> str
 """
-dynamic_fun = create_function(func_signature, my_handler)
 ```
 
 but unfortunately `inspect.signature` is not able to detect them so the generated function does not contain the annotations. See [this example](https://github.com/smarie/python-makefun/issues/7#issuecomment-459353197). 
 
-### 2- Creating functions from `Signature` objects
 
-Another quite frequent case is that you wish to create a function that has the same signature that another one, or with a signature that derives from another one (for example, you wish to add a parameter).
+#### Using `Signature` objects
 
-To support these use cases, as well as all use cases where you wish to create functions ex-nihilo with any kind of signature, `create_function` is also able to accept a `Signature` object as input.
- 
-For example, you can extract the signature from your function using `inspect.signature`, modify it if needed (below we add a parameter), and then pass it to `create_function`:
+`create_function` and `@with_signature` are able to accept a `Signature` object as input, instead of a `str`. That might be more convenient than using strings to programmatically define signatures. For example we can rewrite the above script using `Signature`:
 
 ```python
-try:  # python 3.3+
-    from inspect import signature, Signature, Parameter
-except ImportError:
-    from funcsigs import signature, Signature, Parameter
+from makefun import with_signature
+from inspect import Signature, Parameter
 
+# (1) define the signature using objects.
+parameters = [Parameter('b', kind=Parameter.POSITIONAL_OR_KEYWORD),
+              Parameter('a', kind=Parameter.POSITIONAL_OR_KEYWORD, default=0), ]
+func_sig = Signature(parameters)
+func_name = 'foo'
+
+# (2) define the function
+@with_signature(func_sig, func_name=func_name)
+def gen_func(*args, **kwargs):
+    """This docstring will be used in the generated function by default"""
+    print("func_impl called !")
+    return args, kwargs
+```
+
+Note that `Signature` objects do not contain any function name information. You therefore have to provide an explicit `func_name` argument to `@with_signature` (or to `create_function`) as shown above.
+
+!!! note "`Signature` availability in python 2"
+    In python 2 the `inspect` package does not provide any signature-related features, but a complete backport is available: [`funcsigs`](https://github.com/testing-cabal/funcsigs).
+
+
+### 2- Deriving from existing signatures
+
+In many real-world applications we want to reuse "as is", or slightly modify, an existing signature.
+
+#### Copying a signature
+
+The easiest way to copy the signature from another function is to directly pass this function as the first argument in `@with_signature` or `create_function`. That way you do not have to use `inspect`/`funcsigs`.
+
+#### Signature-preserving function wrappers
+
+[`@functools.wraps`](https://docs.python.org/3/library/functools.html#functools.wraps) is a famous decorator to create "signature-preserving" function wrappers. However it does not actually preserve the signature, it just uses a trick (setting the `__wrapped__` attribute) to trigger special dedicated behaviour in `stdlib`'s `help()` and `signature()` methods.
+ 
+This has two major limitations: 
+
+ 1. the wrapper code will execute *even when the provided arguments are invalid*. 
+ 2. the wrapper code can not easily access an argument using its name, from the received `*args, **kwargs`. Indeed one would have to handle all cases (positional, keyword, default) and therefore to use something like `Signature.bind()`.
+
+`makefun` provides a convenient replacement for `@wraps` that fixes these two issues:
+ 
+```python
+from makefun import wraps
+
+# a dummy function
+def foo(a, b=1):
+    """ foo doc """
+    return a + b
+
+# our signature-preserving wrapper
+@wraps(foo)
+def enhanced_foo(*args, **kwargs):
+    print('hello!')
+    print('b=%s' % kwargs['b'])  # we can reliably access 'b'
+    return foo(*args, **kwargs)
+``` 
+
+We can check that the wrapper behaves correctly whatever the call modes:
+
+```python
+>>> assert enhanced_foo(1, 2) == 3  # positional 'b'
+hello!
+b=2
+>>> assert enhanced_foo(b=0, a=1) == 1  # keyword 'b'
+hello!
+b=0
+>>> assert enhanced_foo(1) == 2  # default 'b'
+hello!
+b=1
+```
+
+And let's pass wrong arguments to it: we see that the wrapper is **not** executed.
+
+```python
+>>> enhanced_foo()
+TypeError: foo() missing 1 required positional argument: 'a'
+```
+
+You can try to do the same experiment with `functools.wraps` to see the difference.
+
+Finally note that a `create_wrapper` function is also provided for convenience ; it is the equivalent of `@wraps` but as a standard function - not a decorator.
+
+!!! note "creating signature-preserving decorators"
+    Creating decorators and creating signature-preserving function wrappers are two independent problems. `makefun` is solely focused on the second problem. If you wish to solve the first problem you can look at [`decopatch`](https://smarie.github.io/python-decopatch/). It provides a compact syntax, relying on `makefun`, if you wish to tackle both at once.
+
+
+#### Editing a signature
+
+Below we show how to add a parameter to a function. We first capture its `Signature` using `inspect.signature(f)`, we modify it to add a parameter, and finally we use it in `create_function` to create our final function:
+
+```python
+from makefun import with_signature
+from inspect import signature, Parameter
+
+# (0) the reference function
 def foo(b, a=0):
     print("foo called: b=%s, a=%s" % (b, a))
     return b, a
 
-# capture the name and signature of existing function `foo`
+# (1a) capture the name and signature of reference function `foo`
 func_name = foo.__name__
 original_func_sig = signature(foo)
 print("Original Signature: %s" % original_func_sig)
 
-# modify the signature to add a new parameter
+# (1b) modify the signature to add a new parameter 'z' as first argument
 params = list(original_func_sig.parameters.values())
 params.insert(0, Parameter('z', kind=Parameter.POSITIONAL_OR_KEYWORD))
 func_sig = original_func_sig.replace(parameters=params)
 print("New Signature: %s" % func_sig)
 
-# define the handler that should be called
-def my_handler(z, *args, **kwargs):
-    print("my_handler called ! z=%s" % z)
+# (2) define the wrapper implementation
+@with_signature(func_sig, func_name=func_name)
+def foo_wrapper(z, *args, **kwargs):
+    print("foo_wrapper called ! z=%s" % z)
     # call the foo function 
     output = foo(*args, **kwargs)
     # return augmented output
     return z, output
         
-# create a dynamic function with the same signature and name
-dynamic_fun = create_function(func_sig, my_handler, func_name=func_name)
-
 # call it
-dynamic_fun(3, 2)
+assert foo_wrapper(3, 2) == 3, (2, 0)
 ```
 
 yields
@@ -126,20 +265,16 @@ yields
 Original Signature: (b, a=0)
 New Signature: (z, b, a=0)
 
-my_handler called ! z=3
+foo_wrapper called ! z=3
 foo called: b=2, a=0
 ```
 
-This way you can therefore easily create function wrappers with different signatures: not only adding, but also removing parameters, changing their kind (forcing keyword-only for example), etc. The possibilities are as numerous as the capabilities of the `Signature` objects.
-
-Finally note that you can pass a function instead of a `Signature` object. The signature of this function will be used. This is particularly convenient if you wish to create a function wrapper, that is keeping the same signature than the wrapped function.
-
-#### Signature mod helpers
+This way you can therefore easily create function wrappers with different signatures: not only adding, but also removing parameters, changing their kind (forcing keyword-only for example), etc. The possibilities are as endless as the capabilities of the `Signature` objects.
 
 Two helper functions are provided in this toolbox to make it a bit easier for you to edit `Signature` objects:
  
  - `remove_signature_parameters` creates a new signature from an existing one by removing all parameters corresponding to the names provided
- - `add_signature_parameters` prepends the `Parameter`s provided in its `first=` argument, and appends the ones provided in its `last` argument 
+ - `add_signature_parameters` prepends the `Parameter`s provided in its `first=` argument, and appends the ones provided in its `last` argument.
 
 ```python
 from makefun import add_signature_parameters, remove_signature_parameters
@@ -167,85 +302,42 @@ original signature: foo(b, c, a=0)
 modified signature: foo(z, c, o=True)
 ```
 
-No rocket science here, but they might save you a few lines of code if your use-case is not too specific.
+They might save you a few lines of code if your use-case is not too specific.
 
-### 3- Changing the signature of a function
 
-A goodie decorator is also provided: `@with_signature`. It has the same arguments than `create_function`, except `func_handler`: calls will be handled by the decorated function directly. 
+### 3- Advanced topics
 
-It can be used to quickly change the signature of a function:
+#### Generators and Coroutines
 
-```python
-from makefun import with_signature
-
-@with_signature("foo(a, b)")
-def foo(*args, **kwargs):
-    # ...
-```
-
-Or to create a signature-preserving function wrapper, exactly like `@functools.wraps` but with the signature-preserving feature:
+`create_function` and `@with_signature` will automatically create a generator if your implementation is a generator:
 
 ```python
-from makefun import with_signature
-
-# we want to wrap this function f to add some prints before calls
-def f(a, b):
-    return a + b
-
-# create our wrapper: it will have the same signature than f
-@with_signature(f)
-def f_wrapper(*args, **kwargs):
-    # first print something interesting
-    print('hello')
-    # then call f as usual
-    return f(*args, **kwargs)
-
-f_wrapper(1, 2)  # prints `'hello` and returns 1 + 2 
-```
-
-Finally, you can use `None` as signature to indicate that you just want to update the metadata (`func_name`, `doc`, `modulename`) without creating any wrapper:
-
-```python
-@with_signature(None, func_name='f')
-def foo(a):
-    return a
-
-assert foo.__name__ == 'f'
-```
-
-### 4- Advanced topics
-
-#### Generators, Coroutines, and Asyncio
-
-`create_function` and `@with_signature` will automatically create a generator if your function handler is a generator:
-
-```python
-# define the handler that should be called
-def my_generator_handler(b, a=0):
+# define the implementation
+def my_generator_impl(b, a=0):
     for i in range(a, b):
         yield i * i
 
 # create the dynamic function
-dynamic_fun = create_function("foo(a, b)", my_generator_handler)
+gen_func = create_function("foo(a, b)", my_generator_impl)
 
 # verify that the new function is a generator and behaves as such
-assert isgeneratorfunction(dynamic_fun)
-assert list(dynamic_fun(1, 4)) == [1, 4, 9]
+assert isgeneratorfunction(gen_func)
+assert list(gen_func(1, 4)) == [1, 4, 9]
 ```
 
 The same goes for generator-based coroutines:
 
 ```python
-# define the handler that should be called
-def my_gencoroutine_handler(first_msg):
+# define the impl that should be called
+def my_gencoroutine_impl(first_msg):
     second_msg = (yield first_msg)
     yield second_msg
 
 # create the dynamic function
-dynamic_fun = create_function("foo(first_msg='hello')", my_gencoroutine_handler)
+gen_func = create_function("foo(first_msg='hello')", my_gencoroutine_impl)
 
-# verify that the new function is a generator-based coroutine and behaves correctly
-cor = dynamic_fun('hi')
+# verify that the new func is a generator-based coroutine and behaves correctly
+cor = gen_func('hi')
 assert next(cor) == 'hi'
 assert cor.send('chaps') == 'chaps'
 cor.send('ola')  # raises StopIteration
@@ -254,26 +346,26 @@ cor.send('ola')  # raises StopIteration
 and asyncio coroutines as well
 
 ```python
-# define the handler that should be called
-async def my_native_coroutine_handler(sleep_time):
+# define the impl that should be called
+async def my_native_coroutine_impl(sleep_time):
     await sleep(sleep_time)
     return sleep_time
 
 # create the dynamic function
-dynamic_fun = create_function("foo(sleep_time=2)", my_native_coroutine_handler)
+gen_func = create_function("foo(sleep_time=2)", my_native_coroutine_impl)
 
 # verify that the new function is a native coroutine and behaves correctly
 from asyncio import get_event_loop
-out = get_event_loop().run_until_complete(dynamic_fun(5))
+out = get_event_loop().run_until_complete(gen_func(5))
 assert out == 5
 ```
 
-#### Variable-length, Positional-only and Keyword-only
+#### Generated source code
 
-By default, all arguments (including the ones which fell back to default values) will be passed to the handler. You can see it by printing the `__source__` field of the generated function:
+The generated source code is in the `__source__` field of the generated function:
 
 ```python
-print(dynamic_fun.__source__)
+print(gen_func.__source__)
 ```
 
 prints the following source code:
@@ -284,12 +376,11 @@ def foo(b, a=0):
 
 ```
 
-The `__call_handler_` symbol represents your handler. You see that the variables are passed to it *as keyword arguments* when possible (`_call_handler_(b=b)`, not simply `_call_handler_(b)`). However in some cases, the function that you want create has variable-length arguments. In this case the generated function will adapt the way it passes the arguments to your handler, as expected:
+The `_call_handler_` symbol represents your implementation. As [already mentioned](#arguments_mapping), you see that the variables are passed to it *as keyword arguments* when possible (`_call_handler_(b=b)`, not simply `_call_handler_(b)`). Of course if it is not possible it adapts:
 
 ```python
-func_signature = "foo(a=0, *args, **kwargs)"
-dynamic_fun = create_function(func_signature, my_handler)
-print(dynamic_fun.__source__)
+gen_func = create_function("foo(a=0, *args, **kwargs)", func_impl)
+print(gen_func.__source__)
 ```
 
 prints the following source code:
@@ -297,46 +388,25 @@ prints the following source code:
 ```python
 def foo(a=0, *args, **kwargs):
     return _call_handler_(a=a, *args, **kwargs)
-
 ```
-
-This time you see that `*args` and `kwargs` are passed with their stars.
-
-Positional-only arguments do not exist as of today in python. They can be declared on a `Signature` object, but then the string version of the signature presents a syntax error for the python compiler:
-
-```python
-try:  # python 3.3+
-    from inspect import Signature, Parameter
-except ImportError:
-    from funcsigs import Signature, Parameter
-
-params = [Parameter('a', kind=Parameter.POSITIONAL_ONLY),
-          Parameter('b', kind=Parameter.POSITIONAL_OR_KEYWORD)]
-print(str(Signature(parameters=params)))              
-```
-
-yields `(<a>, b)` in python 2 (`funcsigs`) and `(a, /, b)` in python 3 with `inspect`.
-
-If a future python version supports positional-only ([PEP457](https://www.python.org/dev/peps/pep-0457/) and [PEP570](https://www.python.org/dev/peps/pep-0570/)), this library will adapt - no change of code will be required, as long as the string representation of `Signature` objects adopts the correct syntax.
-
 
 #### Function reference injection
 
-In some scenarios you may share the same handler among several created functions, for example to expose slightly different signatures on top of the same core function.
+In some scenarios you may wish to share the same implementation among several created functions, for example to expose slightly different signatures on top of the same core.
 
-In that case you may wish your handler to know from which dynamically generated function it is called. For this simply use `inject_as_first_arg=True`, and the called function will be passed as the first argument to your handler:
+In that case you may wish your implementation to know from which dynamically generated function it is being called. For this, simply use `inject_as_first_arg=True`, and the called function will be injected as the first argument:
 
 ```python
-def generic_handler(f, *args, **kwargs):
-    print("This is generic handler called by %s" % f.__name__)
+def core_impl(f, *args, **kwargs):
+    print("This is generic core called by %s" % f.__name__)
     # here you could use f.__name__ in a if statement to determine what to do
     if f.__name__ == "func1":
         print("called from func1 !")
     return args, kwargs
 
 # generate 2 functions
-func1 = create_function("func1(a, b)", generic_handler, inject_as_first_arg=True)
-func2 = create_function("func2(a, d)", generic_handler, inject_as_first_arg=True)
+func1 = create_function("func1(a, b)", core_impl, inject_as_first_arg=True)
+func2 = create_function("func2(a, d)", core_impl, inject_as_first_arg=True)
 
 func1(1, 2)
 func2(1, 2)
@@ -345,31 +415,24 @@ func2(1, 2)
 yields
 
 ```
-This is generic handler called by func1
+This is generic core called by func1
 called from func1 !
-This is generic handler called by func2
+This is generic core called by func2
 ```
-
-#### Additional customization
-
-`create_function` can optionally:
-
- * override the docstring if you pass a non-None `doc` argument
- * add other attributes on the generated function if you pass additional keyword arguments
-
-See `help(create_function)` for details.
 
 
 ## Main features / benefits
 
  * **Generate functions with a dynamically defined signature**: the signature can be provided as a string or as a `Signature` object, thus making it handy to derive from other functions.
- * **Intercept calls with your handler**: the generated functions redirect their calls to the provided handler function. As long as the signature is compliant, it will work as expected. For example the signature can be specific (`a: int, b=None`), and the handler more generic (`*args, **kwargs`)
+ * **Implement them easily**: the generated functions redirect their calls to the provided implementation function. As long as the signature is compliant, it will work as expected. For example the signature can be specific (`a: int, b=None`), and the implementation more generic (`*args, **kwargs`). Arguments will always be passed as keywords arguments when possible.
+ * Replace **`@functools.wraps** so that it correctly preserves signatures, and enable you to easily access named arguments.
 
 ## See Also
 
  - [decorator](https://github.com/micheles/decorator), which largely inspired this code
  - [PEP362 - Function Signature Object](https://www.python.org/dev/peps/pep-0362) 
  - [A blog entry on dynamic function creation](http://block.arch.ethz.ch/blog/2016/11/creating-functions-dynamically/)
+ - [functools.wraps](https://docs.python.org/3/library/functools.html#functools.wraps)
 
 ### Others
 

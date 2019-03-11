@@ -1,6 +1,6 @@
 import sys
 
-from makefun import create_function
+from makefun import create_function, wraps
 
 
 # Python 2 does not support function annotations; Python 3.0-3.4 do not support variable annotations.
@@ -42,3 +42,38 @@ def test_create_facades():
             elif f_name == "func3":
                 assert args == (), f_name + ' args test failed'
                 assert kwargs == dict(c=25, a=12, d=None), f_name + ' kwargs test failed'
+
+
+def test_so_decorator():
+    """
+    Tests that solution at
+    https://stackoverflow.com/questions/739654/how-to-make-a-chain-of-function-decorators/1594484#1594484
+    actually works
+    """
+
+    # from functools import wraps
+
+    def makebold(fn):
+        @wraps(fn)
+        def wrapped():
+            return "<b>" + fn() + "</b>"
+
+        return wrapped
+
+    def makeitalic(fn):
+        @wraps(fn)
+        def wrapped():
+            return "<i>" + fn() + "</i>"
+
+        return wrapped
+
+    @makebold
+    @makeitalic
+    def hello():
+        """what?"""
+        return "hello world"
+
+    assert hello() == "<b><i>hello world</i></b>"
+    assert hello.__name__ == "hello"
+    help(hello)  # the help and signature are preserved
+    assert hasattr(hello, '__wrapped__')
