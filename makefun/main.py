@@ -128,7 +128,7 @@ def create_function(func_signature,             # type: Union[str, Signature, Ca
             raise ValueError("a non-None func_name should be provided when a `Signature` is provided")
 
         # create the signature string
-        func_signature_str = func_name + str(func_signature) + ":"
+        func_signature_str = get_signature_string(func_name, func_signature, evaldict)
 
     elif callable(func_signature):
         # grab the func name
@@ -139,7 +139,7 @@ def create_function(func_signature,             # type: Union[str, Signature, Ca
         func_signature = signature(func_signature)
 
         # create the signature string
-        func_signature_str = func_name + str(func_signature) + ":"
+        func_signature_str = get_signature_string(func_name, func_signature, evaldict)
     else:
         raise TypeError("Invalid type for `func_signature`: %s" % type(func_signature))
 
@@ -198,6 +198,52 @@ def create_function(func_signature,             # type: Union[str, Signature, Ca
                    module=modulename, **attrs)
 
     return f
+
+
+class DefaultHolder:
+    __slots__ = 'varname'
+
+    def __init__(self, varname):
+        self.varname = varname
+
+    def __repr__(self):
+        return self.varname
+
+
+def get_signature_string(func_name, func_signature, evaldict):
+    """
+    Returns the string to be used as signature.
+    If there is a non-native symbol in the defaults, it is created as a variable in the evaldict
+    :param func_name:
+    :param func_signature:
+    :return:
+    """
+    # protect the parameters if needed
+    new_params = []
+    for p_name, p in func_signature.parameters.items():
+        if p.default is not Parameter.empty and not isinstance(p.default, (int, str, float, bool)):
+            # check if the repr() of the default value is equal to itself.
+            needs_protection = True
+            try:
+                deflt = eval(repr(p.default))
+                needs_protection = deflt != p.default
+            except SyntaxError:
+                pass
+
+            # if we have any problem, we need to protect the default value
+            if needs_protection:
+                # store the object in the evaldict and insert name
+                varname = "DEFAULT_%s" % p_name
+                evaldict[varname] = p.default
+                p = Parameter(p.name, kind=p.kind, default=DefaultHolder(varname), annotation=p.annotation)
+
+        new_params.append(p)
+
+    # copy signature object
+    s = Signature(parameters=new_params, return_annotation=func_signature.return_annotation)
+
+    # return the final string representation
+    return "%s%s:" % (func_name, s)
 
 
 def get_signature_from_string(func_sig_str, evaldict):
