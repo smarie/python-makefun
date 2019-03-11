@@ -36,6 +36,40 @@ FUNC_DEF = re.compile('(?s)^\s*(?P<funcname>[_\w][_\w\d]*)\s*'
                       '((?P<typed_return_hint>->\s*.+)|:\s*#\s*(?P<comment_return_hint>.+))*$')
 
 
+def create_wrapper(wrapped,
+                   wrapper,
+                   func_name=None,             # type: str
+                   inject_as_first_arg=False,  # type: bool
+                   addsource=True,             # type: bool
+                   addhandler=True,            # type: bool
+                   doc=None,                   # type: str
+                   modulename=None,            # type: str
+                   **attrs
+                   ):
+    """
+    Creates a signature-preserving wrapper function.
+
+    It is similar in behaviour to `functools.update_wrapper`, but relies on a proper dynamically-generated function.
+    Therefore as opposed to `functools.update_wrapper`, the wrapper body will not be executed if the arguments provided
+    are not compliant with the signature - instead a `TypeError` will be raised before entering the wrapper body.
+
+    WARNING: the order of arguments is the same than in `create_function` so it is reversed with respect to
+    `functools.update_wrapper`.
+
+    This function is just an alias for
+
+        `create_function(wrapped, wrapper, __wrapped__=f, **kwargs)`
+
+    In other words, we just set the additional `__wrapped__` attribute on the created function, to stay compliant with
+    the `functools.update_wrapper` convention.
+    See https://docs.python.org/3/library/functools.html#functools.update_wrapper
+    :return:
+    """
+    return create_function(wrapped, wrapper, func_name=func_name, inject_as_first_arg=inject_as_first_arg,
+                           addsource=addsource, addhandler=addhandler, doc=doc, modulename=modulename,
+                           __wrapped__=wrapped, **attrs)
+
+
 def create_function(func_signature,             # type: Union[str, Signature, Callable[[Any], Any]]
                     func_handler,               # type: Callable[[Any], Any]
                     func_name=None,             # type: str
@@ -416,6 +450,34 @@ def _get_callerframe(offset=0):
         frame = None
 
     return frame
+
+
+def wraps(f,
+          func_name=None,             # type: str
+          inject_as_first_arg=False,  # type: bool
+          addsource=True,   # type: bool
+          addhandler=True,  # type: bool
+          doc=None,         # type: str
+          modulename=None,  # type: str
+          **attrs
+          ):
+    """
+    Decorator to create a signature-preserving wrapper function.
+
+    It is similar to `functools.wraps`, but relies on a proper dynamically-generated function. Therefore as opposed to
+    `functools.wraps`, the wrapper body will not be executed if the arguments provided are not
+    compliant with the signature - instead a `TypeError` will be raised before entering the wrapper body.
+
+    This decorator is just an alias for
+
+        `with_signature(f, __wrapped__=f, **kwargs)`
+
+    In other words, we just set the additional `__wrapped__` attribute on the created function, to stay compliant with
+    the `functools.wraps` convention. See https://docs.python.org/3/library/functools.html#functools.wraps
+    :return:
+    """
+    return with_signature(f, func_name=func_name, inject_as_first_arg=inject_as_first_arg, addsource=addsource,
+                          addhandler=addhandler, doc=doc, modulename=modulename, __wrapped__=f, **attrs)
 
 
 def with_signature(func_signature,             # type: Union[str, Signature]
