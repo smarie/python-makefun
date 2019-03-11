@@ -1,47 +1,69 @@
 import sys
+from inspect import getmodule
 
 from makefun import create_function, wraps
 
 
-# Python 2 does not support function annotations; Python 3.0-3.4 do not support variable annotations.
-python_version = sys.version_info.major
-
-
-def test_create_facades():
+def test_create_facades(capsys):
     """
     Simple test to create multiple functions with the same body
-    See https://stackoverflow.com/questions/13184281/python-dynamic-function-creation-with-custom-names
+    This corresponds to the answer at
+    https://stackoverflow.com/questions/13184281/python-dynamic-function-creation-with-custom-names/55105893#55105893
     :return:
     """
-    def generic_handler(f, *args, **kwargs):
-        print("This is generic handler called by %s" % f.__name__)
+
+    # generic core implementation
+    def generic_impl(f, *args, **kwargs):
+        print("This is generic impl called by %s" % f.__name__)
         # here you could use f.__name__ in a if statement to determine what to do
         if f.__name__ == "func1":
             print("called from func1 !")
         return args, kwargs
 
-    # generate 3 functions
+    my_module = getmodule(generic_impl)
+
+    # generate 3 facade functions with various signatures
     for f_name, f_params in [("func1", "b, *, a"),
                              ("func2", "*args, **kwargs"),
                              ("func3", "c, *, a, d=None")]:
-        if f_name in {"func1", "func3"} and python_version < 3:
-            # ignore: syntax not supported
+        if f_name in {"func1", "func3"} and sys.version_info < (3, 0):
+            # Python 2 does not support function annotations; Python 3.0-3.4 do not support variable annotations.
             pass
         else:
-            f = create_function("%s(%s)" % (f_name, f_params), generic_handler, inject_as_first_arg=True)
-            assert f.__name__ == f_name
-            # try to execute
-            args, kwargs = f(25, a=12)
+            # the signature to generate
+            f_sig = "%s(%s)" % (f_name, f_params)
 
-            if f_name == "func1":
-                assert args == (), f_name + ' args test failed'
-                assert kwargs == dict(b=25, a=12), f_name + ' kwargs test failed'
-            elif f_name == "func2":
-                assert args == (25,), f_name + ' args test failed'
-                assert kwargs == dict(a=12), f_name + ' kwargs test failed'
-            elif f_name == "func3":
-                assert args == (), f_name + ' args test failed'
-                assert kwargs == dict(c=25, a=12, d=None), f_name + ' kwargs test failed'
+            # create the function dynamically
+            f = create_function(f_sig, generic_impl, inject_as_first_arg=True)
+
+            # assign the symbol somewhere (local context, module...)
+            setattr(my_module, f_name, f)
+
+    # grab each function and use it
+    if sys.version_info >= (3, 0):
+        func1 = getattr(my_module, 'func1')
+        assert func1(25, a=12) == ((), dict(b=25, a=12))
+
+    func2 = getattr(my_module, 'func2')
+    assert func2(25, a=12) == ((25,), dict(a=12))
+
+    if sys.version_info >= (3, 0):
+        func3 = getattr(my_module, 'func3')
+        assert func3(25, a=12) == ((), dict(c=25, a=12, d=None))
+
+    captured = capsys.readouterr()
+    with capsys.disabled():
+        print(captured.out)
+
+    if sys.version_info >= (3, 0):
+        assert captured.out == """This is generic impl called by func1
+called from func1 !
+This is generic impl called by func2
+This is generic impl called by func3
+"""
+    else:
+        assert captured.out == """This is generic impl called by func2
+"""
 
 
 def test_so_decorator():
