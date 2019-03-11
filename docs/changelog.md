@@ -1,5 +1,16 @@
 # Changelog
 
+### 1.3.0 - Aliases for signature-preserving wrapper scenarios
+
+ - Now providing a `@wraps`, equivalent of `functools.wraps`; and a `create_wrapper` equivalent of `functools.update_wrapper`. Fixes [#21](https://github.com/smarie/python-makefun/issues/21)
+
+ - `@with_signature` now does not override the `__name__` when signature is provided as a function. Fixes [#22](https://github.com/smarie/python-makefun/issues/22)
+
+ - `add_signature_parameters` now accepts that parameters are provided as single elements (not necessarily iterables)
+
+ - Updated documentation
+
+
 ### 1.2.0 - `@with_signature` supports `None`
 
 `None` can be used as the desired signature of `@with_signature`. This indicated that the user does not want to create a new function but only wants to update the metadata. Fixes [#20](https://github.com/smarie/python-makefun/issues/20).
