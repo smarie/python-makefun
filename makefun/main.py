@@ -472,7 +472,7 @@ def with_signature(func_signature,             # type: Union[str, Signature]
             return create_function(func_signature=func_signature if func_signature is not None else f,
                                    func_handler=f,
                                    func_name=func_name if func_name is not None
-                                             else (None if isinstance(func_signature, str) else f.__name__),
+                                             else (f.__name__ if isinstance(func_signature, Signature) else None),
                                    inject_as_first_arg=inject_as_first_arg,
                                    addsource=addsource,
                                    addhandler=addhandler,
