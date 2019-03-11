@@ -25,7 +25,7 @@ except ImportError:
         return False
 
 try:  # python 3.5+
-    from typing import Callable, Any, Union
+    from typing import Callable, Any, Union, Iterable
 except ImportError:
     pass
 
@@ -561,30 +561,48 @@ def remove_signature_parameters(s, *param_names):
     return s.replace(parameters=params.values())
 
 
-def add_signature_parameters(s, first=(), last=()):
+def add_signature_parameters(s,         # type: Signature
+                             first=(),  # type: Union[Parameter, Iterable[Parameter]]
+                             last=(),   # type: Union[Parameter, Iterable[Parameter]]
+                             ):
     """
     Adds the provided parameters to the signature s (returns a new signature instance).
 
     :param s:
-    :param first: a list of `Parameter` instances to be added at the beginning of the parameter's list
-    :param last: a list of `Parameter` instances to be added at the end of the parameter's list
+    :param first: a single element or a list of `Parameter` instances to be added at the beginning of the parameter's
+        list
+    :param last: a single element or a list of `Parameter` instances to be added at the end of the parameter's list
     :return:
     """
     params = OrderedDict(s.parameters.items())
     lst = list(params.values())
 
     # prepend
-    for param in first:
-        if param.name in params:
-            raise ValueError("Parameter with name '%s' is present twice in the signature to create" % param.name)
+    try:
+        for param in first:
+            if param.name in params:
+                raise ValueError("Parameter with name '%s' is present twice in the signature to create" % param.name)
+            else:
+                lst.insert(0, param)
+    except TypeError:
+        # a single argument
+        if first.name in params:
+            raise ValueError("Parameter with name '%s' is present twice in the signature to create" % first.name)
         else:
-            lst.insert(0, param)
+            lst.insert(0, first)
 
     # append
-    for param in last:
-        if param.name in params:
-            raise ValueError("Parameter with name '%s' is present twice in the signature to create" % param.name)
+    try:
+        for param in last:
+            if param.name in params:
+                raise ValueError("Parameter with name '%s' is present twice in the signature to create" % param.name)
+            else:
+                lst.append(param)
+    except TypeError:
+        # a single argument
+        if last.name in params:
+            raise ValueError("Parameter with name '%s' is present twice in the signature to create" % last.name)
         else:
-            lst.append(param)
+            lst.append(last)
 
     return s.replace(parameters=lst)
