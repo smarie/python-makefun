@@ -268,6 +268,13 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#130-aliases-for-signature-preserving-wrapper-scenarios" title="1.3.0 - Aliases for signature-preserving wrapper scenarios" class="md-nav__link">
+    1.3.0 - Aliases for signature-preserving wrapper scenarios
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#120-with_signature-supports-none" title="1.2.0 - @with_signature supports None" class="md-nav__link">
     1.2.0 - @with_signature supports None
   </a>
@@ -383,6 +390,13 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#130-aliases-for-signature-preserving-wrapper-scenarios" title="1.3.0 - Aliases for signature-preserving wrapper scenarios" class="md-nav__link">
+    1.3.0 - Aliases for signature-preserving wrapper scenarios
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#120-with_signature-supports-none" title="1.2.0 - @with_signature supports None" class="md-nav__link">
     1.2.0 - @with_signature supports None
   </a>
@@ -486,6 +500,21 @@
                 
                 
                 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<h3 id="130-aliases-for-signature-preserving-wrapper-scenarios">1.3.0 - Aliases for signature-preserving wrapper scenarios<a class="headerlink" href="#130-aliases-for-signature-preserving-wrapper-scenarios" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p>Now providing a <code>@wraps</code>, equivalent of <code>functools.wraps</code>; and a <code>create_wrapper</code> equivalent of <code>functools.update_wrapper</code>. Fixes <a href="https://github.com/smarie/python-makefun/issues/21">#21</a></p>
+</li>
+<li>
+<p><code>@with_signature</code> now does not override the <code>__name__</code> when signature is provided as a function. Fixes <a href="https://github.com/smarie/python-makefun/issues/22">#22</a></p>
+</li>
+<li>
+<p><code>add_signature_parameters</code> now accepts that parameters are provided as single elements (not necessarily iterables)</p>
+</li>
+<li>
+<p>Updated documentation</p>
+</li>
+</ul>
 <h3 id="120-with_signature-supports-none">1.2.0 - <code>@with_signature</code> supports <code>None</code><a class="headerlink" href="#120-with_signature-supports-none" title="Permanent link">&para;</a></h3>
 <p><code>None</code> can be used as the desired signature of <code>@with_signature</code>. This indicated that the user does not want to create a new function but only wants to update the metadata. Fixes <a href="https://github.com/smarie/python-makefun/issues/20">#20</a>.</p>
 <h3 id="112-fixes">1.1.2 - Fixes<a class="headerlink" href="#112-fixes" title="Permanent link">&para;</a></h3>
