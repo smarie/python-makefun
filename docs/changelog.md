@@ -1,5 +1,22 @@
 # Changelog
 
+### 1.5.0 - Major refactoring and bugfixes
+
+**Function creation API:**
+
+ - renamed all `handler` into `impl` for clarity. Fixes [#27](https://github.com/smarie/python-makefun/issues/27).
+ - renamed `addsource` and `addhandler` arguments as `add_source` and `add_impl` respectively, for consistency
+ - signatures can not be provided as a callable anymore - that was far too confusing. If the reference signature is a callable, then use `@wraps` or `create_wrapper`, because that's probably what you want to do (= reuse not only the signature but also all metadata). Fixes [#26](https://github.com/smarie/python-makefun/issues/26).
+ - the function name is now optional in signatures provided as string.
+ - now setting `__qualname__` attribute
+ - default function name, qualname, doc and module name are the ones from `func_impl` in `create_function` and `@with_signature`, and are the ones from the wrapped function in `create_wrapper` and `@wraps` as intuitively expected. Fixes [#28](https://github.com/smarie/python-makefun/issues/28).
+ 
+ **Wrappers:**
+ 
+  - `@wraps` and `create_wrapper` now offer a `new_sig` argument. In that case the `__wrapped__` attribute is not set. Fixes [#25](https://github.com/smarie/python-makefun/issues/25).
+  - `@wraps` and `create_wrapper` now correctly preserve the `__dict__` and other metadata from the wrapped item. Fixes [#24](https://github.com/smarie/python-makefun/issues/24)
+ 
+
 ### 1.4.0 - Non-representable default values are now handled correctly
 
 When a non-representable default value was used in the signature to generate, the code failed with a `SyntaxError`. This case is now correctly handled, by storing the corresponding variable in the generated function's context. Fixes [#23](https://github.com/smarie/python-makefun/issues/23).
@@ -51,8 +68,8 @@ Now a string signature can be provided to `@with_signature` without problem. Fix
 
 `create_function` and `@with_signature`:
 
- - New `modulename` parameter to override the module name. Fixes [#14](https://github.com/smarie/python-makefun/issues/14)
- - the handler is now available as a field of the generated function (under `__call_handler__`). New `addhandler` parameter (default: True) controls this behaviour. Fixes [#16](https://github.com/smarie/python-makefun/issues/16)
+ - New `module_name` parameter to override the module name. Fixes [#14](https://github.com/smarie/python-makefun/issues/14)
+ - the handler is now available as a field of the generated function (under `__func_impl__`). New `addhandler` parameter (default: True) controls this behaviour. Fixes [#16](https://github.com/smarie/python-makefun/issues/16)
 
 
 Misc:
@@ -92,7 +109,7 @@ Improved design by getting rid of the regular expression parser to check paramet
 
  - Handler functions can now receive the dynamically created function as first argument, by using `create_function(func_signature, func_handler, inject_as_first_arg=True)`. Fixes [#1](https://github.com/smarie/python-makefun/issues/1)
 
- - Renamed `_call_` into `_call_handler_` in the generated code.
+ - Renamed `_call_` into `_func_impl_` in the generated code.
 
 Misc:
 
