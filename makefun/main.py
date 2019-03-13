@@ -749,9 +749,9 @@ def add_signature_parameters(s,         # type: Signature
     params = OrderedDict(s.parameters.items())
     lst = list(params.values())
 
-    # prepend
+    # prepend but keep the order
     try:
-        for param in first:
+        for param in reversed(first):
             if param.name in params:
                 raise ValueError("Parameter with name '%s' is present twice in the signature to create" % param.name)
             else:
