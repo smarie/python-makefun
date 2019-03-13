@@ -1,5 +1,8 @@
 import logging
+import sys
 from copy import copy, deepcopy
+
+import pytest
 
 from makefun.main import get_signature_from_string, with_signature
 
@@ -41,10 +44,15 @@ def test_preserve_attributes():
 
 def test_empty_name_in_string():
     """ Tests that string signatures can now be provided without function name"""
-    func_name, func_sig, func_sig_str = get_signature_from_string('(a: int)', locals())
+    if sys.version_info < (3, 0):
+        str_sig = '(a)'
+    else:
+        str_sig = '(a:int)'
+    func_name, func_sig, func_sig_str = get_signature_from_string(str_sig, locals())
     assert func_name is None
-    assert str(func_sig) == "(a:int)"
-    assert func_sig_str == "(a: int):"
+    # to handle type hints in signatures in python 3.5 we have to always remove the spaces
+    assert str(func_sig).replace(' ', '') == str_sig
+    assert func_sig_str == str_sig + ':'
 
 
 def test_same_than_wraps_basic():
@@ -70,10 +78,13 @@ def test_same_than_wraps_basic():
     makefun_with_signature_normal = with_signature(signature(test_from_sig_wrapper))(foo_wrapper)
 
     for field in ('__module__', '__name__', '__qualname__', '__doc__', '__annotations__'):
-        assert getattr(functool_wrapped, field) == getattr(makefun_wrapped, field), "field %s is different" % field
-        assert getattr(functool_wrapped, field) == getattr(makefun_with_signature_inverted, field), "field %s is different" % field
-        if field != '__annotations__':
-            assert getattr(functool_wrapped, field) != getattr(makefun_with_signature_normal, field), "field %s is identical" % field
+        if sys.version_info < (3, 0) and field in {'__qualname__', '__annotations__'}:
+            pass
+        else:
+            assert getattr(functool_wrapped, field) == getattr(makefun_wrapped, field), "field %s is different" % field
+            assert getattr(functool_wrapped, field) == getattr(makefun_with_signature_inverted, field), "field %s is different" % field
+            if field != '__annotations__':
+                assert getattr(functool_wrapped, field) != getattr(makefun_with_signature_normal, field), "field %s is identical" % field
 
 
 def tests_wraps_sigchange():
@@ -89,12 +100,16 @@ def tests_wraps_sigchange():
         return foo(*args, **kwargs)
 
     for field in ('__module__', '__name__', '__qualname__', '__doc__', '__annotations__'):
-        assert getattr(goo, field) == getattr(foo, field), "field %s is different" % field
+        if sys.version_info < (3, 0) and field in {'__qualname__', '__annotations__'}:
+            pass
+        else:
+            assert getattr(goo, field) == getattr(foo, field), "field %s is different" % field
 
     assert str(signature(goo)) == "(a, b=0)"
     assert goo('hello') == 'hello'
 
 
+@pytest.mark.skipif(sys.version_info < (3, 0), reason="requires python3 or higher")
 def test_qualname_when_nested():
     """ Tests that qualname is correctly set when `@with_signature` is applied on nested functions """
 
