@@ -21,7 +21,7 @@ The typical use cases are:
 
 It currently supports three ways to define the signature of the created function
 
- - from a given reference function, e.g. `foo`
+ - from a given reference function, e.g. `foo`.
  - from strings, e.g. `'foo(a, b=1)'`
  - from `Signature` objects, either manually created, or obtained by using the `inspect.signature` (or its backport `funcsigs.signature`) method.
 
@@ -69,7 +69,8 @@ func_impl called !
 
 You can also:
 
- * override the function name, docstring and module name if you pass a non-None `func_name`, `doc` and `modulename` argument
+ * remove the name from the signature string (e.g. `'(b, a=0)'`) to directly use the function name of `func_impl`.
+ * override the function name, docstring, qualname and module name if you pass a non-None `func_name`, `doc`, `qualname` and `module_name` argument
  * add other attributes on the generated function if you pass additional keyword arguments
 
 See `help(create_function)` for details.
@@ -96,7 +97,7 @@ def gen_func(*args, **kwargs):
     return args, kwargs
 ```
 
-It also has the capability to take `None` as a signature, if you just want to update the metadata (`func_name`, `doc`, `modulename`) without creating any function:
+It also has the capability to take `None` as a signature, if you just want to update the metadata (`func_name`, `doc`, `qualname`, `module_name`) without creating any function:
 
 ```python
 @with_signature(None, func_name='f')
@@ -164,11 +165,11 @@ In many real-world applications we want to reuse "as is", or slightly modify, an
 
 #### Copying a signature
 
-The easiest way to copy the signature from another function is to directly pass this function as the first argument in `@with_signature` or `create_function`. That way you do not have to use `inspect`/`funcsigs`.
+If you just want to expose the same signature as a reference function (and not wrap it nor appear like it), the easiest way to copy the signature from another function `f` is to use `signature(f)` from `inspect`/`funcsigs`.
 
 #### Signature-preserving function wrappers
 
-[`@functools.wraps`](https://docs.python.org/3/library/functools.html#functools.wraps) is a famous decorator to create "signature-preserving" function wrappers. However it does not actually preserve the signature, it just uses a trick (setting the `__wrapped__` attribute) to trigger special dedicated behaviour in `stdlib`'s `help()` and `signature()` methods.
+[`@functools.wraps`](https://docs.python.org/3/library/functools.html#functools.wraps) is a famous decorator to create "signature-preserving" function wrappers. However it does not actually preserve the signature, it just uses a trick (setting the `__wrapped__` attribute) to trigger special dedicated behaviour in `stdlib`'s `help()` and `signature()` methods. See [here](https://stackoverflow.com/questions/308999/what-does-functools-wraps-do/55102697#55102697).
  
 This has two major limitations: 
 
@@ -224,10 +225,10 @@ Finally note that a `create_wrapper` function is also provided for convenience ;
 
 #### Editing a signature
 
-Below we show how to add a parameter to a function. We first capture its `Signature` using `inspect.signature(f)`, we modify it to add a parameter, and finally we use it in `create_function` to create our final function:
+Below we show how to add a parameter to a function. We first capture its `Signature` using `inspect.signature(f)`, we modify it to add a parameter, and finally we use it in `wraps` to create our final function:
 
 ```python
-from makefun import with_signature
+from makefun import wraps
 from inspect import signature, Parameter
 
 # (0) the reference function
@@ -235,19 +236,18 @@ def foo(b, a=0):
     print("foo called: b=%s, a=%s" % (b, a))
     return b, a
 
-# (1a) capture the name and signature of reference function `foo`
-func_name = foo.__name__
-original_func_sig = signature(foo)
-print("Original Signature: %s" % original_func_sig)
+# (1a) capture the signature of reference function `foo`
+foo_sig = signature(foo)
+print("Original Signature: %s" % foo_sig)
 
 # (1b) modify the signature to add a new parameter 'z' as first argument
-params = list(original_func_sig.parameters.values())
+params = list(foo_sig.parameters.values())
 params.insert(0, Parameter('z', kind=Parameter.POSITIONAL_OR_KEYWORD))
-func_sig = original_func_sig.replace(parameters=params)
-print("New Signature: %s" % func_sig)
+new_sig = foo_sig.replace(parameters=params)
+print("New Signature: %s" % new_sig)
 
 # (2) define the wrapper implementation
-@with_signature(func_sig, func_name=func_name)
+@wraps(foo, new_sig=new_sig)
 def foo_wrapper(z, *args, **kwargs):
     print("foo_wrapper called ! z=%s" % z)
     # call the foo function 
@@ -283,23 +283,24 @@ def foo(b, c, a=0):
     pass
 
 # original signature
-original_func_sig = signature(foo)
-print("original signature: %s%s" % (foo.__name__, original_func_sig))
+foo_sig = signature(foo)
+print("original signature: %s" % foo_sig)
 
 # let's modify it
-func_sig = add_signature_parameters(original_func_sig,
-                first=(Parameter('z', kind=Parameter.POSITIONAL_OR_KEYWORD),),
-                last=(Parameter('o', kind=Parameter.POSITIONAL_OR_KEYWORD, 
-                                     default=True),))
-func_sig = remove_signature_parameters(func_sig, 'b', 'a')
-print("modified signature: %s%s" % (foo.__name__, original_func_sig))
+new_sig = add_signature_parameters(foo_sig,
+                first=Parameter('z', kind=Parameter.POSITIONAL_OR_KEYWORD),
+                last=Parameter('o', kind=Parameter.POSITIONAL_OR_KEYWORD, 
+                               default=True)
+          )
+new_sig = remove_signature_parameters(new_sig, 'b', 'a')
+print("modified signature: %s" % new_sig)
 ```
 
 yields
 
 ```bash
-original signature: foo(b, c, a=0)
-modified signature: foo(z, c, o=True)
+original signature: (b, c, a=0)
+modified signature: (z, c, o=True)
 ```
 
 They might save you a few lines of code if your use-case is not too specific.
@@ -372,11 +373,11 @@ prints the following source code:
 
 ```python
 def foo(b, a=0):
-    return _call_handler_(b=b, a=a)
+    return _func_impl_(b=b, a=a)
 
 ```
 
-The `_call_handler_` symbol represents your implementation. As [already mentioned](#arguments_mapping), you see that the variables are passed to it *as keyword arguments* when possible (`_call_handler_(b=b)`, not simply `_call_handler_(b)`). Of course if it is not possible it adapts:
+The `_func_impl_` symbol represents your implementation. As [already mentioned](#arguments_mapping), you see that the variables are passed to it *as keyword arguments* when possible (`_func_impl_(b=b)`, not simply `_func_impl_(b)`). Of course if it is not possible it adapts:
 
 ```python
 gen_func = create_function("foo(a=0, *args, **kwargs)", func_impl)
@@ -387,7 +388,7 @@ prints the following source code:
 
 ```python
 def foo(a=0, *args, **kwargs):
-    return _call_handler_(a=a, *args, **kwargs)
+    return _func_impl_(a=a, *args, **kwargs)
 ```
 
 #### Function reference injection

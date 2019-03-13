@@ -7,7 +7,8 @@ except ImportError:
     from funcsigs import signature, Signature, Parameter
 
 
-from makefun import create_function, add_signature_parameters, remove_signature_parameters, with_signature, wraps
+from makefun import create_function, add_signature_parameters, remove_signature_parameters, with_signature, wraps, \
+    create_wrapper
 
 python_version = sys.version_info.major
 
@@ -67,7 +68,8 @@ def test_ex_nihilo_kw_only():
     assert gen_func.__source__ == ref_src
 
 
-def test_from_sig_wrapper():
+@pytest.mark.parametrize('use_decorator', [False, True], ids="use_decorator={}".format)
+def test_from_sig_wrapper(use_decorator):
     """ Tests that we can create a function from a Signature object """
 
     def foo(b, a=0):
@@ -94,7 +96,10 @@ def test_from_sig_wrapper():
         return z, output
 
     # create the dynamic function
-    gen_func = create_function(func_sig, func_impl, func_name=func_name)
+    if use_decorator:
+        gen_func = wraps(foo, new_sig=func_sig)(func_impl)
+    else:
+        gen_func = create_wrapper(foo, func_impl, new_sig=func_sig)
 
     # check the source code
     ref_src = "def foo(z, b, a=0):\n    return _func_impl_(z=z, b=b, a=a)\n"
@@ -111,15 +116,18 @@ def test_helper_functions():
         pass
 
     # original signature
-    original_func_sig = signature(foo)
-    assert str(original_func_sig) == '(b, c, a=0)'
+    foo_sig = signature(foo)
+    print("original signature: %s" % foo_sig)
 
     # let's modify it
-    func_sig = add_signature_parameters(original_func_sig,
-                                        first=Parameter('z', Parameter.POSITIONAL_OR_KEYWORD),
-                                        last=(Parameter('o', Parameter.POSITIONAL_OR_KEYWORD, default=True),))
-    func_sig = remove_signature_parameters(func_sig, 'b', 'a')
-    assert str(func_sig) == '(z, c, o=True)'
+    new_sig = add_signature_parameters(foo_sig,
+                                       first=Parameter('z', kind=Parameter.POSITIONAL_OR_KEYWORD),
+                                       last=Parameter('o', kind=Parameter.POSITIONAL_OR_KEYWORD,
+                                                      default=True)
+                                       )
+    new_sig = remove_signature_parameters(new_sig, 'b', 'a')
+    print("modified signature: %s" % new_sig)
+    assert str(new_sig) == '(z, c, o=True)'
 
 
 def test_injection():
