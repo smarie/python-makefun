@@ -694,6 +694,8 @@ def with_signature(func_signature,             # type: Union[str, Signature]
                     f.__name__ = func_name
                 if doc is not None:
                     f.__doc__ = doc
+                if qualname is not None:
+                    f.__qualname__ = qualname
                 if module_name is not None:
                     f.__module__ = module_name
                 for k, v in attrs.items():
