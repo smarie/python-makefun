@@ -7,7 +7,7 @@ def get_legacy_py_generator_body_template():
     :return:
     """
     return """def %s
-    _i = iter(_call_handler_(%s))    # initialize the generator
+    _i = iter(_func_impl_(%s))    # initialize the generator
     _y = next(_i)                    # first iteration
     while 1:
         try:

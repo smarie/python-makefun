@@ -31,75 +31,103 @@ except ImportError:
 
 
 # macroscopic signature strings checker (we do not look inside params, `signature` will do it for us)
-FUNC_DEF = re.compile('(?s)^\s*(?P<funcname>[_\w][_\w\d]*)\s*'
+FUNC_DEF = re.compile('(?s)^\s*(?P<funcname>[_\w][_\w\d]*)?\s*'
                       '\(\s*(?P<params>.*?)\s*\)\s*'
                       '((?P<typed_return_hint>->\s*.+)|:\s*#\s*(?P<comment_return_hint>.+))*$')
 
 
 def create_wrapper(wrapped,
                    wrapper,
+                   new_sig=None,               # type: Union[str, Signature]
                    func_name=None,             # type: str
                    inject_as_first_arg=False,  # type: bool
-                   addsource=True,             # type: bool
-                   addhandler=True,            # type: bool
+                   add_source=True,             # type: bool
+                   add_impl=True,            # type: bool
                    doc=None,                   # type: str
-                   modulename=None,            # type: str
+                   qualname=None,              # type: str
+                   module_name=None,            # type: str
                    **attrs
                    ):
     """
     Creates a signature-preserving wrapper function.
 
-    It is similar in behaviour to `functools.update_wrapper`, but relies on a proper dynamically-generated function.
-    Therefore as opposed to `functools.update_wrapper`, the wrapper body will not be executed if the arguments provided
-    are not compliant with the signature - instead a `TypeError` will be raised before entering the wrapper body.
-
-    WARNING: the order of arguments is the same than in `create_function` so it is reversed with respect to
-    `functools.update_wrapper`.
-
-    This function is just an alias for
-
-        `create_function(wrapped, wrapper, __wrapped__=f, **kwargs)`
-
-    In other words, we just set the additional `__wrapped__` attribute on the created function, to stay compliant with
-    the `functools.update_wrapper` convention.
-    See https://docs.python.org/3/library/functools.html#functools.update_wrapper
-    :return:
+    See `@makefun.wraps`
     """
-    return create_function(wrapped, wrapper, func_name=func_name, inject_as_first_arg=inject_as_first_arg,
-                           addsource=addsource, addhandler=addhandler, doc=doc, modulename=modulename,
-                           __wrapped__=wrapped, **attrs)
+    func_name, func_sig, doc, qualname, module_name, all_attrs = _get_args_for_wrapping(wrapped, new_sig, func_name,
+                                                                                        doc, qualname, module_name,
+                                                                                        attrs)
+
+    return create_function(func_sig, wrapper,
+                           func_name=func_name,
+                           inject_as_first_arg=inject_as_first_arg,
+                           add_source=add_source, add_impl=add_impl,
+                           doc=doc, qualname=qualname,
+                           module_name=module_name,
+                           **all_attrs)
 
 
-def create_function(func_signature,             # type: Union[str, Signature, Callable[[Any], Any]]
-                    func_handler,               # type: Callable[[Any], Any]
+def create_function(func_signature,             # type: Union[str, Signature]
+                    func_impl,                  # type: Callable[[Any], Any]
                     func_name=None,             # type: str
                     inject_as_first_arg=False,  # type: bool
-                    addsource=True,             # type: bool
-                    addhandler=True,            # type: bool
+                    add_source=True,            # type: bool
+                    add_impl=True,              # type: bool
                     doc=None,                   # type: str
-                    modulename=None,            # type: str
+                    qualname=None,              # type: str
+                    module_name=None,           # type: str
                     **attrs):
     """
-    Creates a function with signature <func_signature> that will call <func_handler> with its arguments in order
-    when called.
+    Creates a function with signature <func_signature> that will call <func_impl> with its arguments when called.
+    Arguments are passed as keyword-arguments when it is possible (so all the time, except for var-positional or
+    positional-only arguments that get passed as *args. Note that pos-only does not yet exist in python but this case
+    is already covered because it is supported by `Signature` objects).
 
-    :param func_signature: either a string without 'def' such as "foo(a, b: int, *args, **kwargs)", a callable, or a
-        `Signature` object, for example from the output of `inspect.signature` or from the `funcsigs.signature`
-        backport. Note that these objects can be created and edited too. If this is a `Signature`, then a non-none
-        `func_name` should be provided. If this is a string, `func_name` should not be provided.
-    :param func_handler:
-    :param inject_as_first_arg: if True, the created function will be injected as the first positional argument of the
-        function handler. This can be handy in case the handler is shared between several facades and needs to know
-        from which context it was called. Default=False
-    :param func_name: mandatory if func_signature is a `Signature` object, indeed these objects do not contain any name.
-    :param addsource: a boolean indicating if a '__source__' annotation should be added to the generated function
+    `func_signature` can be provided:
+
+     - as a string containing the name and signature without 'def' keyword, such as `'foo(a, b: int, *args, **kwargs)'`.
+      In which case the name in the string will be used for the `__name__` and `__qualname__` of the created function
+      by default
+     - as a `Signature` object, for example created using `signature(f)` or handcrafted. In this case the `__name__`
+      and `__qualname__` of the created function will be copied from `func_impl` by default.
+
+    All the other metadata of the created function are defined as follows:
+
+     - default `__name__` attribute (see above) can be overriden by providing a non-None `func_name`
+     - default `__qualname__` attribute (see above) can be overridden by providing a non-None `qualname`
+     - `__annotations__` attribute is created to match the annotations in the signature.
+     - `__doc__` attribute is copied from `func_impl.__doc__` except if overridden using `doc`
+     - `__module__` attribute is copied from `func_impl.__module__` except if overridden using `module_name`
+
+    Finally two new attributes are optionally created
+
+     - `__source__` attribute: set if `add_source` is `True` (default), this attribute contains the source code of the
+     generated function
+     - `__func_impl__` attribute: set if `add_impl` is `True` (default), this attribute contains a pointer to
+     `func_impl`
+
+    :param func_signature: either a string without 'def' such as "foo(a, b: int, *args, **kwargs)" or "(a, b: int)",
+        or a `Signature` object, for example from the output of `inspect.signature` or from the `funcsigs.signature`
+        backport. Note that these objects can be created manually too. If the signature is provided as a string and
+        contains a non-empty name, this name will be used instead of the one of the decorated function.
+    :param func_impl: the function that will be called when the generated function is executed. Its signature should
+        be compliant with (=more generic than) `func_signature`
+    :param inject_as_first_arg: if `True`, the created function will be injected as the first positional argument of
+        `func_impl`. This can be handy in case the implementation is shared between several facades and needs
+        to know from which context it was called. Default=`False`
+    :param func_name: provide a non-`None` value to override the created function `__name__` and `__qualname__`. If this
+        is `None` (default), the `__name__` will default to the one of `func_impl` if `func_signature` is a `Signature`,
+        or to the name defined in `func_signature` if `func_signature` is a `str` and contains a non-empty name.
+    :param add_source: a boolean indicating if a '__source__' annotation should be added to the generated function
         (default: True)
-    :param addhandler: a boolean indicating if a '__call_handler__' annotation should be added to the generated function
+    :param add_impl: a boolean indicating if a '__func_impl__' annotation should be added to the generated function
         (default: True)
     :param doc: a string representing the docstring that will be used to set the __doc__ attribute on the generated
-        function. If None (default), the doc of func_handler will be used.
-    :param modulename: the name of the module to be set on the function (under __module__ ). If None (default), the
-        caller module name will be used.
+        function. If None (default), the doc of func_impl will be used.
+    :param qualname: a string representing the qualified name to be used. If None (default), the `__qualname__` will
+        default to the one of `func_impl` if `func_signature` is a `Signature`, or to the name defined in
+        `func_signature` if `func_signature` is a `str` and contains a non-empty name.
+    :param module_name: the name of the module to be set on the function (under __module__ ). If None (default),
+        `func_impl.__module__` will be used.
     :param attrs: other keyword attributes that should be set on the function
     :return:
     """
@@ -110,42 +138,57 @@ def create_function(func_signature,             # type: Union[str, Signature, Ca
         frame = _get_callerframe(offset=1)
     except KeyError:
         frame = _get_callerframe()
-    evaldict, _modulename = extract_module_and_evaldict(frame)
-    modulename = modulename if modulename is not None else _modulename
+    evaldict, _ = extract_module_and_evaldict(frame)
+
+    # name defaults
+    user_provided_name = True
+    if func_name is None:
+        func_name = func_impl.__name__
+        user_provided_name = False
+
+    # qname default
+    user_provided_qname = True
+    if qualname is None:
+        qualname = getattr(func_impl, '__qualname__', None)
+        user_provided_qname = False
+
+    # doc default
+    if doc is None:
+        doc = getattr(func_impl, '__doc__', None)
+
+    # module name default
+    if module_name is None:
+        module_name = func_impl.__module__
 
     # input signature handling
     if isinstance(func_signature, str):
-        # func_name should not be provided
-        if func_name is not None:
-            raise ValueError("func_name should not be provided when the signature is provided as a string")
-
         # transform the string into a Signature and make sure the string contains ":"
-        func_name, func_signature, func_signature_str = get_signature_from_string(func_signature, evaldict)
+        func_name_from_str, func_signature, func_signature_str = get_signature_from_string(func_signature, evaldict)
+
+        # if not explicitly overridden using `func_name`, the name in the string takes over
+        if func_name_from_str is not None:
+            if not user_provided_name:
+                func_name = func_name_from_str
+            if not user_provided_qname:
+                qualname = func_name
+
+        # fix the signature if needed
+        if func_name_from_str is None:
+            func_signature_str = func_name + func_signature_str
 
     elif isinstance(func_signature, Signature):
-        # func name should be provided
-        if func_name is None:
-            raise ValueError("a non-None func_name should be provided when a `Signature` is provided")
-
         # create the signature string
         func_signature_str = get_signature_string(func_name, func_signature, evaldict)
 
-    elif callable(func_signature):
-        # grab the func name
-        if func_name is None:
-            func_name = func_signature.__name__
-
-        # inspect the signature
-        func_signature = signature(func_signature)
-
-        # create the signature string
-        func_signature_str = get_signature_string(func_name, func_signature, evaldict)
     else:
         raise TypeError("Invalid type for `func_signature`: %s" % type(func_signature))
 
     # extract all information needed from the `Signature`
     posonly_names, kwonly_names, varpos_names, varkw_names, unrestricted_names = get_signature_params(func_signature)
     params_names = posonly_names + unrestricted_names + varpos_names + kwonly_names + varkw_names
+
+    # Note: in decorator the annotations were extracted using getattr(func_impl, '__annotations__') instead.
+    # This seems equivalent but more general (provided by the signature, not the function), but to check
     annotations, defaults, kwonlydefaults = get_signature_details(func_signature)
 
     # create the body of the function to compile
@@ -159,43 +202,39 @@ def create_function(func_signature,             # type: Union[str, Signature, Ca
         # with Python 3.5 isgeneratorfunction returns True for all coroutines
         # however we know that it is NOT possible to have a generator
         # coroutine in python 3.5: PEP525 was not there yet
-        generatorcaller = isgeneratorfunction(func_handler) and not iscoroutinefunction(func_handler)
+        generatorcaller = isgeneratorfunction(func_impl) and not iscoroutinefunction(func_impl)
     else:
-        generatorcaller = isgeneratorfunction(func_handler)
+        generatorcaller = isgeneratorfunction(func_impl)
 
     if generatorcaller:
         if sys.version_info >= (3, 3):
-            body = "def %s\n    yield from _call_handler_(%s)\n" % (func_signature_str, params_str)
+            body = "def %s\n    yield from _func_impl_(%s)\n" % (func_signature_str, params_str)
         else:
             from makefun._main_legacy_py import get_legacy_py_generator_body_template
             body = get_legacy_py_generator_body_template() % (func_signature_str, params_str)
     else:
-        body = "def %s\n    return _call_handler_(%s)\n" % (func_signature_str, params_str)
+        body = "def %s\n    return _func_impl_(%s)\n" % (func_signature_str, params_str)
 
-    if iscoroutinefunction(func_handler):
+    if iscoroutinefunction(func_impl):
         body = ("async " + body).replace('return', 'return await')
 
-    # create the function by compiling code, mapping the `_call_handler_` symbol to `func_handler`
+    # create the function by compiling code, mapping the `_func_impl_` symbol to `func_impl`
     protect_eval_dict(evaldict, func_name, params_names)
-    evaldict['_call_handler_'] = func_handler
+    evaldict['_func_impl_'] = func_impl
     f = _make(func_name, params_names, body, evaldict)
 
     # add the source annotation if needed
-    if addsource:
+    if add_source:
         attrs['__source__'] = body
 
     # add the handler if needed
-    if addhandler:
-        attrs['__call_handler__'] = func_handler
-
-    # by default the doc is the one from the provided handler
-    if doc is None:
-        doc = getattr(func_handler, '__doc__', None)
+    if add_impl:
+        attrs['__func_impl__'] = func_impl
 
     # update the signature
-    _update_fields(f, name=func_name, doc=doc, annotations=annotations,
+    _update_fields(f, name=func_name, qualname=qualname, doc=doc, annotations=annotations,
                    defaults=tuple(defaults), kwonlydefaults=kwonlydefaults,
-                   module=modulename, **attrs)
+                   module=module_name, **attrs)
 
     return f
 
@@ -267,6 +306,11 @@ def get_signature_from_string(func_sig_str, evaldict):
 
     # extract function name and parameter names list
     func_name = groups['funcname']
+    if func_name is None or func_name == '':
+        func_name_ = 'dummy'
+        func_name = None
+    else:
+        func_name_ = func_name
     # params_str = groups['params']
     # params_names = extract_params_names(params_str)
 
@@ -278,8 +322,10 @@ def get_signature_from_string(func_sig_str, evaldict):
         func_sig_str = func_sig_str + ':'
 
     # Create a dummy function
-    body = 'def %s\n    pass\n' % func_sig_str
-    dummy_f = _make(func_name, [], body, evaldict)
+    # complete the string if name is empty, so that we can actually use _make
+    func_sig_str_ = (func_name_ + func_sig_str) if func_name is None else func_sig_str
+    body = 'def %s\n    pass\n' % func_sig_str_
+    dummy_f = _make(func_name_, [], body, evaldict)
 
     # return its signature
     return func_name, signature(dummy_f), func_sig_str
@@ -381,7 +427,7 @@ def extract_module_and_evaldict(frame):
     """
     try:
         # get the module name
-        modulename = frame.f_globals.get('__name__', '?')
+        module_name = frame.f_globals.get('__name__', '?')
 
         # construct a dictionary with all variables
         # this is required e.g. if a symbol is used in a type hint
@@ -390,10 +436,10 @@ def extract_module_and_evaldict(frame):
 
     except AttributeError:
         # either the frame is None of the f_globals and f_locals are not available
-        modulename = '?'
+        module_name = '?'
         evaldict = dict()
 
-    return evaldict, modulename
+    return evaldict, module_name
 
 
 def protect_eval_dict(evaldict, func_name, params_names):
@@ -430,12 +476,12 @@ def _make(funcname, params_names, body, evaldict=None):
     :param params_names:
     :param body:
     :param evaldict:
-    :param addsource:
+    :param add_source:
     :return:
     """
     evaldict = evaldict or {}
     for n in params_names:
-        if n in ('_func_', '_call_handler_'):
+        if n in ('_func_', '_func_impl_'):
             raise NameError('%s is overridden in\n%s' % (n, body))
 
     if not body.endswith('\n'):  # newline is needed for old Pythons
@@ -459,7 +505,7 @@ def _make(funcname, params_names, body, evaldict=None):
     return func
 
 
-def _update_fields(func, name, doc=None, annotations=None, defaults=(), kwonlydefaults=None, module=None, **kw):
+def _update_fields(func, name, qualname=None, doc=None, annotations=None, defaults=(), kwonlydefaults=None, module=None, **kw):
     """
     Update the signature of func with the provided information
 
@@ -471,6 +517,10 @@ def _update_fields(func, name, doc=None, annotations=None, defaults=(), kwonlyde
     :return:
     """
     func.__name__ = name
+
+    if qualname is not None:
+        func.__qualname__ = qualname
+
     func.__doc__ = doc
     func.__dict__ = kw
 
@@ -499,12 +549,14 @@ def _get_callerframe(offset=0):
 
 
 def wraps(f,
+          new_sig=None,         # type: Union[str, Signature]
           func_name=None,             # type: str
           inject_as_first_arg=False,  # type: bool
-          addsource=True,   # type: bool
-          addhandler=True,  # type: bool
+          add_source=True,   # type: bool
+          add_impl=True,  # type: bool
           doc=None,         # type: str
-          modulename=None,  # type: str
+          qualname=None,    # type: str
+          module_name=None,  # type: str
           **attrs
           ):
     """
@@ -514,78 +566,150 @@ def wraps(f,
     `functools.wraps`, the wrapper body will not be executed if the arguments provided are not
     compliant with the signature - instead a `TypeError` will be raised before entering the wrapper body.
 
-    This decorator is just an alias for
+    `@wraps(f)` is equivalent to
 
-        `with_signature(f, __wrapped__=f, **kwargs)`
+        `@with_signature(signature(f),
+                         func_name=f.__name__,
+                         doc=f.__doc__,
+                         module_name=f.__module__,
+                         qualname=f.__qualname__,
+                         __wrapped__=f,
+                         **f.__dict__,
+                         **attrs)`
 
-    In other words, we just set the additional `__wrapped__` attribute on the created function, to stay compliant with
-    the `functools.wraps` convention. See https://docs.python.org/3/library/functools.html#functools.wraps
+    In other words, as opposed to `@with_signature`, the metadata (doc, module name, etc.) is provided by the wrapped
+    `f`, so that the created function seems to be identical (except for the signature if a non-None `new_sig` is
+    provided). If `new_sig` is None, we set the additional `__wrapped__` attribute on the created function, to stay
+    compliant with the `functools.wraps` convention.
+    See https://docs.python.org/3/library/functools.html#functools.wraps
+    """
+    func_name, func_sig, doc, qualname, module_name, all_attrs = _get_args_for_wrapping(f, new_sig, func_name, doc,
+                                                                                        qualname, module_name, attrs)
+
+    return with_signature(func_sig,
+                          func_name=func_name,
+                          inject_as_first_arg=inject_as_first_arg,
+                          add_source=add_source, add_impl=add_impl,
+                          doc=doc,
+                          qualname=qualname,
+                          module_name=module_name,
+                          **all_attrs)
+
+
+def _get_args_for_wrapping(wrapped, new_sig, func_name, doc, qualname, module_name, attrs):
+    """
+    Internal method used by @wraps and create_wrapper
+
+    :param wrapped:
+    :param new_sig:
+    :param func_name:
+    :param doc:
+    :param qualname:
+    :param module_name:
+    :param attrs:
     :return:
     """
-    return with_signature(f, func_name=func_name, inject_as_first_arg=inject_as_first_arg, addsource=addsource,
-                          addhandler=addhandler, doc=doc, modulename=modulename, __wrapped__=f, **attrs)
+    # the desired signature
+    func_sig = signature(wrapped) if new_sig is None else new_sig
+
+    # the desired metadata
+    if func_name is None:
+        func_name = wrapped.__name__
+    if doc is None:
+        doc = wrapped.__doc__
+    if qualname is None:
+        qualname = getattr(wrapped, '__qualname__', None)
+    if module_name is None:
+        module_name = wrapped.__module__
+
+    # attributes: start from the wrapped dict, add '__wrapped__' if needed, and override with all attrs.
+    all_attrs = copy(wrapped.__dict__)
+    if new_sig is None:
+        all_attrs['__wrapped__'] = wrapped
+    all_attrs.update(attrs)
+
+    return func_name, func_sig, doc, qualname, module_name, all_attrs
 
 
 def with_signature(func_signature,             # type: Union[str, Signature]
                    func_name=None,             # type: str
                    inject_as_first_arg=False,  # type: bool
-                   addsource=True,             # type: bool
-                   addhandler=True,            # type: bool
+                   add_source=True,             # type: bool
+                   add_impl=True,            # type: bool
                    doc=None,                   # type: str
-                   modulename=None,            # type: str
+                   qualname=None,              # type: str
+                   module_name=None,            # type: str
                    **attrs
                    ):
     """
     A decorator for functions, to change their signature. The new signature should be compliant with the old one.
 
-    If `func_signature` is set to `None`, then no new function is created: this simply applies the new metadata (name,
-    doc, modulename) to the decorated function. `addsource`, `addhandler` and `inject_as_first_arg` should not be set
-    in this case.
+    ```python
+    @with_signature(<arguments>)
+    def impl(...):
+        ...
+    ```
+
+    is totally equivalent to `impl = create_function(<arguments>, func_impl=impl)` except for one additional behaviour:
+
+     - If `func_signature` is set to `None`, there is no `TypeError` as in create_function. Instead, this simply
+     applies the new metadata (name, doc, module_name, attrs) to the decorated function without creating a wrapper.
+     `add_source`, `add_impl` and `inject_as_first_arg` should not be set in this case.
 
     :param func_signature: the new signature of the decorated function. Either a string without 'def' such as
-        "foo(a, b: int, *args, **kwargs)", a callable, or a `Signature` object, for example from the output of
-        `inspect.signature` or from the `funcsigs.signature` backport. Note that these objects can be created and
-        edited too. If this is a `Signature`, then a non-None `func_name` should be provided. If this is a string,
-        `func_name` should not be provided. Finally `None` can be provided to indicate that user wants to only change
-        the medatadata (func_name, doc, modulename) but without generating a new function.
-    :param func_name: mandatory if func_signature is a `Signature` object, indeed these objects do not contain any name.
-    :param addsource: a boolean indicating if a '__source__' annotation should be added to the generated function
+        "foo(a, b: int, *args, **kwargs)" of "(a, b: int)", or a `Signature` object, for example from the output of
+        `inspect.signature` or from the `funcsigs.signature` backport. Note that these objects can be created manually
+        too. If the signature is provided as a string and contains a non-empty name, this name will be used instead
+        of the one of the decorated function. Finally `None` can be provided to indicate that user wants to only change
+        the medatadata (func_name, doc, module_name, attrs) of the decorated function, without generating a new
+        function.
+    :param inject_as_first_arg: if `True`, the created function will be injected as the first positional argument of
+        the decorated function. Default=`False`
+    :param func_name: provide a non-`None` value to override the created function `__name__` and `__qualname__`. If this
+        is `None` (default), the `__name__` and `__qualname__` will default to the ones of the decorated function if
+        `func_signature` is a `Signature`, or to the name defined in `func_signature` if `func_signature` is a `str`
+        and contains a non-empty name.
+    :param add_source: a boolean indicating if a '__source__' annotation should be added to the generated function
         (default: True)
-    :param addhandler: a boolean indicating if a '__call_handler__' annotation should be added to the generated function
+    :param add_impl: a boolean indicating if a '__func_impl__' annotation should be added to the generated function
         (default: True)
     :param doc: a string representing the docstring that will be used to set the __doc__ attribute on the generated
-        function. If None (default), the doc of func_handler will be used.
-    :param modulename: the name of the module to be set on the function (under __module__ ). If None (default), the
-        caller module name will be used.
+        function. If None (default), the doc of func_impl will be used.
+    :param qualname: a string representing the qualified name to be used. If None (default), the `__qualname__` will
+        default to the one of `func_impl` if `func_signature` is a `Signature`, or to the name defined in
+        `func_signature` if `func_signature` is a `str` and contains a non-empty name.
+    :param module_name: the name of the module to be set on the function (under __module__ ). If None (default),
+        `func_impl.__module__` will be used.
     :param attrs: other keyword attributes that should be set on the function
-    :return:
     """
     if func_signature is None:
         # make sure that user does not provide non-default other args
-        if inject_as_first_arg or not addsource or not addhandler or len(attrs) > 0:
+        if inject_as_first_arg or not add_source or not add_impl:
             raise ValueError("If `func_signature=None` no new signature will be generated so only `func_name`, "
-                             "`modulename` and `doc` should be provided, to modify the metadata.")
+                             "`module_name`, `doc` and `attrs` should be provided, to modify the metadata.")
         else:
             def replace_f(f):
-                # manually apply all the metadata, but do not generate code - that's useless
+                # manually apply all the non-None metadata, but do not call create_function - that's useless
                 if func_name is not None:
                     f.__name__ = func_name
                 if doc is not None:
                     f.__doc__ = doc
-                if modulename is not None:
-                    f.__module__ = modulename
+                if module_name is not None:
+                    f.__module__ = module_name
+                for k, v in attrs.items():
+                    setattr(f, k, v)
                 return f
     else:
         def replace_f(f):
-            return create_function(func_signature=func_signature if func_signature is not None else f,
-                                   func_handler=f,
-                                   func_name=func_name if func_name is not None
-                                             else (f.__name__ if isinstance(func_signature, Signature) else None),
+            return create_function(func_signature=func_signature,
+                                   func_impl=f,
+                                   func_name=func_name,
                                    inject_as_first_arg=inject_as_first_arg,
-                                   addsource=addsource,
-                                   addhandler=addhandler,
+                                   add_source=add_source,
+                                   add_impl=add_impl,
                                    doc=doc,
-                                   modulename=modulename,
+                                   qualname=qualname,
+                                   module_name=module_name,
                                    _with_sig_=True,  # special trick to tell create_function that we're @with_signature
                                    **attrs
                                    )

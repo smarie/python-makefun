@@ -40,7 +40,7 @@ def test_ex_nihilo(type, decorator):
         gen_func = create_function(func_sig, func_impl, func_name=func_name)
 
     # first check the source code
-    ref_src = "def foo(b, a=0):\n    return _call_handler_(b=b, a=a)\n"
+    ref_src = "def foo(b, a=0):\n    return _func_impl_(b=b, a=a)\n"
     print("Generated Source :\n" + gen_func.__source__)
     assert gen_func.__source__ == ref_src
 
@@ -62,7 +62,7 @@ def test_ex_nihilo_kw_only():
     func_sig = "foo(b, *, a=0, **kwargs)"
     gen_func = create_function(func_sig, func_impl)
 
-    ref_src = "def foo(b, *, a=0, **kwargs):\n    return _call_handler_(b=b, a=a, **kwargs)\n"
+    ref_src = "def foo(b, *, a=0, **kwargs):\n    return _func_impl_(b=b, a=a, **kwargs)\n"
     print(gen_func.__source__)
     assert gen_func.__source__ == ref_src
 
@@ -85,7 +85,7 @@ def test_from_sig_wrapper():
     func_sig = original_func_sig.replace(parameters=params)
     print("New Signature: %s" % func_sig)
 
-    # define the handler that should be called
+    # define the implementation
     def func_impl(z, *args, **kwargs):
         print("func_impl called ! z=%s" % z)
         # call the foo function
@@ -97,7 +97,7 @@ def test_from_sig_wrapper():
     gen_func = create_function(func_sig, func_impl, func_name=func_name)
 
     # check the source code
-    ref_src = "def foo(z, b, a=0):\n    return _call_handler_(z=z, b=b, a=a)\n"
+    ref_src = "def foo(z, b, a=0):\n    return _func_impl_(z=z, b=b, a=a)\n"
     print("Generated Source :\n" + gen_func.__source__)
     assert gen_func.__source__ == ref_src
 
