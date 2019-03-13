@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.5.1 - bug fix
+
+`add_signature_parameters` now correctly inserts parameters in the right order when they are prepended (using `first=`). Fixed [#29](https://github.com/smarie/python-makefun/issues/29).
+
 ### 1.5.0 - Major refactoring and bugfixes
 
 **Function creation API:**
