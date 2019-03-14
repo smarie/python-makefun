@@ -308,7 +308,7 @@ They might save you a few lines of code if your use-case is not too specific.
 
 #### Removing parameters easily
 
-As goodies, `makefun` provides a `partial` function that are equivalent to `functools.partial`, except that it is fully signature-preserving and modifies the documentation with a nice helper message explaining that this is a partial view:
+As goodies, `makefun` provides a `partial` function that are equivalent to [`functools.partial`](https://docs.python.org/2/library/functools.html#functools.partial), except that it is fully signature-preserving and modifies the documentation with a nice helper message explaining that this is a partial view:
 
 ```python
 def foo(x, y):
