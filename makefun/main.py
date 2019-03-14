@@ -198,15 +198,7 @@ def create_function(func_signature,             # type: Union[str, Signature]
     if inject_as_first_arg:
         params_str = "%s, %s" % (func_name, params_str)
 
-    if (3, 5) <= sys.version_info < (3, 6):
-        # with Python 3.5 isgeneratorfunction returns True for all coroutines
-        # however we know that it is NOT possible to have a generator
-        # coroutine in python 3.5: PEP525 was not there yet
-        generatorcaller = isgeneratorfunction(func_impl) and not iscoroutinefunction(func_impl)
-    else:
-        generatorcaller = isgeneratorfunction(func_impl)
-
-    if generatorcaller:
+    if _is_generator_func(func_impl):
         if sys.version_info >= (3, 3):
             body = "def %s\n    yield from _func_impl_(%s)\n" % (func_signature_str, params_str)
         else:
@@ -237,6 +229,21 @@ def create_function(func_signature,             # type: Union[str, Signature]
                    module=module_name, **attrs)
 
     return f
+
+
+def _is_generator_func(func_impl):
+    """
+    Return True if the func_impl is a generator
+    :param func_impl:
+    :return:
+    """
+    if (3, 5) <= sys.version_info < (3, 6):
+        # with Python 3.5 isgeneratorfunction returns True for all coroutines
+        # however we know that it is NOT possible to have a generator
+        # coroutine in python 3.5: PEP525 was not there yet
+        return isgeneratorfunction(func_impl) and not iscoroutinefunction(func_impl)
+    else:
+        return isgeneratorfunction(func_impl)
 
 
 class DefaultHolder:
@@ -778,3 +785,74 @@ def add_signature_parameters(s,         # type: Signature
             lst.append(last)
 
     return s.replace(parameters=lst)
+
+
+def with_partial(*preset_pos_args, **preset_kwargs):
+    """
+    Decorator to 'partialize' a function using `partial`
+
+    :param preset_pos_args:
+    :param preset_kwargs:
+    :return:
+    """
+    def apply_decorator(f):
+        return partial(f, *preset_pos_args, **preset_kwargs)
+    return apply_decorator
+
+
+def partial(f, *preset_pos_args, **preset_kwargs):
+    """
+
+    :param preset_pos_args:
+    :param preset_kwargs:
+    :return:
+    """
+    # TODO do we need to mimic `partial`'s behaviour concerning positional args?
+
+    # (1) remove all preset arguments from the signature
+    orig_sig = signature(f)
+    # first the first n positional
+    if len(orig_sig.parameters) <= len(preset_pos_args):
+        raise ValueError("Cannot preset %s positional args, function %s has only %s args."
+                         "" % (len(preset_pos_args), f.__name__, len(orig_sig.parameters)))
+    new_sig = Signature(parameters=tuple(orig_sig.parameters.values())[len(preset_pos_args):],
+                        return_annotation=orig_sig.return_annotation)
+    # then the keyword
+    try:
+        new_sig = remove_signature_parameters(new_sig, *preset_kwargs.keys())
+    except KeyError as e:
+        raise ValueError("Cannot preset keyword argument, it does not appear to be present in the signature of %s: %s"
+                         "" % (f.__name__, e))
+
+    if _is_generator_func(f):
+        if sys.version_info >= (3, 3):
+            from makefun._main_latest_py import make_partial_using_yield_from
+            partial_f = make_partial_using_yield_from(new_sig, f, *preset_pos_args, **preset_kwargs)
+        else:
+            from makefun._main_legacy_py import make_partial_using_yield
+            partial_f = make_partial_using_yield(new_sig, f, *preset_pos_args, **preset_kwargs)
+    else:
+        @wraps(f, new_sig=new_sig)
+        def partial_f(*args, **kwargs):
+            # since the signature does the checking for us, no need to check for redundancy.
+            kwargs.update(preset_kwargs)
+            return f(*itertools.chain(preset_pos_args, args), **kwargs)
+
+    # update the doc
+    argstring = ', '.join([("%s" % a) for a in preset_pos_args])
+    if len(argstring) > 0:
+        argstring = argstring + ', '
+    argstring = argstring + str(new_sig)[1:-1]
+    if len(argstring) > 0:
+        argstring = argstring + ', '
+    argstring = argstring + ', '.join(["%s=%s" % (k, v) for k, v in preset_kwargs.items()])
+    new_line = "<This function is equivalent to '%s(%s)', see original '%s' doc below.>\n" \
+               "" % (partial_f.__name__, argstring, partial_f.__name__)
+    # new_line = new_line + ("-" * (len(new_line) - 1)) + '\n'
+    try:
+        doc = getattr(partial_f, '__doc__')
+        partial_f.__doc__ = new_line + doc
+    except AttributeError:
+        partial_f.__doc__ = new_line
+
+    return partial_f

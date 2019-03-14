@@ -306,6 +306,58 @@ modified signature: (z, c, o=True)
 They might save you a few lines of code if your use-case is not too specific.
 
 
+#### Removing parameters easily
+
+As goodies, `makefun` provides a `partial` function that are equivalent to `functools.partial`, except that it is fully signature-preserving and modifies the documentation with a nice helper message explaining that this is a partial view:
+
+```python
+def foo(x, y):
+    """
+    a `foo` function
+
+    :param x:
+    :param y:
+    :return:
+    """
+    return x + y
+   
+from makefun import partial
+bar = partial(foo, x=12)
+``` 
+
+we can test it:
+
+```python
+>>> assert bar(1) == 13
+>>> help(bar)
+Help on function bar in module makefun.tests.test_partial_and_macros:
+
+bar(y)
+    <This function is equivalent to 'foo(y, x=12)', see original 'foo' doc below.>
+    
+    a `foo` function
+    
+    :param x:
+    :param y:
+    :return:
+```
+
+A decorator is also available to create partial views easily for quick tests:
+
+```python
+@with_partial(x=12)
+def foo(x, y):
+    """
+    a `foo` function
+
+    :param x:
+    :param y:
+    :return:
+    """
+    return x + y
+```
+
+
 ### 3- Advanced topics
 
 #### Generators and Coroutines

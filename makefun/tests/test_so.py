@@ -1,7 +1,15 @@
 import sys
 from inspect import getmodule
 
+import pytest
+
 from makefun import create_function, wraps
+
+
+try:  # python 3.3+
+    from inspect import signature, Signature, Parameter
+except ImportError:
+    from funcsigs import signature, Signature, Parameter
 
 
 def test_create_facades(capsys):
@@ -99,3 +107,122 @@ def test_so_decorator():
     assert hello.__name__ == "hello"
     help(hello)  # the help and signature are preserved
     assert hasattr(hello, '__wrapped__')
+
+
+def test_so_facade():
+    def create_initiation_function(cls, gen_init):
+        # (1) check which signature we want to create
+        params = [Parameter('self', kind=Parameter.POSITIONAL_OR_KEYWORD)]
+        for mandatory_arg_name in cls.__init_args__:
+            params.append(Parameter(mandatory_arg_name, kind=Parameter.POSITIONAL_OR_KEYWORD))
+        for default_arg_name, default_arg_val in cls.__opt_init_args__.items():
+            params.append(Parameter(default_arg_name, kind=Parameter.POSITIONAL_OR_KEYWORD, default=default_arg_val))
+        sig = Signature(params)
+
+        # (2) create the init function dynamically
+        return create_function(sig, generic_init)
+
+    # ----- let's use it
+
+    def generic_init(self, *args, **kwargs):
+        """Function to initiate a generic object"""
+        assert len(args) == 0
+        for name, val in kwargs.items():
+            setattr(self, name, val)
+
+    class my_class:
+        __init_args__ = ["x", "y"]
+        __opt_init_args__ = {"my_opt": None}
+
+    my_class.__init__ = create_initiation_function(my_class, generic_init)
+
+    # check
+    o1 = my_class(1, 2)
+    assert vars(o1) == {'y': 2, 'x': 1, 'my_opt': None}
+
+    o2 = my_class(1, 2, 3)
+    assert vars(o2) == {'y': 2, 'x': 1, 'my_opt': 3}
+
+    o3 = my_class(my_opt='hello', y=3, x=2)
+    assert vars(o3) == {'y': 3, 'x': 2, 'my_opt': 'hello'}
+
+
+def test_so_sig_preserving(capsys):
+    """
+    Tests that the answer at
+    https://stackoverflow.com/a/55163391/7262247
+    is correct
+    """
+    def my_decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        wrapper._decorator_name_ = 'my_decorator'
+        return wrapper
+
+    @my_decorator
+    def my_func(x):
+        """my function"""
+        print('hello %s' % x)
+
+    assert my_func._decorator_name_ == 'my_decorator'
+    help(my_func)
+
+    captured = capsys.readouterr()
+    with capsys.disabled():
+        print(captured.out)
+
+    assert captured.out == """Help on function my_func in module makefun.tests.test_so:
+
+my_func(x)
+    my function
+
+"""
+
+
+def test_sig_preserving_2(capsys):
+    """
+    Checks that answer at
+    https://stackoverflow.com/a/55163816/7262247
+    works
+    """
+    def args_as_ints(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            print("wrapper executes")
+            # convert all to int. note that in a signature-preserving wrapper almost all args will come as kwargs
+            args = [int(x) for x in args]
+            kwargs = dict((k, int(v)) for k, v in kwargs.items())
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    @args_as_ints
+    def funny_function(x, y, z=3):
+        """Computes x*y + 2*z"""
+        return x * y + 2 * z
+
+    print(funny_function("3", 4.0, z="5"))
+    # 22
+    help(funny_function)
+    # Help on function funny_function in module __main__:
+    #
+    # funny_function(x, y, z=3)
+    #     Computes x*y + 2*z
+
+    with pytest.raises(TypeError):
+        funny_function(0)  # TypeError: funny_function() takes at least 2 arguments (1 given)
+
+    captured = capsys.readouterr()
+    with capsys.disabled():
+        print(captured.out)
+
+    assert captured.out == """wrapper executes
+22
+Help on function funny_function in module makefun.tests.test_so:
+
+funny_function(x, y, z=3)
+    Computes x*y + 2*z
+
+"""
