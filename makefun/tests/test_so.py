@@ -3,8 +3,7 @@ from inspect import getmodule
 
 import pytest
 
-from makefun import create_function, wraps
-
+from makefun import create_function, wraps, partial
 
 try:  # python 3.3+
     from inspect import signature, Signature, Parameter
@@ -224,5 +223,35 @@ Help on function funny_function in module makefun.tests.test_so:
 
 funny_function(x, y, z=3)
     Computes x*y + 2*z
+
+"""
+
+
+def test_so_partial(capsys):
+    """
+    Tests that the answer at
+    https://stackoverflow.com/a/55165541/7262247
+    is correct
+    """
+    def foo(a, b, c=1):
+        """Return (a+b)*c."""
+        return (a + b) * c
+
+    bar10_p = partial(foo, b=10)
+
+    assert bar10_p(0) == 10
+    assert bar10_p(0, c=2) == 20
+
+    help(bar10_p)
+
+    captured = capsys.readouterr()
+    with capsys.disabled():
+        print(captured.out)
+
+    assert captured.out == """Help on function foo in module makefun.tests.test_so:
+
+foo(a, c=1)
+    <This function is equivalent to 'foo(a, c=1, b=10)', see original 'foo' doc below.>
+    Return (a+b)*c.
 
 """
