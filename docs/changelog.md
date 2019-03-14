@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.6.0 - added `with_partial` and `partial`
+
+New method `partial` that behaves like `functools.partial`, and equivalent decorator `@with_partial`. Fixes [#30](https://github.com/smarie/python-makefun/issues/30).
+
 ### 1.5.1 - bug fix
 
 `add_signature_parameters` now correctly inserts parameters in the right order when they are prepended (using `first=`). Fixed [#29](https://github.com/smarie/python-makefun/issues/29).
