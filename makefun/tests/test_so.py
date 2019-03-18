@@ -3,7 +3,7 @@ from inspect import getmodule
 
 import pytest
 
-from makefun import create_function, wraps, partial
+from makefun import create_function, wraps, partial, with_partial
 
 try:  # python 3.3+
     from inspect import signature, Signature, Parameter
@@ -253,5 +253,48 @@ def test_so_partial(capsys):
 foo(a, c=1)
     <This function is equivalent to 'foo(a, c=1, b=10)', see original 'foo' doc below.>
     Return (a+b)*c.
+
+"""
+
+
+def test_so_partial2(capsys):
+    """
+    Tests that the solution at
+    https://stackoverflow.com/a/55161579/7262247
+    works (the one using makefun only. for the other two, see test.so.py in decopatch project)
+    """
+
+    @with_partial(a='hello', b='world')
+    def test(a, b, x, y):
+        print(a, b)
+        print(x, y)
+
+    test(1, 2)
+    help(test)
+
+    @with_partial(a='hello', b='world')
+    def test(a, b, x, y):
+        """Here is a doc"""
+        print(a, b)
+        print(x, y)
+
+    help(test)
+
+    captured = capsys.readouterr()
+    with capsys.disabled():
+        print(captured.out)
+
+    assert captured.out == """hello world
+1 2
+Help on function test in module makefun.tests.test_so:
+
+test(x, y)
+    <This function is equivalent to 'test(x, y, a=hello, b=world)'.>
+
+Help on function test in module makefun.tests.test_so:
+
+test(x, y)
+    <This function is equivalent to 'test(x, y, a=hello, b=world)', see original 'test' doc below.>
+    Here is a doc
 
 """
