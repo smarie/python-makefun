@@ -846,13 +846,14 @@ def partial(f, *preset_pos_args, **preset_kwargs):
     if len(argstring) > 0:
         argstring = argstring + ', '
     argstring = argstring + ', '.join(["%s=%s" % (k, v) for k, v in preset_kwargs.items()])
-    new_line = "<This function is equivalent to '%s(%s)', see original '%s' doc below.>\n" \
-               "" % (partial_f.__name__, argstring, partial_f.__name__)
+
     # new_line = new_line + ("-" * (len(new_line) - 1)) + '\n'
-    try:
-        doc = getattr(partial_f, '__doc__')
+    doc = getattr(partial_f, '__doc__', None)
+    if doc is None or len(doc) == 0:
+        partial_f.__doc__ = "<This function is equivalent to '%s(%s)'.>\n" % (partial_f.__name__, argstring)
+    else:
+        new_line = "<This function is equivalent to '%s(%s)', see original '%s' doc below.>\n" \
+                   "" % (partial_f.__name__, argstring, partial_f.__name__)
         partial_f.__doc__ = new_line + doc
-    except AttributeError:
-        partial_f.__doc__ = new_line
 
     return partial_f
