@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.6.1 - `with_partial` and `partial` minor bug fix
+
+Fixed `partial` to support missing and empty docstring. Fixes [#31](https://github.com/smarie/python-makefun/issues/31).
+
 ### 1.6.0 - added `with_partial` and `partial`
 
 New method `partial` that behaves like `functools.partial`, and equivalent decorator `@with_partial`. Fixes [#30](https://github.com/smarie/python-makefun/issues/30).
