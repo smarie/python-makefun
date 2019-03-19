@@ -300,7 +300,7 @@ test(x, y)
 
 """
 
-    if (3, 0) <= sys.version_info <= (3, 5):
+    if (3, 0) <= sys.version_info < (3, 6):
         # in older versions of python, the order of **kwargs is not guaranteed (see PEP 468)
         assert captured.out.replace('a=hello', 'b=world') == ref_str.replace('a=hello', 'b=world')
     else:
