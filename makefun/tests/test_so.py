@@ -285,7 +285,7 @@ def test_so_partial2(capsys):
     with capsys.disabled():
         print(captured.out)
 
-    assert captured.out == """hello world
+    ref_str = """hello world
 1 2
 Help on function test in module makefun.tests.test_so:
 
@@ -299,3 +299,9 @@ test(x, y)
     Here is a doc
 
 """
+
+    if (3, 0) <= sys.version_info <= (3, 5):
+        # in older versions of python, the order of **kwargs is not guaranteed (see PEP 468)
+        assert captured.out.replace('a=hello', 'b=world') == ref_str.replace('a=hello', 'b=world')
+    else:
+        assert captured.out == ref_str
