@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.6.2 - Bug fix with type hints in signature
+
+Fixed bug when the signature of the function to create contains non-locally available type hints. Fixes [#32](https://github.com/smarie/python-makefun/issues/32).
+
 ### 1.6.1 - `with_partial` and `partial` minor bug fix
 
 Fixed `partial` to support missing and empty docstring. Fixes [#31](https://github.com/smarie/python-makefun/issues/31).
