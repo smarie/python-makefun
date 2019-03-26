@@ -1,6 +1,5 @@
 import logging
 import sys
-from copy import copy, deepcopy
 
 import pytest
 
@@ -128,3 +127,17 @@ def test_qualname_when_nested():
     # our mod
     assert C.D.g.__qualname__ == 'test_qualname_when_nested.<locals>.C.D.g'
     assert str(signature(C.D.g)) == "(self, a)"
+
+
+@pytest.mark.skipif(sys.version_info < (3, 5), reason="requires python 3.5 or higher (non-comment type hints)")
+def test_type_hint_error():
+    """ Test for https://github.com/smarie/python-makefun/issues/32 """
+
+    from makefun.tests._test_py35 import make_ref_function
+    ref_f = make_ref_function()
+
+    @wraps(ref_f)
+    def foo(a):
+        return a
+
+    assert foo(10) == 10

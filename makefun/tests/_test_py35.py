@@ -9,3 +9,16 @@ def make_native_coroutine_handler():
         return sleep_time
 
     return my_native_coroutine_handler
+
+
+def make_ref_function():
+    """Returns a function with a type hint that is locally defined """
+
+    # the symbol is defined here, so it is not seen outside
+    class A:
+        pass
+
+    def ref(a: A):
+        pass
+
+    return ref

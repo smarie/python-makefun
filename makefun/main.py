@@ -246,7 +246,12 @@ def _is_generator_func(func_impl):
         return isgeneratorfunction(func_impl)
 
 
-class DefaultHolder:
+class _SymbolRef:
+    """
+    A class used to protect signature default values and type hints when the local context would not be able
+    to evaluate them properly when the new function is created. In this case we store them under a known name,
+    we add that name to the locals(), and we use this symbol that has a repr() equal to the name.
+    """
     __slots__ = 'varname'
 
     def __init__(self, varname):
@@ -267,22 +272,16 @@ def get_signature_string(func_name, func_signature, evaldict):
     # protect the parameters if needed
     new_params = []
     for p_name, p in func_signature.parameters.items():
-        if p.default is not Parameter.empty and not isinstance(p.default, (int, str, float, bool)):
-            # check if the repr() of the default value is equal to itself.
-            needs_protection = True
-            try:
-                deflt = eval(repr(p.default))
-                needs_protection = deflt != p.default
-            except SyntaxError:
-                pass
+        # if default value can not be evaluated, protect it
+        default_needs_protection = _signature_symbol_needs_protection(p.default, evaldict)
+        new_default = _protect_signature_symbol(p.default, default_needs_protection, "DEFAULT_%s" % p_name, evaldict)
 
-            # if we have any problem, we need to protect the default value
-            if needs_protection:
-                # store the object in the evaldict and insert name
-                varname = "DEFAULT_%s" % p_name
-                evaldict[varname] = p.default
-                p = Parameter(p.name, kind=p.kind, default=DefaultHolder(varname), annotation=p.annotation)
+        # if type hint can not be evaluated, protect it
+        annotation_needs_protection = _signature_symbol_needs_protection(p.annotation, evaldict)
+        new_annotation = _protect_signature_symbol(p.annotation, annotation_needs_protection, "HINT_%s" % p_name, evaldict)
 
+        # replace the parameter with the possibly new default and hint
+        p = Parameter(p.name, kind=p.kind, default=new_default, annotation=new_annotation)
         new_params.append(p)
 
     # copy signature object
@@ -290,6 +289,48 @@ def get_signature_string(func_name, func_signature, evaldict):
 
     # return the final string representation
     return "%s%s:" % (func_name, s)
+
+
+def _signature_symbol_needs_protection(symbol, evaldict):
+    """
+    Helper method for signature symbols (defaults, type hints) protection.
+
+    Returns True if the given symbol needs to be protected - that is, if its repr() can not be correctly evaluated with current evaldict.
+    :param symbol:
+    :return:
+    """
+    if symbol is not None and symbol is not Parameter.empty and not isinstance(symbol, (int, str, float, bool)):
+        # check if the repr() of the default value is equal to itself.
+        try:
+            deflt = eval(repr(symbol), evaldict)
+            needs_protection = deflt != symbol
+        except SyntaxError:
+            needs_protection = True
+    else:
+        needs_protection = False
+
+    return needs_protection
+
+
+def _protect_signature_symbol(val, needs_protection, varname, evaldict):
+    """
+    Helper method for signature symbols (defaults, type hints) protection.
+
+    Returns either `val`, or a protection symbol. In that case the protection symbol
+    is created with name `varname` and inserted into `evaldict`
+
+    :param val:
+    :param needs_protection:
+    :param varname:
+    :param evaldict:
+    :return:
+    """
+    if needs_protection:
+        # store the object in the evaldict and insert name
+        evaldict[varname] = val
+        return _SymbolRef(varname)
+    else:
+        return val
 
 
 def get_signature_from_string(func_sig_str, evaldict):
