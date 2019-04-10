@@ -18,7 +18,7 @@ def make_ref_function():
     class A:
         pass
 
-    def ref(a: A):
+    def ref(a: A) -> A:
         pass
 
     return ref

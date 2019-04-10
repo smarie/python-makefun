@@ -278,14 +278,20 @@ def get_signature_string(func_name, func_signature, evaldict):
 
         # if type hint can not be evaluated, protect it
         annotation_needs_protection = _signature_symbol_needs_protection(p.annotation, evaldict)
-        new_annotation = _protect_signature_symbol(p.annotation, annotation_needs_protection, "HINT_%s" % p_name, evaldict)
+        new_annotation = _protect_signature_symbol(p.annotation, annotation_needs_protection, "HINT_%s" % p_name,
+                                                   evaldict)
 
         # replace the parameter with the possibly new default and hint
         p = Parameter(p.name, kind=p.kind, default=new_default, annotation=new_annotation)
         new_params.append(p)
 
+    # if return type hint can not be evaluated, protect it
+    return_needs_protection = _signature_symbol_needs_protection(func_signature.return_annotation, evaldict)
+    new_return_annotation = _protect_signature_symbol(func_signature.return_annotation, return_needs_protection,
+                                                      "RETURNHINT", evaldict)
+
     # copy signature object
-    s = Signature(parameters=new_params, return_annotation=func_signature.return_annotation)
+    s = Signature(parameters=new_params, return_annotation=new_return_annotation)
 
     # return the final string representation
     return "%s%s:" % (func_name, s)
