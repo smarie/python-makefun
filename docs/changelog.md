@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.6.3 - Bug fix with type hints in signature
+
+Fixed bug when the return type annotation of the function to create contains non-locally available type hints. Fixes [#33](https://github.com/smarie/python-makefun/issues/33).
+
 ### 1.6.2 - Bug fix with type hints in signature
 
 Fixed bug when the signature of the function to create contains non-locally available type hints. Fixes [#32](https://github.com/smarie/python-makefun/issues/32).
