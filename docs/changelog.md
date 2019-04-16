@@ -1,5 +1,11 @@
 # Changelog
 
+### 1.6.4 - Bug fix and minor improvement
+
+ * Fixed PEP8 error in source code. Fixes [#35](https://github.com/smarie/python-makefun/issues/35).
+
+ * Now string signatures can contain a colon. Fixes [#36](https://github.com/smarie/python-makefun/issues/36)
+ 
 ### 1.6.3 - Bug fix with type hints in signature
 
 Fixed bug when the return type annotation of the function to create contains non-locally available type hints. Fixes [#33](https://github.com/smarie/python-makefun/issues/33).
