@@ -3,7 +3,7 @@ import pytest
 from makefun import wraps
 
 
-@pytest.skip("known to fail")
+@pytest.mark.skip("known to fail")
 def test_wraps_varpositional():
     """ test for https://github.com/smarie/python-makefun/issues/34 """
     def f(a, *args):
