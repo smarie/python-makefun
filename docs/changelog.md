@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.6.6 - Bug fix
+
+ * Fixed yet another nasty varpositional-related bug :). Fixes [#38](https://github.com/smarie/python-makefun/issues/38).
+
 ### 1.6.5 - Bug fix
 
  * Fixed `NameError` in case of unknown symbols in type hints. Fixes [#37](https://github.com/smarie/python-makefun/issues/37).
