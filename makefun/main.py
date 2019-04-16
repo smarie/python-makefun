@@ -310,6 +310,8 @@ def _signature_symbol_needs_protection(symbol, evaldict):
         try:
             deflt = eval(repr(symbol), evaldict)
             needs_protection = deflt != symbol
+        except NameError:
+            needs_protection = True
         except SyntaxError:
             needs_protection = True
     else:

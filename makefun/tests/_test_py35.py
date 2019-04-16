@@ -22,3 +22,13 @@ def make_ref_function():
         pass
 
     return ref
+
+
+def make_ref_function2():
+    """ """
+    from typing import Any
+
+    def ref(a: Any):
+        pass
+
+    return ref
