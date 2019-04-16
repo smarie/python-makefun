@@ -31,9 +31,9 @@ except ImportError:
 
 
 # macroscopic signature strings checker (we do not look inside params, `signature` will do it for us)
-FUNC_DEF = re.compile('(?s)^\s*(?P<funcname>[_\w][_\w\d]*)?\s*'
-                      '\(\s*(?P<params>.*?)\s*\)\s*'
-                      '((?P<typed_return_hint>->\s*.+)|:\s*#\s*(?P<comment_return_hint>.+))*$')
+FUNC_DEF = re.compile('(?s)^\\s*(?P<funcname>[_\\w][_\\w\\d]*)?\\s*'
+                      '\\(\\s*(?P<params>.*?)\\s*\\)\\s*'
+                      '((?P<typed_return_hint>->\\s*.+)|:\\s*#\\s*(?P<comment_return_hint>.+))*$')
 
 
 def create_wrapper(wrapped,
