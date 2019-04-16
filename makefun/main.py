@@ -33,7 +33,7 @@ except ImportError:
 # macroscopic signature strings checker (we do not look inside params, `signature` will do it for us)
 FUNC_DEF = re.compile('(?s)^\\s*(?P<funcname>[_\\w][_\\w\\d]*)?\\s*'
                       '\\(\\s*(?P<params>.*?)\\s*\\)\\s*'
-                      '((?P<typed_return_hint>->\\s*.+)|:\\s*#\\s*(?P<comment_return_hint>.+))*$')
+                      '(((?P<typed_return_hint>->\\s*[^:]+)?(?P<colon>:)?\\s*)|:\\s*#\\s*(?P<comment_return_hint>.+))*$')
 
 
 def create_wrapper(wrapped,
@@ -371,8 +371,10 @@ def get_signature_from_string(func_sig_str, evaldict):
     # find the keyword parameters and the others
     # posonly_names, kwonly_names, unrestricted_names = separate_positional_and_kw(params_names)
 
+    colon_end = groups['colon']
     cmt_return_hint = groups['comment_return_hint']
-    if cmt_return_hint is None or len(cmt_return_hint) == 0:
+    if (colon_end is None or len(colon_end) == 0) \
+            and (cmt_return_hint is None or len(cmt_return_hint) == 0):
         func_sig_str = func_sig_str + ':'
 
     # Create a dummy function
