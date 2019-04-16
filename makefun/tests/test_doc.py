@@ -151,15 +151,50 @@ def test_var_length():
     """Demonstrates how variable-length arguments are passed to the handler """
 
     # define the handler that should be called
-    def func_impl(*args, **kwargs):
-        """This docstring will be used in the generated function by default"""
-        print("func_impl called !")
-        return args, kwargs
 
-    func_sig = "foo(a=0, *args, **kwargs)"
-    gen_func = create_function(func_sig, func_impl)
+    def generate_function(func_sig, dummy_call):
+        def func_impl(*args, **kwargs):
+            """This docstring will be used in the generated function by default"""
+            print("func_impl called !")
+            dummy_call(*args, **kwargs)
+            return args, kwargs
+
+        return create_function(func_sig, func_impl)
+
+    func_sig = "foo(a, b=0, *args, **kwargs)"
+
+    def dummy_call(a, b=0, *args, **kwargs):
+        print()
+
+    gen_func = generate_function(func_sig, dummy_call)
+
     print(gen_func.__source__)
-    assert gen_func(0, 1) == ((1,), {'a': 0})
+    # unfortunately we can not have this because as soon as users provide a bit more positional args they there
+    # are TypeErrors "got multiple values for argument 'a'"
+    # assert gen_func(0, 1, 2) == ((2), {'a': 0, 'b': 1})
+    assert gen_func(0, 1, 2) == ((0, 1, 2), {})
+    assert gen_func(0, b=1) == ((0, 1), {})
+    # checks that the order is correctly set
+    assert gen_func(b=1, a=0) == ((0, 1), {})
+
+    with pytest.raises(TypeError):
+        gen_func(2, a=0, b=1)
+    # --
+
+    func_sig = "foo(b=0, *args, **kwargs)"
+
+    def dummy_call(b=0, *args, **kwargs):
+        print()
+
+    gen_func = generate_function(func_sig, dummy_call)
+
+    print(gen_func.__source__)
+
+    assert gen_func(1, 0) == ((1, 0), {})
+    assert gen_func(b=1) == ((1, ), {})
+
+    with pytest.raises(TypeError):
+        gen_func(1, b=0)
 
 
 def test_positional_only():

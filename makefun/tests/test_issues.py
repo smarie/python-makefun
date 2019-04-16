@@ -18,6 +18,17 @@ def test_wraps_varpositional():
     foo('hello', 12)
 
 
+def test_varpositional2():
+    """ test for https://github.com/smarie/python-makefun/issues/38 """
+
+    @with_signature("(a, *args)")
+    def foo(a, *args):
+        assert a == 'hello'
+        assert args == (12, )
+
+    foo('hello', 12)
+
+
 def test_invalid_signature_str():
     """Test for https://github.com/smarie/python-makefun/issues/36"""
 
@@ -36,3 +47,19 @@ def test_invalid_signature_str_py3():
     @with_signature(sig)
     def foo(a):
         pass
+
+
+def test_init_replaced():
+
+    class Foo(object):
+        @with_signature("(self, a)")
+        def __init__(self, *args, **kwargs):
+            pass
+
+    f = Foo(1)
+
+    class Bar(Foo):
+        def __init__(self, *args, **kwargs):
+            super(Bar, self).__init__(*args, **kwargs)
+
+    b = Bar(2)

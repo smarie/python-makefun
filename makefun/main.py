@@ -184,16 +184,18 @@ def create_function(func_signature,             # type: Union[str, Signature]
         raise TypeError("Invalid type for `func_signature`: %s" % type(func_signature))
 
     # extract all information needed from the `Signature`
-    posonly_names, kwonly_names, varpos_names, varkw_names, unrestricted_names = get_signature_params(func_signature)
-    params_names = posonly_names + unrestricted_names + varpos_names + kwonly_names + varkw_names
+    params_to_kw_assignment_mode = get_signature_params(func_signature)
+    params_names = list(params_to_kw_assignment_mode.keys())
 
     # Note: in decorator the annotations were extracted using getattr(func_impl, '__annotations__') instead.
     # This seems equivalent but more general (provided by the signature, not the function), but to check
     annotations, defaults, kwonlydefaults = get_signature_details(func_signature)
 
     # create the body of the function to compile
-    assignments = posonly_names + [("%s=%s" % (k, k)) if k[0] != '*' else k
-                                   for k in unrestricted_names + varpos_names + kwonly_names + varkw_names]
+    # The generated function body should dispatch its received arguments to the inner function.
+    # For this we will pass as much as possible the arguments as keywords.
+    # However if there are varpositional arguments we cannot
+    assignments = [("%s=%s" % (k, k)) if is_kw else k for k, is_kw in params_to_kw_assignment_mode.items()]
     params_str = ', '.join(assignments)
     if inject_as_first_arg:
         params_str = "%s, %s" % (func_name, params_str)
@@ -433,22 +435,26 @@ def get_signature_params(s):
     :param s:
     :return:
     """
-    posonly_names, kwonly_names, varpos_names, varkw_names, unrestricted_names = [], [], [], [], []
+    # this ordered dictionary will contain parameters and True/False whether we should use keyword assignment or not
+    params_to_assignment_mode = OrderedDict()
     for p_name, p in s.parameters.items():
         if p.kind is Parameter.POSITIONAL_ONLY:
-            posonly_names.append(p_name)
+            params_to_assignment_mode[p_name] = False
         elif p.kind is Parameter.KEYWORD_ONLY:
-            kwonly_names.append(p_name)
+            params_to_assignment_mode[p_name] = True
         elif p.kind is Parameter.POSITIONAL_OR_KEYWORD:
-            unrestricted_names.append(p_name)
+            params_to_assignment_mode[p_name] = True
         elif p.kind is Parameter.VAR_POSITIONAL:
-            varpos_names.append("*" + p_name)
+            # We have to pass all the arguments that were here in previous positions, as positional too.
+            for k in params_to_assignment_mode.keys():
+                params_to_assignment_mode[k] = False
+            params_to_assignment_mode["*" + p_name] = False
         elif p.kind is Parameter.VAR_KEYWORD:
-            varkw_names.append("**" + p_name)
+            params_to_assignment_mode["**" + p_name] = False
         else:
             raise ValueError("Unknown kind: %s" % p.kind)
 
-    return posonly_names, kwonly_names, varpos_names, varkw_names, unrestricted_names
+    return params_to_assignment_mode
 
 
 def get_signature_details(s):

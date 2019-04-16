@@ -40,8 +40,10 @@ def case_simple_with_star_args1():
     # param_names = ['b', 'a']
 
     inputs = "12"
-    args = ()
-    kwargs = {'a': 0, 'b': 12}
+    # args = ()
+    # kwargs = {'a': 0, 'b': 12}
+    args = (12,)
+    kwargs = {'a': 0}
     return params_str, inputs, (args, kwargs)
 
 
