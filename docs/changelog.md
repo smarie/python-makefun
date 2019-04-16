@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.6.5 - Bug fix
+
+ * Fixed `NameError` in case of unknown symbols in type hints. Fixes [#37](https://github.com/smarie/python-makefun/issues/37).
+
 ### 1.6.4 - Bug fix and minor improvement
 
  * Fixed PEP8 error in source code. Fixes [#35](https://github.com/smarie/python-makefun/issues/35).
