@@ -49,6 +49,20 @@ def test_invalid_signature_str_py3():
         pass
 
 
+def test_return_annotation_in_py2():
+    """Test for https://github.com/smarie/python-makefun/issues/39"""
+    def f():
+        pass
+
+    f.__annotations__ = {'return': None}
+
+    @wraps(f)
+    def b():
+        pass
+
+    b()
+
+
 def test_init_replaced():
 
     class Foo(object):

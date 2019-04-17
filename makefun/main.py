@@ -271,6 +271,8 @@ def get_signature_string(func_name, func_signature, evaldict):
     :param func_signature:
     :return:
     """
+    no_type_hints_allowed = sys.version_info < (3, 5)
+
     # protect the parameters if needed
     new_params = []
     for p_name, p in func_signature.parameters.items():
@@ -278,19 +280,25 @@ def get_signature_string(func_name, func_signature, evaldict):
         default_needs_protection = _signature_symbol_needs_protection(p.default, evaldict)
         new_default = _protect_signature_symbol(p.default, default_needs_protection, "DEFAULT_%s" % p_name, evaldict)
 
-        # if type hint can not be evaluated, protect it
-        annotation_needs_protection = _signature_symbol_needs_protection(p.annotation, evaldict)
-        new_annotation = _protect_signature_symbol(p.annotation, annotation_needs_protection, "HINT_%s" % p_name,
-                                                   evaldict)
+        if no_type_hints_allowed:
+            new_annotation = Parameter.empty
+        else:
+            # if type hint can not be evaluated, protect it
+            annotation_needs_protection = _signature_symbol_needs_protection(p.annotation, evaldict)
+            new_annotation = _protect_signature_symbol(p.annotation, annotation_needs_protection, "HINT_%s" % p_name,
+                                                       evaldict)
 
         # replace the parameter with the possibly new default and hint
         p = Parameter(p.name, kind=p.kind, default=new_default, annotation=new_annotation)
         new_params.append(p)
 
-    # if return type hint can not be evaluated, protect it
-    return_needs_protection = _signature_symbol_needs_protection(func_signature.return_annotation, evaldict)
-    new_return_annotation = _protect_signature_symbol(func_signature.return_annotation, return_needs_protection,
-                                                      "RETURNHINT", evaldict)
+    if no_type_hints_allowed:
+        new_return_annotation = Parameter.empty
+    else:
+        # if return type hint can not be evaluated, protect it
+        return_needs_protection = _signature_symbol_needs_protection(func_signature.return_annotation, evaldict)
+        new_return_annotation = _protect_signature_symbol(func_signature.return_annotation, return_needs_protection,
+                                                          "RETURNHINT", evaldict)
 
     # copy signature object
     s = Signature(parameters=new_params, return_annotation=new_return_annotation)
