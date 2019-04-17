@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.6.7 - Increased tolerance to function signatures in python 2
+
+ * In python 2 some libraries such as `attrs` can modify the annotations manually, making `signature` return a string representation that is not compliant with the language version. This raised a `SyntaxError` in previous versions. The new version silently removes all these annotations in python versions that do not support them. Fixes [#39](https://github.com/smarie/python-makefun/issues/39).
+
 ### 1.6.6 - Bug fix
 
  * Fixed yet another nasty varpositional-related bug :). Fixes [#38](https://github.com/smarie/python-makefun/issues/38).

@@ -389,7 +389,7 @@ ignore-imports=no
 
 [SPELLING]
 
-# Spelling dictionary name. Available dictionaries: none. To create_function it working
+# Spelling dictionary name. Available dictionaries: none. To make it working
 # install python-enchant package.
 spelling-dict=
 
