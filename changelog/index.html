@@ -268,6 +268,13 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#168-improved-performance" title="1.6.8 - Improved performance" class="md-nav__link">
+    1.6.8 - Improved performance
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#167-increased-tolerance-to-function-signatures-in-python-2" title="1.6.7 - Increased tolerance to function signatures in python 2" class="md-nav__link">
     1.6.7 - Increased tolerance to function signatures in python 2
   </a>
@@ -467,6 +474,13 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#168-improved-performance" title="1.6.8 - Improved performance" class="md-nav__link">
+    1.6.8 - Improved performance
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#167-increased-tolerance-to-function-signatures-in-python-2" title="1.6.7 - Increased tolerance to function signatures in python 2" class="md-nav__link">
     1.6.7 - Increased tolerance to function signatures in python 2
   </a>
@@ -654,6 +668,10 @@
                 
                 
                 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<h3 id="168-improved-performance">1.6.8 - Improved performance<a class="headerlink" href="#168-improved-performance" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Improved performance of inner method <code>get_signature_string</code> (used by all entry points) after profiling.</li>
+</ul>
 <h3 id="167-increased-tolerance-to-function-signatures-in-python-2">1.6.7 - Increased tolerance to function signatures in python 2<a class="headerlink" href="#167-increased-tolerance-to-function-signatures-in-python-2" title="Permanent link">&para;</a></h3>
 <ul>
 <li>In python 2 some libraries such as <code>attrs</code> can modify the annotations manually, making <code>signature</code> return a string representation that is not compliant with the language version. This raised a <code>SyntaxError</code> in previous versions. The new version silently removes all these annotations in python versions that do not support them. Fixes <a href="https://github.com/smarie/python-makefun/issues/39">#39</a>.</li>
