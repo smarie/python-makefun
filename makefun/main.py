@@ -275,6 +275,7 @@ def get_signature_string(func_name, func_signature, evaldict):
 
     # protect the parameters if needed
     new_params = []
+    params_changed = False
     for p_name, p in func_signature.parameters.items():
         # if default value can not be evaluated, protect it
         default_needs_protection = _signature_symbol_needs_protection(p.default, evaldict)
@@ -282,26 +283,35 @@ def get_signature_string(func_name, func_signature, evaldict):
 
         if no_type_hints_allowed:
             new_annotation = Parameter.empty
+            annotation_needs_protection = new_annotation is not p.annotation
         else:
             # if type hint can not be evaluated, protect it
             annotation_needs_protection = _signature_symbol_needs_protection(p.annotation, evaldict)
             new_annotation = _protect_signature_symbol(p.annotation, annotation_needs_protection, "HINT_%s" % p_name,
                                                        evaldict)
 
-        # replace the parameter with the possibly new default and hint
-        p = Parameter(p.name, kind=p.kind, default=new_default, annotation=new_annotation)
+        # only create if necessary (inspect __init__ methods are slow)
+        if default_needs_protection or annotation_needs_protection:
+            # replace the parameter with the possibly new default and hint
+            p = Parameter(p.name, kind=p.kind, default=new_default, annotation=new_annotation)
+            params_changed = True
+
         new_params.append(p)
 
     if no_type_hints_allowed:
         new_return_annotation = Parameter.empty
+        return_needs_protection = new_return_annotation is not func_signature.return_annotation
     else:
         # if return type hint can not be evaluated, protect it
         return_needs_protection = _signature_symbol_needs_protection(func_signature.return_annotation, evaldict)
         new_return_annotation = _protect_signature_symbol(func_signature.return_annotation, return_needs_protection,
                                                           "RETURNHINT", evaldict)
 
-    # copy signature object
-    s = Signature(parameters=new_params, return_annotation=new_return_annotation)
+    # only create new signature if necessary (inspect __init__ methods are slow)
+    if params_changed or return_needs_protection:
+        s = Signature(parameters=new_params, return_annotation=new_return_annotation)
+    else:
+        s = func_signature
 
     # return the final string representation
     return "%s%s:" % (func_name, s)
@@ -316,18 +326,14 @@ def _signature_symbol_needs_protection(symbol, evaldict):
     :return:
     """
     if symbol is not None and symbol is not Parameter.empty and not isinstance(symbol, (int, str, float, bool)):
-        # check if the repr() of the default value is equal to itself.
         try:
-            deflt = eval(repr(symbol), evaldict)
-            needs_protection = deflt != symbol
-        except NameError:
-            needs_protection = True
-        except SyntaxError:
-            needs_protection = True
+            # check if the repr() of the default value is equal to itself.
+            return eval(repr(symbol), evaldict) != symbol
+        except (NameError, SyntaxError):
+            # in case of error this needs protection
+            return True
     else:
-        needs_protection = False
-
-    return needs_protection
+        return False
 
 
 def _protect_signature_symbol(val, needs_protection, varname, evaldict):
