@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.6.9 - Fixed dependencies
+
+Added missing `six` dependency explicitly.
+
 ### 1.6.8 - Improved performance 
 
  * Improved performance of inner method `get_signature_string` (used by all entry points) after profiling.
