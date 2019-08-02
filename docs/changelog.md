@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.6.10 - Fixed dependencies 2
+
+Fixed `six` dependency: also declared as a setup dependency.
+
 ### 1.6.9 - Fixed dependencies
 
 Added missing `six` dependency explicitly.

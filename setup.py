@@ -13,7 +13,7 @@ here = path.abspath(path.dirname(__file__))
 # *************** Dependencies *********
 INSTALL_REQUIRES = ['funcsigs;python_version<"3.3"', 'six']
 DEPENDENCY_LINKS = []
-SETUP_REQUIRES = ['pytest-runner', 'setuptools_scm', 'pypandoc', 'pandoc']
+SETUP_REQUIRES = ['pytest-runner', 'setuptools_scm', 'pypandoc', 'pandoc', 'six']
 TESTS_REQUIRE = ['pytest', 'pytest-logging', 'pytest-cov', 'pytest-cases']
 EXTRAS_REQUIRE = {}
 
