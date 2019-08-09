@@ -1,0 +1,7 @@
+[build-system]
+requires = [
+    "pytest-runner",
+    "setuptools",
+    "setuptools_scm",
+    "six",
+]
