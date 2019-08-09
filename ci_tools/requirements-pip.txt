@@ -1,8 +1,6 @@
 # --- to execute setup.py whatever the goal
 setuptools_scm
 pytest-runner
-pandoc
-pypandoc
 six
 
 # --- to run the tests
