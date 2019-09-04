@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.6.11 - Added __version__ attribute
+
+Added `__version__` attribute to comply with PEP396, following [this guide](https://smarie.github.io/python-getversion/#package-versioning-best-practices). Fixes [#45](https://github.com/smarie/python-makefun/issues/45).
+
 ### 1.6.10 - Fixed dependencies 2
 
 Fixed `six` dependency: also declared as a setup dependency.
