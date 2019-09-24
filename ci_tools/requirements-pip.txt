@@ -10,7 +10,7 @@ pytest-cases>=1.2.0
 
 # --- to generate the reports (see scripts in ci_tools, called by .travis)
 pytest-cov==2.6.0  # after 2.6.1 it requires pytest 3.6
-pytest-html  #$PYTEST_HTML_VERSION
+pytest-html==1.9.0  # otherwise requires pytest 5
 xunitparser
 
 # --- to generate the doc (see .travis)
