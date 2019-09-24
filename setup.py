@@ -14,16 +14,14 @@ here = path.abspath(path.dirname(__file__))
 INSTALL_REQUIRES = ['funcsigs;python_version<"3.3"', 'six']
 DEPENDENCY_LINKS = []
 SETUP_REQUIRES = ['pytest-runner', 'setuptools_scm', 'six']
-TESTS_REQUIRE = ['pytest', 'pytest-logging', 'pytest-cov', 'pytest-cases']
+TESTS_REQUIRE = ['pytest', 'pytest-logging', 'pytest-cases']
 EXTRAS_REQUIRE = {}
 
 # simple check
 try:
     from setuptools_scm import get_version
 except Exception as e:
-    raise_from(Exception('Required packages for setup not found. You may wish you execute '
-                         '"pip install -r ci_tools/requirements-setup.txt" to install them or alternatively install '
-                         'them manually using conda or other system. The list is : ' + str(SETUP_REQUIRES)), e)
+    raise_from(Exception('Required packages for setup not found. Please install `setuptools_scm`'), e)
 
 # ************** ID card *****************
 DISTNAME = 'makefun'
@@ -38,9 +36,6 @@ version_for_download_url = get_version()
 DOWNLOAD_URL = URL + '/tarball/' + version_for_download_url
 
 KEYWORDS = 'dynamic function generation definition signature args wrapper'
-# --Get the long description from the README file
-# with open(path.join(here, 'README.md'), encoding='utf-8') as f:
-#    LONG_DESCRIPTION = f.read()
 
 with open(path.join(here, 'docs', 'long_description.md')) as f:
     LONG_DESCRIPTION = f.read()
