@@ -811,21 +811,40 @@ def remove_signature_parameters(s, *param_names):
     return s.replace(parameters=params.values())
 
 
-def add_signature_parameters(s,         # type: Signature
-                             first=(),  # type: Union[Parameter, Iterable[Parameter]]
-                             last=(),   # type: Union[Parameter, Iterable[Parameter]]
+def add_signature_parameters(s,             # type: Signature
+                             first=(),      # type: Union[Parameter, Iterable[Parameter]]
+                             last=(),       # type: Union[Parameter, Iterable[Parameter]]
+                             custom=(),     # type: Union[Parameter, Iterable[Parameter]]
+                             custom_idx=-1  # type: int
                              ):
     """
-    Adds the provided parameters to the signature s (returns a new signature instance).
+    Adds the provided parameters to the signature `s` (returns a new signature instance).
 
-    :param s:
+    :param s: the original signature to edit
     :param first: a single element or a list of `Parameter` instances to be added at the beginning of the parameter's
         list
     :param last: a single element or a list of `Parameter` instances to be added at the end of the parameter's list
-    :return:
+    :param custom: a single element or a list of `Parameter` instances to be added at a custom position in the list.
+        that position is determined with `custom_idx`
+    :param custom_idx: the custom position to insert the `custom` parameters to.
+    :return: a new signature created from the original one by adding the specified parameters.
     """
     params = OrderedDict(s.parameters.items())
     lst = list(params.values())
+
+    # insert at custom position (but keep the order, that's why we use 'reversed')
+    try:
+        for param in reversed(custom):
+            if param.name in params:
+                raise ValueError("Parameter with name '%s' is present twice in the signature to create" % param.name)
+            else:
+                lst.insert(custom_idx, param)
+    except TypeError:
+        # a single argument
+        if custom.name in params:
+            raise ValueError("Parameter with name '%s' is present twice in the signature to create" % custom.name)
+        else:
+            lst.insert(custom_idx, custom)
 
     # prepend but keep the order
     try:
