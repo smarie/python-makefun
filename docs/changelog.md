@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.7.0 - minor goodies update
+
+`add_signature_parameters` now accepts that one specifies a custom index where to insert the new parameters.
+
 ### 1.6.11 - Added __version__ attribute
 
 Added `__version__` attribute to comply with PEP396, following [this guide](https://smarie.github.io/python-getversion/#package-versioning-best-practices). Fixes [#45](https://github.com/smarie/python-makefun/issues/45).
