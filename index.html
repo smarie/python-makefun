@@ -32,7 +32,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.4.3">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.6.0">
     
     
       
@@ -40,17 +40,17 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/application.30686662.css">
+      <link rel="stylesheet" href="assets/stylesheets/application.1b62728e.css">
       
       
     
     
-      <script src="assets/javascripts/modernizr.74668098.js"></script>
+      <script src="assets/javascripts/modernizr.268332fc.js"></script>
     
     
       
         <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono&display=fallback">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
         <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
       
     
@@ -688,7 +688,7 @@
 <span class="c1"># (2) define the function implementation</span>
 <span class="k">def</span> <span class="nf">func_impl</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;This docstring will be used in the generated function by default&quot;&quot;&quot;</span>
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;func_impl called !&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;func_impl called !&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span>
 
 <span class="c1"># (3) create the dynamic function</span>
@@ -721,13 +721,13 @@
 <span class="nd">@with_signature</span><span class="p">(</span><span class="s2">&quot;foo(b, a=0)&quot;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">gen_func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;This docstring will be used in the generated function by default&quot;&quot;&quot;</span>
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;func_impl called !&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;func_impl called !&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span>
 </pre></div>
 
 
 <p>It also has the capability to take <code>None</code> as a signature, if you just want to update the metadata (<code>func_name</code>, <code>doc</code>, <code>qualname</code>, <code>module_name</code>) without creating any function:</p>
-<div class="codehilite"><pre><span></span><span class="nd">@with_signature</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">func_name</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="nd">@with_signature</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">func_name</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">a</span>
 
@@ -768,7 +768,7 @@
 <span class="nd">@with_signature</span><span class="p">(</span><span class="n">func_sig</span><span class="p">,</span> <span class="n">func_name</span><span class="o">=</span><span class="n">func_name</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">gen_func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;This docstring will be used in the generated function by default&quot;&quot;&quot;</span>
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;func_impl called !&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;func_impl called !&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span>
 </pre></div>
 
@@ -800,8 +800,8 @@
 <span class="c1"># our signature-preserving wrapper</span>
 <span class="nd">@wraps</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">enhanced_foo</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;hello!&#39;</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;b=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">])</span>  <span class="c1"># we can reliably access &#39;b&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;hello!&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;b=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">])</span>  <span class="c1"># we can reliably access &#39;b&#39;</span>
     <span class="k">return</span> <span class="n">foo</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 
@@ -838,23 +838,23 @@
 
 <span class="c1"># (0) the reference function</span>
 <span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;foo called: b=</span><span class="si">%s</span><span class="s2">, a=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;foo called: b=</span><span class="si">%s</span><span class="s2">, a=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span>
 
 <span class="c1"># (1a) capture the signature of reference function `foo`</span>
 <span class="n">foo_sig</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Original Signature: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">foo_sig</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Original Signature: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">foo_sig</span><span class="p">)</span>
 
 <span class="c1"># (1b) modify the signature to add a new parameter &#39;z&#39; as first argument</span>
 <span class="n">params</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">foo_sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 <span class="n">params</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Parameter</span><span class="o">.</span><span class="n">POSITIONAL_OR_KEYWORD</span><span class="p">))</span>
 <span class="n">new_sig</span> <span class="o">=</span> <span class="n">foo_sig</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">parameters</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;New Signature: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">new_sig</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;New Signature: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">new_sig</span><span class="p">)</span>
 
 <span class="c1"># (2) define the wrapper implementation</span>
 <span class="nd">@wraps</span><span class="p">(</span><span class="n">foo</span><span class="p">,</span> <span class="n">new_sig</span><span class="o">=</span><span class="n">new_sig</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">foo_wrapper</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;foo_wrapper called ! z=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">z</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;foo_wrapper called ! z=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">z</span><span class="p">)</span>
     <span class="c1"># call the foo function </span>
     <span class="n">output</span> <span class="o">=</span> <span class="n">foo</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="c1"># return augmented output</span>
@@ -887,16 +887,16 @@ foo called: b=2, a=0
 
 <span class="c1"># original signature</span>
 <span class="n">foo_sig</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;original signature: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">foo_sig</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;original signature: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">foo_sig</span><span class="p">)</span>
 
 <span class="c1"># let&#39;s modify it</span>
 <span class="n">new_sig</span> <span class="o">=</span> <span class="n">add_signature_parameters</span><span class="p">(</span><span class="n">foo_sig</span><span class="p">,</span>
                 <span class="n">first</span><span class="o">=</span><span class="n">Parameter</span><span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Parameter</span><span class="o">.</span><span class="n">POSITIONAL_OR_KEYWORD</span><span class="p">),</span>
                 <span class="n">last</span><span class="o">=</span><span class="n">Parameter</span><span class="p">(</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Parameter</span><span class="o">.</span><span class="n">POSITIONAL_OR_KEYWORD</span><span class="p">,</span> 
-                               <span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                               <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
           <span class="p">)</span>
 <span class="n">new_sig</span> <span class="o">=</span> <span class="n">remove_signature_parameters</span><span class="p">(</span><span class="n">new_sig</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;modified signature: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">new_sig</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;modified signature: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">new_sig</span><span class="p">)</span>
 </pre></div>
 
 
@@ -932,7 +932,7 @@ modified signature: <span class="o">(</span>z, c, <span class="nv">o</span><span
 <span class="n">bar</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
     <span class="o">&lt;</span><span class="n">This</span> <span class="n">function</span> <span class="ow">is</span> <span class="n">equivalent</span> <span class="n">to</span> <span class="s1">&#39;foo(y, x=12)&#39;</span><span class="p">,</span> <span class="n">see</span> <span class="n">original</span> <span class="s1">&#39;foo&#39;</span> <span class="n">doc</span> <span class="n">below</span><span class="o">.&gt;</span>
 
-    <span class="n">a</span> <span class="sb">`foo`</span> <span class="n">function</span>
+    <span class="n">a</span> <span class="err">`</span><span class="n">foo</span><span class="err">`</span> <span class="n">function</span>
 
     <span class="p">:</span><span class="n">param</span> <span class="n">x</span><span class="p">:</span>
     <span class="p">:</span><span class="n">param</span> <span class="n">y</span><span class="p">:</span>
@@ -990,8 +990,8 @@ modified signature: <span class="o">(</span>z, c, <span class="nv">o</span><span
 
 <p>and asyncio coroutines as well</p>
 <div class="codehilite"><pre><span></span><span class="c1"># define the impl that should be called</span>
-<span class="n">async</span> <span class="k">def</span> <span class="nf">my_native_coroutine_impl</span><span class="p">(</span><span class="n">sleep_time</span><span class="p">):</span>
-    <span class="n">await</span> <span class="n">sleep</span><span class="p">(</span><span class="n">sleep_time</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">my_native_coroutine_impl</span><span class="p">(</span><span class="n">sleep_time</span><span class="p">):</span>
+    <span class="k">await</span> <span class="n">sleep</span><span class="p">(</span><span class="n">sleep_time</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">sleep_time</span>
 
 <span class="c1"># create the dynamic function</span>
@@ -1006,7 +1006,7 @@ modified signature: <span class="o">(</span>z, c, <span class="nv">o</span><span
 
 <h4 id="generated-source-code">Generated source code<a class="headerlink" href="#generated-source-code" title="Permanent link">&para;</a></h4>
 <p>The generated source code is in the <code>__source__</code> field of the generated function:</p>
-<div class="codehilite"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">gen_func</span><span class="o">.</span><span class="n">__source__</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">gen_func</span><span class="o">.</span><span class="n">__source__</span><span class="p">)</span>
 </pre></div>
 
 
@@ -1018,7 +1018,7 @@ modified signature: <span class="o">(</span>z, c, <span class="nv">o</span><span
 
 <p>The <code>_func_impl_</code> symbol represents your implementation. As <a href="#arguments_mapping">already mentioned</a>, you see that the variables are passed to it <em>as keyword arguments</em> when possible (<code>_func_impl_(b=b)</code>, not simply <code>_func_impl_(b)</code>). Of course if it is not possible it adapts:</p>
 <div class="codehilite"><pre><span></span><span class="n">gen_func</span> <span class="o">=</span> <span class="n">create_function</span><span class="p">(</span><span class="s2">&quot;foo(a=0, *args, **kwargs)&quot;</span><span class="p">,</span> <span class="n">func_impl</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">gen_func</span><span class="o">.</span><span class="n">__source__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">gen_func</span><span class="o">.</span><span class="n">__source__</span><span class="p">)</span>
 </pre></div>
 
 
@@ -1032,15 +1032,15 @@ modified signature: <span class="o">(</span>z, c, <span class="nv">o</span><span
 <p>In some scenarios you may wish to share the same implementation among several created functions, for example to expose slightly different signatures on top of the same core.</p>
 <p>In that case you may wish your implementation to know from which dynamically generated function it is being called. For this, simply use <code>inject_as_first_arg=True</code>, and the called function will be injected as the first argument:</p>
 <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">core_impl</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;This is generic core called by </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">f</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;This is generic core called by </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">f</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
     <span class="c1"># here you could use f.__name__ in a if statement to determine what to do</span>
     <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;func1&quot;</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;called from func1 !&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;called from func1 !&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span>
 
 <span class="c1"># generate 2 functions</span>
-<span class="n">func1</span> <span class="o">=</span> <span class="n">create_function</span><span class="p">(</span><span class="s2">&quot;func1(a, b)&quot;</span><span class="p">,</span> <span class="n">core_impl</span><span class="p">,</span> <span class="n">inject_as_first_arg</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">func2</span> <span class="o">=</span> <span class="n">create_function</span><span class="p">(</span><span class="s2">&quot;func2(a, d)&quot;</span><span class="p">,</span> <span class="n">core_impl</span><span class="p">,</span> <span class="n">inject_as_first_arg</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">func1</span> <span class="o">=</span> <span class="n">create_function</span><span class="p">(</span><span class="s2">&quot;func1(a, b)&quot;</span><span class="p">,</span> <span class="n">core_impl</span><span class="p">,</span> <span class="n">inject_as_first_arg</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">func2</span> <span class="o">=</span> <span class="n">create_function</span><span class="p">(</span><span class="s2">&quot;func2(a, d)&quot;</span><span class="p">,</span> <span class="n">core_impl</span><span class="p">,</span> <span class="n">inject_as_first_arg</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="n">func1</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">func2</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
@@ -1073,6 +1073,7 @@ This is generic core called by func2
 <p>Details on the github page: <a href="https://github.com/smarie/python-makefun">https://github.com/smarie/python-makefun</a></p>
                 
                   
+                
                 
               
               
@@ -1126,7 +1127,7 @@ This is generic core called by func2
       
     </div>
     
-      <script src="assets/javascripts/application.ac79c3b0.js"></script>
+      <script src="assets/javascripts/application.808e90bb.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"."}})</script>
       
