@@ -33,6 +33,30 @@ def test_compilefun_nested():
 
     assert bar(5, -5.0) == 0
 
+
+def test_compilefun_method():
+    """Tests that the @compilefun decorator works for class methods"""
+
+    class A:
+        @compile_fun
+        def meth1(self, par1):
+            print("in A.meth1: par1 =", par1)
+
+    a = A()
+    a.meth1("via meth1")
+
+    class A:
+        def __init__(self):
+            self.i = 1
+
+        @compile_fun
+        def add(self, a):
+            return self.i + a
+
+    a = A()
+    assert A().add(-1) == 0
+
+
 # def test_compileclass_decorator():
 #
 #     @compile_fun
