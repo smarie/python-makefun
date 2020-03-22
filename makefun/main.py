@@ -1004,8 +1004,17 @@ def compile_fun(target):
     evaldict, _ = extract_module_and_evaldict(frame)
 
     # compile all references first
-    if target.func_closure is not None:
-        for name, value in zip(target.func_code.co_freevars, (c.cell_contents for c in target.func_closure)):
+    try:
+        # python 3
+        func_closure = target.__closure__
+        func_code = target.__code__
+    except AttributeError:
+        # python 2
+        func_closure = target.func_closure
+        func_code = target.func_code
+
+    if func_closure is not None:
+        for name, value in zip(func_code.co_freevars, (c.cell_contents for c in func_closure)):
             try:
                 evaldict[name] = compile_fun(value)
             except UnsupportedForCompilation:
