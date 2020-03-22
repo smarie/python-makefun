@@ -986,16 +986,17 @@ def compile_fun(target):
         return a + b
     ```
 
-    If the function closure includes functions, they are recursively replaced
-    with compiled versions too (only for this closure, this does not modify
-    them otherwise).
+    If the function closure includes functions, they are recursively replaced with compiled versions too (only for
+    this closure, this does not modify them otherwise).
 
-    **IMPORTANT** this decorator is a "goodie" in early stage and has not been
-    extensively tested. Feel free to contribute !
+    **IMPORTANT** this decorator is a "goodie" in early stage and has not been extensively tested. Feel free to
+    contribute !
 
-    Note that according to
-    [this post](https://stackoverflow.com/a/471227/7262247) compiling does not
-    make the code run any faster.
+    Note that according to [this post](https://stackoverflow.com/a/471227/7262247) compiling does not make the code
+    run any faster.
+
+    Known issues: `NameError` will appear if your function code depends on symbols that have not yet been defined.
+    Make sure all symbols exist first ! See https://github.com/smarie/python-makefun/issues/47
     """
     if not isinstance(target, FunctionType):
         raise UnsupportedForCompilation("Only functions can be compiled by this decorator")

@@ -504,6 +504,7 @@ If the function closure includes functions, they are recursively replaced with c
 
 Note that according to [this post](https://stackoverflow.com/a/471227/7262247) compiling does not make the code run any faster.
 
+Known issues: `NameError` will appear if your function code depends on symbols that have not yet been defined. Make sure all symbols exist first ! See https://github.com/smarie/python-makefun/issues/47
 
 ## Main features / benefits
 
