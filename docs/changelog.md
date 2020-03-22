@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.8.0 - new `@compile_fun` goodie
+
+New goodie `@compile_fun` decorator to `compile` a function so that it can not be navigated to using the debugger. Fixes [#46](https://github.com/smarie/python-makefun/issues/46)
+
 ### 1.7.0 - minor goodies update
 
 `add_signature_parameters` now accepts that one specifies a custom index where to insert the new parameters.
