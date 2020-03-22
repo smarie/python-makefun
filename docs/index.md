@@ -473,6 +473,37 @@ called from func1 !
 This is generic core called by func2
 ```
 
+### 4. Other goodies
+
+#### `@compile_fun`
+
+A draft decorator to `compile` any existing function so that users cant debug through it. It can be handy to mask some code from your users for convenience (note that this does not provide any obfuscation, people can still reverse engineer your code easily. Actually the source code even gets copied in the function's `__source__` attribute for convenience):
+
+```python
+from makefun import compile_fun
+
+@compile_fun
+def foo(a, b):
+    return a + b
+
+assert foo(5, -5.0) == 0
+print(foo.__source__)
+```
+
+yields
+
+```
+@compile_fun
+def foo(a, b):
+    return a + b
+```
+
+If the function closure includes functions, they are recursively replaced with compiled versions too (only for this closure, this does not modify them otherwise).
+
+**IMPORTANT** this decorator is a "goodie" in early stage and has not been extensively tested. Feel free to contribute !
+
+Note that according to [this post](https://stackoverflow.com/a/471227/7262247) compiling does not make the code run any faster.
+
 
 ## Main features / benefits
 
