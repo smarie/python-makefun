@@ -4,6 +4,9 @@ import sys
 import itertools
 from collections import OrderedDict
 from copy import copy
+from inspect import getsource
+from textwrap import dedent
+from types import FunctionType
 
 try:  # python 3.3+
     from inspect import signature, Signature, Parameter
@@ -947,3 +950,76 @@ def partial(f, *preset_pos_args, **preset_kwargs):
         partial_f.__doc__ = new_line + doc
 
     return partial_f
+
+
+class UnsupportedForCompilation(TypeError):
+    """
+    Exception raised by @compile_fun when decorated target is not supported
+    """
+    pass
+
+
+def compile_fun(target):
+    """
+    A draft decorator to `compile` any existing function so that users cant
+    debug through it. It can be handy to mask some code from your users for
+    convenience (note that this does not provide any obfuscation, people can
+    still reverse engineer your code easily. Actually the source code even gets
+    copied in the function's `__source__` attribute for convenience):
+
+    ```python
+    from makefun import compile_fun
+
+    @compile_fun
+    def foo(a, b):
+        return a + b
+
+    assert foo(5, -5.0) == 0
+    print(foo.__source__)
+    ```
+
+    yields
+
+    ```
+    @compile_fun
+    def foo(a, b):
+        return a + b
+    ```
+
+    If the function closure includes functions, they are recursively replaced
+    with compiled versions too (only for this closure, this does not modify
+    them otherwise).
+
+    **IMPORTANT** this decorator is a "goodie" in early stage and has not been
+    extensively tested. Feel free to contribute !
+
+    Note that according to
+    [this post](https://stackoverflow.com/a/471227/7262247) compiling does not
+    make the code run any faster.
+    """
+    if not isinstance(target, FunctionType):
+        raise UnsupportedForCompilation("Only functions can be compiled by this decorator")
+
+    frame = _get_callerframe()
+    evaldict, _ = extract_module_and_evaldict(frame)
+
+    # compile all references first
+    if target.func_closure is not None:
+        for name, value in zip(target.func_code.co_freevars, (c.cell_contents for c in target.func_closure)):
+            try:
+                evaldict[name] = compile_fun(value)
+            except UnsupportedForCompilation:
+                pass
+
+    lines = dedent(getsource(target))
+    source_lines = lines
+    if lines[0] == '@':
+        lines = '\n'.join(lines.splitlines()[1:])
+    if lines[-1] != '\n':
+        lines += '\n'
+    # print("compiling: ")
+    # print(lines)
+    new_f = _make(target.__name__, (), lines, evaldict)
+    new_f.__source__ = source_lines
+
+    return new_f
