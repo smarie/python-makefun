@@ -7,6 +7,7 @@ from makefun import compile_fun
 
 
 def test_compilefun():
+    """tests that @compile_fun works correctly"""
 
     @compile_fun
     def foo(a, b):
@@ -23,6 +24,7 @@ def test_compilefun():
 
 
 def test_compilefun_nested():
+    """tests that @compile_fun correctly compiles nested functions recursively"""
 
     def foo(a, b):
         return a + b
@@ -35,7 +37,7 @@ def test_compilefun_nested():
 
 
 def test_compilefun_method():
-    """Tests that the @compilefun decorator works for class methods"""
+    """Tests that @compilefun works for class methods"""
 
     class A:
         @compile_fun
