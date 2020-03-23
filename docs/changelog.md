@@ -1,5 +1,11 @@
 # Changelog
 
+### 1.8.1 - `@compile_fun` Bugfix and better exception
+
+Fixed issue `ValueError: Cell is empty` with `@compile_fun`. Fixed [#48](https://github.com/smarie/python-makefun/issues/48)
+
+Now raising an `UndefinedSymbolError` when a symbol is not known at compilation time. One step towards [#47](https://github.com/smarie/python-makefun/issues/47)
+
 ### 1.8.0 - new `@compile_fun` goodie
 
 New goodie `@compile_fun` decorator to `compile` a function so that it can not be navigated to using the debugger. Fixes [#46](https://github.com/smarie/python-makefun/issues/46)
