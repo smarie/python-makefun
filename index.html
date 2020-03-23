@@ -1115,10 +1115,10 @@ def foo(a, b):
 </code></pre></div>
 
 
-<p>If the function closure includes functions, they are recursively replaced with compiled versions too (only for this closure, this does not modify them otherwise).</p>
+<p>If the function closure includes functions, they are recursively replaced with compiled versions too (only for this closure, this does not modify them otherwise). You may disable this behaviour entirely with <code>recurse=False</code>, or exclude some symbols from this recursion with the <code>except_names=(...)</code> arg (a tuple of names to exclude).</p>
 <p><strong>IMPORTANT</strong> this decorator is a "goodie" in early stage and has not been extensively tested. Feel free to contribute !</p>
 <p>Note that according to <a href="https://stackoverflow.com/a/471227/7262247">this post</a> compiling does not make the code run any faster.</p>
-<p>Known issues: <code>NameError</code> will appear if your function code depends on symbols that have not yet been defined. Make sure all symbols exist first ! See https://github.com/smarie/python-makefun/issues/47</p>
+<p>Known issues: <code>NameError</code> may appear if your function code depends on symbols that have not yet been defined. Make sure all symbols exist first ! See <a href="https://github.com/smarie/python-makefun/issues/47">this issue</a>.</p>
 <h2 id="main-features-benefits">Main features / benefits<a class="headerlink" href="#main-features-benefits" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Generate functions with a dynamically defined signature</strong>: the signature can be provided as a string or as a <code>Signature</code> object, thus making it handy to derive from other functions.</li>
