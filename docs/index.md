@@ -498,13 +498,13 @@ def foo(a, b):
     return a + b
 ```
 
-If the function closure includes functions, they are recursively replaced with compiled versions too (only for this closure, this does not modify them otherwise).
+If the function closure includes functions, they are recursively replaced with compiled versions too (only for this closure, this does not modify them otherwise). You may disable this behaviour entirely with `recurse=False`, or exclude some symbols from this recursion with the `except_names=(...)` arg (a tuple of names to exclude).
 
 **IMPORTANT** this decorator is a "goodie" in early stage and has not been extensively tested. Feel free to contribute !
 
 Note that according to [this post](https://stackoverflow.com/a/471227/7262247) compiling does not make the code run any faster.
 
-Known issues: `NameError` will appear if your function code depends on symbols that have not yet been defined. Make sure all symbols exist first ! See https://github.com/smarie/python-makefun/issues/47
+Known issues: `NameError` may appear if your function code depends on symbols that have not yet been defined. Make sure all symbols exist first ! See [this issue](https://github.com/smarie/python-makefun/issues/47).
 
 ## Main features / benefits
 
