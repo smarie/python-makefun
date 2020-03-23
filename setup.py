@@ -35,7 +35,8 @@ LICENSE_LONG = 'License :: OSI Approved :: BSD License'
 version_for_download_url = get_version()
 DOWNLOAD_URL = URL + '/tarball/' + version_for_download_url
 
-KEYWORDS = 'dynamic function generation definition signature args wrapper'
+KEYWORDS = 'decorate decorator compile make dynamic function generate generation define definition signature ' \
+           'args wrapper'
 
 with open(path.join(here, 'docs', 'long_description.md')) as f:
     LONG_DESCRIPTION = f.read()
