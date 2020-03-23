@@ -102,6 +102,7 @@ def test_compilefun_co_names():
         # TODO one day it would be great to selectively recurse through such imported names. Unfortunately,
         #   this comes with *many* side effects including compilation order, appropriate propagation or
         #   non-propagation of globals(), locals()
+        #   See https://github.com/smarie/python-makefun/issues/52
         assert not is_compiled(dedent)
         return dedent("   hoho")
 
