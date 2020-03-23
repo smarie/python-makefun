@@ -959,6 +959,13 @@ class UnsupportedForCompilation(TypeError):
     pass
 
 
+class UndefinedSymbolError(NameError):
+    """
+    Exception raised by @compile_fun when the function requires a name not yet defined
+    """
+    pass
+
+
 def compile_fun(target):
     """
     A draft decorator to `compile` any existing function so that users cant
@@ -1014,12 +1021,31 @@ def compile_fun(target):
         func_closure = target.func_closure
         func_code = target.func_code
 
+    # Does not work: if `self.i` is used in the code, `i` will appear here
+    # if func_code is not None:
+    #     for name in func_code.co_names:
+    #         try:
+    #             eval(name, evaldict)
+    #         except NameError:
+    #             raise UndefinedSymbolError("Symbol `%s` does not seem to be defined yet. Make sure you apply "
+    #                                        "`compile_fun` *after* all required symbols have been defined." % name)
+
     if func_closure is not None:
-        for name, value in zip(func_code.co_freevars, (c.cell_contents for c in func_closure)):
+        for name, cell in zip(func_code.co_freevars, func_closure):
+            if name not in evaldict:
+                raise UndefinedSymbolError("Symbol %s does not seem to be defined yet. Make sure you apply "
+                                           "`compile_fun` *after* all required symbols have been defined." % name)
             try:
-                evaldict[name] = compile_fun(value)
-            except UnsupportedForCompilation:
-                pass
+                value = cell.cell_contents
+            except ValueError:
+                # empty cell
+                continue
+            else:
+                # non-empty cell
+                try:
+                    evaldict[name] = compile_fun(value)
+                except UnsupportedForCompilation:
+                    pass
 
     lines = dedent(getsource(target))
     source_lines = lines

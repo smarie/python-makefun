@@ -3,7 +3,9 @@
 #  Copyright (c) Schneider Electric Industries, 2020. All right reserved.
 from textwrap import dedent
 
-from makefun import compile_fun
+import pytest
+
+from makefun import compile_fun, UnsupportedForCompilation, UndefinedSymbolError
 
 
 def test_compilefun():
@@ -36,6 +38,18 @@ def test_compilefun_nested():
     assert bar(5, -5.0) == 0
 
 
+def test_compilefun_nameerror():
+    """Tests that the `NameError` is raised at creation time and not at call time"""
+
+    with pytest.raises(UndefinedSymbolError):
+        @compile_fun
+        def fun_requiring_unknown_name(a, b):
+            return unknown_name(a, b)
+
+    def unknown_name(a, b):
+        return a + b
+
+
 def test_compilefun_method():
     """Tests that @compilefun works for class methods"""
 
@@ -57,6 +71,15 @@ def test_compilefun_method():
 
     a = A()
     assert A().add(-1) == 0
+
+
+def test_compileclass_decorator():
+    """tests that applying decorator on a class raises an error """
+
+    with pytest.raises(UnsupportedForCompilation):
+        @compile_fun
+        class A(object):
+            pass
 
 
 # def test_compileclass_decorator():
