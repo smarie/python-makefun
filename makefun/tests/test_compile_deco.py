@@ -15,7 +15,8 @@ def test_compilefun():
     def foo(a, b):
         return a + b
 
-    assert foo(5, -5.0) == 0
+    res = foo(5, -5.0)
+    assert res == 0
 
     ref = """
     @compile_fun
@@ -51,7 +52,8 @@ def test_compilefun_nested():
         assert is_compiled(foo)
         return foo(a, b)
 
-    assert bar(5, -5.0) == 0
+    res = bar(5, -5.0)
+    assert res == 0
 
 
 def test_compilefun_nested_already_compiled():
@@ -66,7 +68,8 @@ def test_compilefun_nested_already_compiled():
         assert is_compiled(foo)
         return foo(a, b)
 
-    assert bar(5, -5.0) == 0
+    res = bar(5, -5.0)
+    assert res == 0
 
 
 @pytest.mark.parametrize("variant", ['all', 'named'], ids="variant={}".format)
@@ -87,7 +90,24 @@ def test_compilefun_nested_exclude(variant):
             assert not is_compiled(foo)
             return foo(a, b)
 
-    assert bar(5, -5.0) == 0
+    res = bar(5, -5.0)
+    assert res == 0
+
+
+def test_compilefun_co_names():
+    """Test that today we do not compile imported names."""
+
+    @compile_fun
+    def foo():
+        # TODO one day it would be great to selectively recurse through such imported names. Unfortunately,
+        #   this comes with *many* side effects including compilation order, appropriate propagation or
+        #   non-propagation of globals(), locals()
+        assert not is_compiled(dedent)
+        return dedent("   hoho")
+
+    res = foo()
+    assert res == "hoho"
+
 
 
 def test_compilefun_nameerror():
