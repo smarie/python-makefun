@@ -1,6 +1,8 @@
 # Changelog
 
-### 1.8.1 - `@compile_fun` Bugfix and better exception
+### 1.9.0 - `@compile_fun` improvements, bugfix and better exception
+
+`@compile_fun`: added capability to disable recursive compilation (`recurse` arg) , and to exclude some names from compilation (`except_names` arg). Fixed [#49](https://github.com/smarie/python-makefun/issues/49) and [#50](https://github.com/smarie/python-makefun/issues/50)
 
 Fixed issue `ValueError: Cell is empty` with `@compile_fun`. Fixed [#48](https://github.com/smarie/python-makefun/issues/48)
 
