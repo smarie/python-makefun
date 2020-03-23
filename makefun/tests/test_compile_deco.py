@@ -25,6 +25,21 @@ def test_compilefun():
     assert foo.__source__ == dedent(ref[1:])
 
 
+def get_code(target):
+    try:
+        # python 3
+        func_code = target.__code__
+    except AttributeError:
+        # python 2
+        func_code = target.func_code
+    return func_code
+
+
+def is_compiled(target):
+    fname = get_code(target).co_filename
+    return fname != __file__ and 'makefun-gen' in fname
+
+
 def test_compilefun_nested():
     """tests that @compile_fun correctly compiles nested functions recursively"""
 
@@ -33,7 +48,29 @@ def test_compilefun_nested():
 
     @compile_fun
     def bar(a, b):
+        assert is_compiled(foo)
         return foo(a, b)
+
+    assert bar(5, -5.0) == 0
+
+
+@pytest.mark.parametrize("variant", ['all', 'named'], ids="variant={}".format)
+def test_compilefun_nested_exclude(variant):
+    """tests that the `except_names` argument of @compile_fun works correctly"""
+
+    def foo(a, b):
+        return a + b
+
+    if variant == 'all':
+        @compile_fun(recurse=False)
+        def bar(a, b):
+            assert not is_compiled(foo)
+            return foo(a, b)
+    else:
+        @compile_fun(except_names=('foo', ))
+        def bar(a, b):
+            assert not is_compiled(foo)
+            return foo(a, b)
 
     assert bar(5, -5.0) == 0
 

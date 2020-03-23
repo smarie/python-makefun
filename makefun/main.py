@@ -28,7 +28,7 @@ except ImportError:
         return False
 
 try:  # python 3.5+
-    from typing import Callable, Any, Union, Iterable
+    from typing import Callable, Any, Union, Iterable, Dict
 except ImportError:
     pass
 
@@ -966,7 +966,9 @@ class UndefinedSymbolError(NameError):
     pass
 
 
-def compile_fun(target):
+def compile_fun(recurse=True,     # type: Union[bool, Callable]
+                except_names=(),  # type: Iterable[str]
+                ):
     """
     A draft decorator to `compile` any existing function so that users cant
     debug through it. It can be handy to mask some code from your users for
@@ -1004,12 +1006,43 @@ def compile_fun(target):
 
     Known issues: `NameError` will appear if your function code depends on symbols that have not yet been defined.
     Make sure all symbols exist first ! See https://github.com/smarie/python-makefun/issues/47
+
+    :param recurse: a boolean (default `True`) indicating if referenced symbols should be compiled too
+    :param except_names: an optional list of symbols to exclude from compilation when `recurse=True`
+    :return:
+    """
+    if callable(recurse):
+        # called with no-args, apply immediately
+        target = recurse
+        # noinspection PyTypeChecker
+        return compile_fun_manually(target, _evaldict=True)
+    else:
+        # called with parenthesis, return a decorator
+        def apply_compile_fun(target):
+            return compile_fun_manually(target, recurse=recurse, except_names=except_names, _evaldict=True)
+
+        return apply_compile_fun
+
+
+def compile_fun_manually(target,
+                         recurse=True,     # type: Union[bool, Callable]
+                         except_names=(),  # type: Iterable[str]
+                         _evaldict=None    # type: Union[bool, Dict]
+                         ):
+    """
+
+    :param target:
+    :return:
     """
     if not isinstance(target, FunctionType):
         raise UnsupportedForCompilation("Only functions can be compiled by this decorator")
 
-    frame = _get_callerframe()
-    evaldict, _ = extract_module_and_evaldict(frame)
+    if _evaldict is None or _evaldict is True:
+        if _evaldict is True:
+            frame = _get_callerframe(offset=1)
+        else:
+            frame = _get_callerframe()
+        _evaldict, _ = extract_module_and_evaldict(frame)
 
     # compile all references first
     try:
@@ -1025,14 +1058,17 @@ def compile_fun(target):
     # if func_code is not None:
     #     for name in func_code.co_names:
     #         try:
-    #             eval(name, evaldict)
+    #             eval(name, _evaldict)
     #         except NameError:
     #             raise UndefinedSymbolError("Symbol `%s` does not seem to be defined yet. Make sure you apply "
     #                                        "`compile_fun` *after* all required symbols have been defined." % name)
 
-    if func_closure is not None:
+    if recurse and func_closure is not None:
+        # recurse-compile
         for name, cell in zip(func_code.co_freevars, func_closure):
-            if name not in evaldict:
+            if name in except_names:
+                continue
+            if name not in _evaldict:
                 raise UndefinedSymbolError("Symbol %s does not seem to be defined yet. Make sure you apply "
                                            "`compile_fun` *after* all required symbols have been defined." % name)
             try:
@@ -1043,19 +1079,25 @@ def compile_fun(target):
             else:
                 # non-empty cell
                 try:
-                    evaldict[name] = compile_fun(value)
+                    # note : not sure the compilation will be made in the appropriate order of dependencies...
+                    # if not, users will have to do it manually
+                    _evaldict[name] = compile_fun_manually(value,
+                                                           recurse=recurse, except_names=except_names,
+                                                           _evaldict=_evaldict)
                 except UnsupportedForCompilation:
                     pass
 
     lines = dedent(getsource(target))
     source_lines = lines
-    if lines[0] == '@':
+    if lines.startswith('@compile_fun'):
         lines = '\n'.join(lines.splitlines()[1:])
+    if '@compile_fun' in lines:
+        raise ValueError("@compile_fun seems to appear several times in the function source")
     if lines[-1] != '\n':
         lines += '\n'
     # print("compiling: ")
     # print(lines)
-    new_f = _make(target.__name__, (), lines, evaldict)
+    new_f = _make(target.__name__, (), lines, _evaldict)
     new_f.__source__ = source_lines
 
     return new_f
