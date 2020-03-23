@@ -966,7 +966,7 @@ class UndefinedSymbolError(NameError):
     pass
 
 
-class SourceUnavailable(IOError, OSError):
+class SourceUnavailable(OSError):
     """
     Exception raised by @compile_fun when the function source is not available (inspect.getsource raises an error)
     """
