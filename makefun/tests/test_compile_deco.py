@@ -54,6 +54,21 @@ def test_compilefun_nested():
     assert bar(5, -5.0) == 0
 
 
+def test_compilefun_nested_already_compiled():
+    """tests that @compile_fun correctly handles when a required function was already compiled"""
+
+    @compile_fun
+    def foo(a, b):
+        return a + b
+
+    @compile_fun
+    def bar(a, b):
+        assert is_compiled(foo)
+        return foo(a, b)
+
+    assert bar(5, -5.0) == 0
+
+
 @pytest.mark.parametrize("variant", ['all', 'named'], ids="variant={}".format)
 def test_compilefun_nested_exclude(variant):
     """tests that the `except_names` argument of @compile_fun works correctly"""

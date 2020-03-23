@@ -966,6 +966,13 @@ class UndefinedSymbolError(NameError):
     pass
 
 
+class SourceUnavailable(IOError, OSError):
+    """
+    Exception raised by @compile_fun when the function source is not available (inspect.getsource raises an error)
+    """
+    pass
+
+
 def compile_fun(recurse=True,     # type: Union[bool, Callable]
                 except_names=(),  # type: Iterable[str]
                 ):
@@ -1044,6 +1051,15 @@ def compile_fun_manually(target,
             frame = _get_callerframe()
         _evaldict, _ = extract_module_and_evaldict(frame)
 
+    # first make sure that source code is available for compilation
+    try:
+        lines = getsource(target)
+    except (OSError, IOError) as e:
+        if 'could not get source code' in str(e):
+            raise SourceUnavailable(target, e)
+        else:
+            raise
+
     # compile all references first
     try:
         # python 3
@@ -1084,10 +1100,11 @@ def compile_fun_manually(target,
                     _evaldict[name] = compile_fun_manually(value,
                                                            recurse=recurse, except_names=except_names,
                                                            _evaldict=_evaldict)
-                except UnsupportedForCompilation:
+                except (UnsupportedForCompilation, SourceUnavailable):
                     pass
 
-    lines = dedent(getsource(target))
+    # now compile from sources
+    lines = dedent(lines)
     source_lines = lines
     if lines.startswith('@compile_fun'):
         lines = '\n'.join(lines.splitlines()[1:])
