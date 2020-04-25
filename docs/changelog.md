@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.9.2 - packaging improvements
+
+ - packaging improvements: set the "universal wheel" flag to 1, and cleaned up the `setup.py`. In particular removed dependency to `six` for setup and added `py.typed` file, as well as set the `zip_safe` flag to False. Removed tests folder from package. Fixes [#54](https://github.com/smarie/python-makefun/issues/54)
+
 ### 1.9.1 - `@compile_fun` bugfix
 
 Fixed `OSError: could not get source code` or `IOError: could not get source code` when `@compile_fun` is used on a function that depends on an already-compiled function. Fixed [#51](https://github.com/smarie/python-makefun/issues/51)
