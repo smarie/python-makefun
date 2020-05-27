@@ -77,3 +77,28 @@ def test_init_replaced():
             super(Bar, self).__init__(*args, **kwargs)
 
     b = Bar(2)
+
+
+def test_issue_55():
+    """Tests that no syntax error appears when no arguments are provided in the signature (name change scenario)"""
+
+    # full name change including stack trace
+
+    @with_signature('bar()')
+    def foo():
+        return 'a'
+
+    assert "bar at" in repr(foo)
+    assert foo.__name__ == 'bar'
+    assert foo() == 'a'
+
+    # only metadata change
+
+    @with_signature(None, func_name='bar')
+    def foo():
+        return 'a'
+
+    if sys.version_info >= (3, 0):
+        assert "foo at" in repr(foo)
+    assert foo.__name__ == 'bar'
+    assert foo() == 'a'
