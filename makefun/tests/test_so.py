@@ -251,8 +251,8 @@ def test_so_partial(capsys):
 
     assert captured.out == """Help on function foo in module makefun.tests.test_so:
 
-foo(a, c=1)
-    <This function is equivalent to 'foo(a, c=1, b=10)', see original 'foo' doc below.>
+foo(a, b=10, c=1)
+    <This function is equivalent to 'foo(a, b=10, c=1)', see original 'foo' doc below.>
     Return (a+b)*c.
 
 """
@@ -289,13 +289,13 @@ def test_so_partial2(capsys):
 1 2
 Help on function test in module makefun.tests.test_so:
 
-test(x, y)
-    <This function is equivalent to 'test(x, y, a=hello, b=world)'.>
+test(x, y, a='hello', b='world')
+    <This function is equivalent to 'test(x, y, a='hello', b='world')'.>
 
 Help on function test in module makefun.tests.test_so:
 
-test(x, y)
-    <This function is equivalent to 'test(x, y, a=hello, b=world)', see original 'test' doc below.>
+test(x, y, a='hello', b='world')
+    <This function is equivalent to 'test(x, y, a='hello', b='world')', see original 'test' doc below.>
     Here is a doc
 
 """
