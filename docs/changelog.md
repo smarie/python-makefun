@@ -1,5 +1,15 @@
 # Changelog
 
+### 1.9.3 - Minor compatibility fixes with functools.partial
+
+ - `@wraps` can now be used to wrap a `functools.partial`. Fixed [#57](https://github.com/smarie/python-makefun/issues/57)
+
+ - `create_function` now correctly reuses information from the partialized function if a `functools.partial` is used as the implementation.
+
+ - `create_function` now raises a more explicit error when no `func_name` can be found.
+
+ - `makefun.partial` now generates a signature that is more consistent with `functools.partial`. Fixes [#58](https://github.com/smarie/python-makefun/issues/58)
+
 ### 1.9.2 - packaging improvements
 
  - packaging improvements: set the "universal wheel" flag to 1, and cleaned up the `setup.py`. In particular removed dependency to `six` for setup and added `py.typed` file, as well as set the `zip_safe` flag to False. Removed tests folder from package. Fixes [#54](https://github.com/smarie/python-makefun/issues/54)
