@@ -1,4 +1,6 @@
 from __future__ import print_function
+
+import functools
 import re
 import sys
 import itertools
@@ -69,6 +71,17 @@ def create_wrapper(wrapped,
                            **all_attrs)
 
 
+def getattr_partial_aware(obj, att_name, *att_default):
+    """ Same as getattr but recurses in obj.func if obj is a partial """
+
+    val = getattr(obj, att_name, *att_default)
+    if isinstance(obj, functools.partial) and \
+            (val is None or att_name == '__dict__' and len(val) == 0):
+        return getattr_partial_aware(obj.func, att_name, *att_default)
+    else:
+        return val
+
+
 def create_function(func_signature,             # type: Union[str, Signature]
                     func_impl,                  # type: Callable[[Any], Any]
                     func_name=None,             # type: str
@@ -131,7 +144,8 @@ def create_function(func_signature,             # type: Union[str, Signature]
         `func_signature` if `func_signature` is a `str` and contains a non-empty name.
     :param module_name: the name of the module to be set on the function (under __module__ ). If None (default),
         `func_impl.__module__` will be used.
-    :param attrs: other keyword attributes that should be set on the function
+    :param attrs: other keyword attributes that should be set on the function. Note that `func_impl.__dict__` is not
+        automatically copied.
     :return:
     """
     # grab context from the caller frame
@@ -146,22 +160,25 @@ def create_function(func_signature,             # type: Union[str, Signature]
     # name defaults
     user_provided_name = True
     if func_name is None:
-        func_name = func_impl.__name__
+        # allow None for now, we'll raise a ValueError later if needed
+        func_name = getattr_partial_aware(func_impl, '__name__', None)
         user_provided_name = False
 
     # qname default
     user_provided_qname = True
     if qualname is None:
-        qualname = getattr(func_impl, '__qualname__', None)
+        qualname = getattr_partial_aware(func_impl, '__qualname__', None)
         user_provided_qname = False
 
     # doc default
     if doc is None:
         doc = getattr(func_impl, '__doc__', None)
+        # note: as opposed to what we do in `@wraps`, we cannot easily generate a better doc for partials here.
+        # Indeed the new signature may not easily match the one in the partial.
 
     # module name default
     if module_name is None:
-        module_name = func_impl.__module__
+        module_name = getattr_partial_aware(func_impl, '__module__', None)
 
     # input signature handling
     if isinstance(func_signature, str):
@@ -177,10 +194,20 @@ def create_function(func_signature,             # type: Union[str, Signature]
 
         # fix the signature if needed
         if func_name_from_str is None:
+            if func_name is None:
+                raise ValueError("Invalid signature for created function: `None` function name. This "
+                                 "probably happened because the decorated function %s has no __name__. You may "
+                                 "wish to pass an explicit `func_name` or to complete the signature string"
+                                 "with the name before the parenthesis." % func_impl)
             func_signature_str = func_name + func_signature_str
 
     elif isinstance(func_signature, Signature):
         # create the signature string
+        if func_name is None:
+            raise ValueError("Invalid signature for created function: `None` function name. This "
+                             "probably happened because the decorated function %s has no __name__. You may "
+                             "wish to pass an explicit `func_name` or to provide the new signature as a "
+                             "string containing the name" % func_impl)
         func_signature_str = get_signature_string(func_name, func_signature, evaldict)
 
     else:
@@ -695,17 +722,24 @@ def _get_args_for_wrapping(wrapped, new_sig, func_name, doc, qualname, module_na
 
     # the desired metadata
     if func_name is None:
-        func_name = wrapped.__name__
+        func_name = getattr_partial_aware(wrapped, '__name__', None)
     if doc is None:
-        doc = wrapped.__doc__
+        doc = getattr(wrapped, '__doc__', None)
+        if isinstance(wrapped, functools.partial) and new_sig is None \
+                and doc == functools.partial(lambda: True).__doc__:
+            # this is the default generic partial doc. generate a better doc, since we know that the sig is not messed with
+            doc = gen_partial_doc(getattr_partial_aware(wrapped.func, '__name__', None),
+                                  getattr_partial_aware(wrapped.func, '__doc__', None),
+                                  func_sig, wrapped.args, wrapped.keywords)
     if qualname is None:
-        qualname = getattr(wrapped, '__qualname__', None)
+        qualname = getattr_partial_aware(wrapped, '__qualname__', None)
     if module_name is None:
-        module_name = wrapped.__module__
+        module_name = getattr_partial_aware(wrapped, '__module__', None)
 
     # attributes: start from the wrapped dict, add '__wrapped__' if needed, and override with all attrs.
-    all_attrs = copy(wrapped.__dict__)
+    all_attrs = copy(getattr_partial_aware(wrapped, '__dict__'))
     if new_sig is None:
+        # there was no change of signature so we can safely set the __wrapped__ attribute
         all_attrs['__wrapped__'] = wrapped
     all_attrs.update(attrs)
 
@@ -902,20 +936,8 @@ def partial(f, *preset_pos_args, **preset_kwargs):
     """
     # TODO do we need to mimic `partial`'s behaviour concerning positional args?
 
-    # (1) remove all preset arguments from the signature
-    orig_sig = signature(f)
-    # first the first n positional
-    if len(orig_sig.parameters) <= len(preset_pos_args):
-        raise ValueError("Cannot preset %s positional args, function %s has only %s args."
-                         "" % (len(preset_pos_args), f.__name__, len(orig_sig.parameters)))
-    new_sig = Signature(parameters=tuple(orig_sig.parameters.values())[len(preset_pos_args):],
-                        return_annotation=orig_sig.return_annotation)
-    # then the keyword
-    try:
-        new_sig = remove_signature_parameters(new_sig, *preset_kwargs.keys())
-    except KeyError as e:
-        raise ValueError("Cannot preset keyword argument, it does not appear to be present in the signature of %s: %s"
-                         "" % (f.__name__, e))
+    # (1) remove/change all preset arguments from the signature
+    new_sig = gen_partial_sig(f, preset_pos_args, preset_kwargs)
 
     if _is_generator_func(f):
         if sys.version_info >= (3, 3):
@@ -931,25 +953,90 @@ def partial(f, *preset_pos_args, **preset_kwargs):
             kwargs.update(preset_kwargs)
             return f(*itertools.chain(preset_pos_args, args), **kwargs)
 
-    # update the doc
-    argstring = ', '.join([("%s" % a) for a in preset_pos_args])
-    if len(argstring) > 0:
-        argstring = argstring + ', '
-    argstring = argstring + str(new_sig)[1:-1]
-    if len(argstring) > 0:
-        argstring = argstring + ', '
-    argstring = argstring + ', '.join(["%s=%s" % (k, v) for k, v in preset_kwargs.items()])
-
-    # new_line = new_line + ("-" * (len(new_line) - 1)) + '\n'
-    doc = getattr(partial_f, '__doc__', None)
-    if doc is None or len(doc) == 0:
-        partial_f.__doc__ = "<This function is equivalent to '%s(%s)'.>\n" % (partial_f.__name__, argstring)
-    else:
-        new_line = "<This function is equivalent to '%s(%s)', see original '%s' doc below.>\n" \
-                   "" % (partial_f.__name__, argstring, partial_f.__name__)
-        partial_f.__doc__ = new_line + doc
+    # update the doc.
+    # Note that partial_f is generated above with a proper __name__ and __doc__ identical to the wrapped ones
+    partial_f.__doc__ = gen_partial_doc(partial_f.__name__, partial_f.__doc__, new_sig, preset_pos_args, preset_kwargs)
 
     return partial_f
+
+
+def gen_partial_sig(f, preset_pos_args, preset_kwargs):
+    """
+    Returns the signature of partial(f, *preset_pos_args, **preset_kwargs)
+    Raises explicit errors in case of non-matching argument names.
+
+    :param f:
+    :param preset_pos_args:
+    :param preset_kwargs:
+    :return:
+    """
+    orig_sig = signature(f)
+    preset_kwargs = copy(preset_kwargs)
+
+    # remove the first n positional, and assign/change default values for the keyword
+    if len(orig_sig.parameters) <= len(preset_pos_args):
+        raise ValueError("Cannot preset %s positional args, function %s has only %s args."
+                         "" % (len(preset_pos_args), getattr(f, '__name__', f), len(orig_sig.parameters)))
+
+    # then the keywords. If they have a new value override it
+    new_params = []
+    new_params_with_default = []
+    for i, (p_name, p) in enumerate(orig_sig.parameters.items()):
+        if i < len(preset_pos_args):
+            break
+        try:
+            overridden_p_default = preset_kwargs.pop(p_name)
+            # override definition
+            p = Parameter(name=p.name, kind=p.kind, default=overridden_p_default, annotation=p.annotation)
+        except KeyError:
+            pass
+        if p.default is not p.empty:
+            new_params_with_default.append(p)
+        else:
+            new_params.append(p)
+
+    new_sig = Signature(parameters=tuple(new_params + new_params_with_default),
+                        return_annotation=orig_sig.return_annotation)
+
+    if len(preset_kwargs) > 0:
+        raise ValueError("Cannot preset keyword argument(s), not present in the signature of %s: %s"
+                         "" % (getattr(f, '__name__', f), preset_kwargs))
+    return new_sig
+
+
+def gen_partial_doc(wrapped_name, wrapped_doc, new_sig, preset_pos_args, preset_kwargs):
+    """
+    Generate a documentation indicating which positional arguments and keyword arguments are set in this
+    partial implementation, and appending the wrapped function doc.
+
+    :param wrapped_name:
+    :param wrapped_doc:
+    :param new_sig:
+    :param preset_pos_args:
+    :param preset_kwargs:
+    :return:
+    """
+    # First include all preset positional argument names...
+    argstring = ', '.join([("%s" % a) for a in preset_pos_args])
+
+    # then all arguments remaining in the signature (changing their default value if overridden)
+    for p_name, p in new_sig.parameters.items():
+        try:
+            p_overridden_default = preset_kwargs[p_name]
+            p = Parameter(name=p.name, kind=p.kind, default=p_overridden_default, annotation=p.annotation)
+        except KeyError:
+            pass
+        argstring = "%s, %s" % (argstring, p) if len(argstring) > 0 else str(p)
+
+    # Write the final docstring
+    if wrapped_doc is None or len(wrapped_doc) == 0:
+        partial_doc = "<This function is equivalent to '%s(%s)'.>\n" % (wrapped_name, argstring)
+    else:
+        new_line = "<This function is equivalent to '%s(%s)', see original '%s' doc below.>\n" \
+                   "" % (wrapped_name, argstring, wrapped_name)
+        partial_doc = new_line + wrapped_doc
+
+    return partial_doc
 
 
 class UnsupportedForCompilation(TypeError):
