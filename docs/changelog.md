@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.9.4 - removed six dependency
+
+ - Removed unused `six` dependency. Note: this version will ship in conda forge.
+
 ### 1.9.3 - Minor compatibility fixes with functools.partial
 
  - `@wraps` can now be used to wrap a `functools.partial`. Fixed [#57](https://github.com/smarie/python-makefun/issues/57)
