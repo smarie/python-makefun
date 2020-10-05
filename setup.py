@@ -22,8 +22,10 @@ EXTRAS_REQUIRE = {}
 # ************** ID card *****************
 DISTNAME = 'makefun'
 DESCRIPTION = 'Small library to dynamically create python functions.'
-MAINTAINER = 'Sylvain MARIE'
-MAINTAINER_EMAIL = 'sylvain.marie@se.com'
+AUTHOR = 'Sylvain MARIE'
+MAINTAINER = AUTHOR
+AUTHOR_EMAIL = 'sylvain.marie@se.com'
+MAINTAINER_EMAIL = AUTHOR_EMAIL
 URL = 'https://github.com/smarie/python-makefun'
 DOWNLOAD_URL = URL + '/tarball/' + get_version()
 LICENSE = 'BSD 3-Clause'
@@ -47,7 +49,8 @@ setup(
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
     # version=VERSION, NOW HANDLED BY GIT
-
+    author=AUTHOR,
+    author_email=AUTHOR_EMAIL,
     maintainer=MAINTAINER,
     maintainer_email=MAINTAINER_EMAIL,
 
