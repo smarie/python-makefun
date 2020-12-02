@@ -974,7 +974,7 @@ def gen_partial_sig(f, preset_pos_args, preset_kwargs):
     preset_kwargs = copy(preset_kwargs)
 
     # remove the first n positional, and assign/change default values for the keyword
-    if len(orig_sig.parameters) <= len(preset_pos_args):
+    if len(orig_sig.parameters) < len(preset_pos_args):
         raise ValueError("Cannot preset %s positional args, function %s has only %s args."
                          "" % (len(preset_pos_args), getattr(f, '__name__', f), len(orig_sig.parameters)))
 

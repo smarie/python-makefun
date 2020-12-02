@@ -2,7 +2,7 @@ import sys
 
 import pytest
 
-from makefun import wraps, with_signature
+from makefun import wraps, with_signature, partial
 
 
 @pytest.mark.skip("known to fail")
@@ -102,3 +102,14 @@ def test_issue_55():
         assert "foo at" in repr(foo)
     assert foo.__name__ == 'bar'
     assert foo() == 'a'
+
+
+def test_partial_noargs():
+    """ Fixes https://github.com/smarie/python-makefun/issues/59 """
+    def foo():
+        pass
+
+    foo._mark = True
+
+    g = partial(foo)
+    assert g._mark is True
