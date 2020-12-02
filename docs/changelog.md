@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.9.5 - Bugfix with `partial` when f has no args
+
+ - `partial` can now be used to create a copy of a function with no args. Fixed `ValueError: Cannot preset 0 positional args, function case_second has only 0 args.`. Fixed [#59](https://github.com/smarie/python-makefun/issues/59)
+
 ### 1.9.4 - removed six dependency
 
  - Removed unused `six` dependency. Note: this version will ship in conda forge.
