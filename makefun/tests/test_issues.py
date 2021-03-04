@@ -113,3 +113,18 @@ def test_partial_noargs():
 
     g = partial(foo)
     assert g._mark is True
+
+
+def test_wraps_dict():
+    """Checks that @wraps correctly propagates the __dict__"""
+
+    def foo():
+        pass
+
+    foo._mark = True
+
+    @wraps(foo)
+    def g():
+        pass
+
+    assert g._mark is True
