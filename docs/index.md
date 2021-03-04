@@ -73,7 +73,7 @@ You can also:
  * override the function name, docstring, qualname and module name if you pass a non-None `func_name`, `doc`, `qualname` and `module_name` argument
  * add other attributes on the generated function if you pass additional keyword arguments
 
-See `help(create_function)` for details.
+See [API reference](./api_reference.md#create_function) for details.
 
 
 #### Arguments mapping
@@ -85,7 +85,7 @@ This behaviour is actually a great feature because it makes it much easier to de
 
 #### More compact syntax
 
-You can use the `@with_signature` decorator to perform exactly the same things than `create_function`, but in a more compact way:
+You can use the [`@with_signature`](./api_reference.md#with_signature) decorator to perform exactly the same things than [`create_function`](./api_reference.md#create_function), but in a more compact way:
 
 ```python
 from makefun import with_signature
@@ -107,7 +107,7 @@ def foo(a):
 assert foo.__name__ == 'f'
 ```
 
-See `help(with_signature)` for details.
+See [API reference](./api_reference.md#with_signature) for details.
 
 #### PEP484 type hints in `str`
 
@@ -133,7 +133,7 @@ but unfortunately `inspect.signature` is not able to detect them so the generate
 
 #### Using `Signature` objects
 
-`create_function` and `@with_signature` are able to accept a `Signature` object as input, instead of a `str`. That might be more convenient than using strings to programmatically define signatures. For example we can rewrite the above script using `Signature`:
+[`create_function`](./api_reference.md#create_function) and [`@with_signature`](./api_reference.md#with_signature) are able to accept a `Signature` object as input, instead of a `str`. That might be more convenient than using strings to programmatically define signatures. For example we can rewrite the above script using `Signature`:
 
 ```python
 from makefun import with_signature
@@ -153,7 +153,7 @@ def gen_func(*args, **kwargs):
     return args, kwargs
 ```
 
-Note that `Signature` objects do not contain any function name information. You therefore have to provide an explicit `func_name` argument to `@with_signature` (or to `create_function`) as shown above.
+Note that `Signature` objects do not contain any function name information. You therefore have to provide an explicit `func_name` argument to [`@with_signature`](./api_reference.md#with_signature) (or to [`create_function`](./api_reference.md#create_function)) as shown above.
 
 !!! note "`Signature` availability in python 2"
     In python 2 the `inspect` package does not provide any signature-related features, but a complete backport is available: [`funcsigs`](https://github.com/testing-cabal/funcsigs).
@@ -176,7 +176,7 @@ This has two major limitations:
  1. the wrapper code will execute *even when the provided arguments are invalid*. 
  2. the wrapper code can not easily access an argument using its name, from the received `*args, **kwargs`. Indeed one would have to handle all cases (positional, keyword, default) and therefore to use something like `Signature.bind()`.
 
-`makefun` provides a convenient replacement for `@wraps` that fixes these two issues:
+`makefun` provides a convenient replacement for [`@wraps`](./api_reference.md#wraps) that fixes these two issues:
  
 ```python
 from makefun import wraps
@@ -217,7 +217,7 @@ TypeError: foo() missing 1 required positional argument: 'a'
 
 You can try to do the same experiment with `functools.wraps` to see the difference.
 
-Finally note that a `create_wrapper` function is also provided for convenience ; it is the equivalent of `@wraps` but as a standard function - not a decorator.
+Finally note that a [`create_wrapper`](./api_reference.md#create_wrapper) function is also provided for convenience ; it is the equivalent of [`@wraps`](./api_reference.md#wraps) but as a standard function - not a decorator.
 
 !!! note "creating signature-preserving decorators"
     Creating decorators and creating signature-preserving function wrappers are two independent problems. `makefun` is solely focused on the second problem. If you wish to solve the first problem you can look at [`decopatch`](https://smarie.github.io/python-decopatch/). It provides a compact syntax, relying on `makefun`, if you wish to tackle both at once.
@@ -273,8 +273,8 @@ This way you can therefore easily create function wrappers with different signat
 
 Two helper functions are provided in this toolbox to make it a bit easier for you to edit `Signature` objects:
  
- - `remove_signature_parameters` creates a new signature from an existing one by removing all parameters corresponding to the names provided
- - `add_signature_parameters` prepends the `Parameter`s provided in its `first=` argument, and appends the ones provided in its `last` argument.
+ - [`remove_signature_parameters`](./api_reference.md#remove_signature_parameters) creates a new signature from an existing one by removing all parameters corresponding to the names provided
+ - [`add_signature_parameters`](./api_reference.md#add_signature_parameters) prepends the `Parameter`s provided in its `first=` argument, and appends the ones provided in its `last` argument.
 
 ```python
 from makefun import add_signature_parameters, remove_signature_parameters
@@ -308,7 +308,7 @@ They might save you a few lines of code if your use-case is not too specific.
 
 #### Removing parameters easily
 
-As goodies, `makefun` provides a `partial` function that are equivalent to [`functools.partial`](https://docs.python.org/2/library/functools.html#functools.partial), except that it is fully signature-preserving and modifies the documentation with a nice helper message explaining that this is a partial view:
+As goodies, `makefun` provides a [`partial`](./api_reference.md#partial) function that are equivalent to [`functools.partial`](https://docs.python.org/2/library/functools.html#functools.partial), except that it is fully signature-preserving and modifies the documentation with a nice helper message explaining that this is a partial view:
 
 ```python
 def foo(x, y):
@@ -342,7 +342,7 @@ bar(y)
     :return:
 ```
 
-A decorator is also available to create partial views easily for quick tests:
+A [`@with_partial`](./api_reference.md#with_partial) decorator is also available to create partial views easily for quick tests:
 
 ```python
 @with_partial(x=12)
@@ -362,7 +362,7 @@ def foo(x, y):
 
 #### Generators and Coroutines
 
-`create_function` and `@with_signature` will automatically create a generator if your implementation is a generator:
+[`create_function`](./api_reference.md#create_function) and [`@with_signature`](./api_reference.md#with_signature) will automatically create a generator if your implementation is a generator:
 
 ```python
 # define the implementation

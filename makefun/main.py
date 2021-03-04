@@ -55,6 +55,7 @@ def create_wrapper(wrapped,
                    ):
     """
     Creates a signature-preserving wrapper function.
+    `create_wrapper(wrapped, wrapper, **kwargs)` is equivalent to `wraps(wrapped, **kwargs)(wrapper)`.
 
     See `@makefun.wraps`
     """
@@ -93,22 +94,23 @@ def create_function(func_signature,             # type: Union[str, Signature]
                     module_name=None,           # type: str
                     **attrs):
     """
-    Creates a function with signature <func_signature> that will call <func_impl> with its arguments when called.
-    Arguments are passed as keyword-arguments when it is possible (so all the time, except for var-positional or
-    positional-only arguments that get passed as *args. Note that pos-only does not yet exist in python but this case
-    is already covered because it is supported by `Signature` objects).
+    Creates a function with signature `func_signature` that will call `func_impl` when called. All arguments received
+    by the generated function will be propagated as keyword-arguments to `func_impl` when it is possible (so all the
+    time, except for var-positional or positional-only arguments that get passed as *args. Note that positional-only
+    does not yet exist in python but this case is already covered because it is supported by `Signature` objects).
 
-    `func_signature` can be provided:
+    `func_signature` can be provided in different formats:
 
      - as a string containing the name and signature without 'def' keyword, such as `'foo(a, b: int, *args, **kwargs)'`.
-      In which case the name in the string will be used for the `__name__` and `__qualname__` of the created function
-      by default
-     - as a `Signature` object, for example created using `signature(f)` or handcrafted. In this case the `__name__`
-      and `__qualname__` of the created function will be copied from `func_impl` by default.
+       In which case the name in the string will be used for the `__name__` and `__qualname__` of the created function
+       by default
+     - as a `Signature` object, for example created using `signature(f)` or handcrafted. Since a `Signature` object
+       does not contain any name, in this case the `__name__` and `__qualname__` of the created function will be copied
+       from `func_impl` by default.
 
     All the other metadata of the created function are defined as follows:
 
-     - default `__name__` attribute (see above) can be overriden by providing a non-None `func_name`
+     - default `__name__` attribute (see above) can be overridden by providing a non-None `func_name`
      - default `__qualname__` attribute (see above) can be overridden by providing a non-None `qualname`
      - `__annotations__` attribute is created to match the annotations in the signature.
      - `__doc__` attribute is copied from `func_impl.__doc__` except if overridden using `doc`
@@ -668,13 +670,21 @@ def wraps(f,
           **attrs
           ):
     """
-    Decorator to create a signature-preserving wrapper function.
+    A decorator to create a signature-preserving wrapper function.
 
-    It is similar to `functools.wraps`, but relies on a proper dynamically-generated function. Therefore as opposed to
-    `functools.wraps`, the wrapper body will not be executed if the arguments provided are not
-    compliant with the signature - instead a `TypeError` will be raised before entering the wrapper body.
+    It is similar to `functools.wraps`, but
 
-    `@wraps(f)` is equivalent to
+     - relies on a proper dynamically-generated function. Therefore as opposed to `functools.wraps`,
+
+        - the wrapper body will not be executed if the arguments provided are not compliant with the signature -
+          instead a `TypeError` will be raised before entering the wrapper body.
+        - the arguments will always be received as keywords by the wrapper, when possible. See
+          [documentation](./index.md#signature-preserving-function-wrappers) for details.
+
+     - you can modify the signature of the resulting function, by providing a new one with `new_sig`. See
+       [documentation](./index.md#editing-a-signature) for details.
+
+    Comparison with `@with_signature`:`@wraps(f)` is equivalent to
 
         `@with_signature(signature(f),
                          func_name=f.__name__,
@@ -689,7 +699,10 @@ def wraps(f,
     `f`, so that the created function seems to be identical (except for the signature if a non-None `new_sig` is
     provided). If `new_sig` is None, we set the additional `__wrapped__` attribute on the created function, to stay
     compliant with the `functools.wraps` convention.
-    See https://docs.python.org/3/library/functools.html#functools.wraps
+
+    All options in `with_signature` remain available for overriding.
+
+    See also [python documentation on @wraps](https://docs.python.org/3/library/functools.html#functools.wraps)
     """
     func_name, func_sig, doc, qualname, module_name, all_attrs = _get_args_for_wrapping(f, new_sig, func_name, doc,
                                                                                         qualname, module_name, attrs)
@@ -779,23 +792,25 @@ def with_signature(func_signature,             # type: Union[str, Signature]
         the medatadata (func_name, doc, module_name, attrs) of the decorated function, without generating a new
         function.
     :param inject_as_first_arg: if `True`, the created function will be injected as the first positional argument of
-        the decorated function. Default=`False`
+        the decorated function. This can be handy in case the implementation is shared between several facades and needs
+        to know from which context it was called. Default=`False`
     :param func_name: provide a non-`None` value to override the created function `__name__` and `__qualname__`. If this
-        is `None` (default), the `__name__` and `__qualname__` will default to the ones of the decorated function if
-        `func_signature` is a `Signature`, or to the name defined in `func_signature` if `func_signature` is a `str`
-        and contains a non-empty name.
+        is `None` (default), the `__name__` will default to the ones of the decorated function if `func_signature` is a
+        `Signature`, or to the name defined in `func_signature` if `func_signature` is a `str` and contains a non-empty
+        name.
     :param add_source: a boolean indicating if a '__source__' annotation should be added to the generated function
         (default: True)
     :param add_impl: a boolean indicating if a '__func_impl__' annotation should be added to the generated function
         (default: True)
     :param doc: a string representing the docstring that will be used to set the __doc__ attribute on the generated
-        function. If None (default), the doc of func_impl will be used.
+        function. If None (default), the doc of the decorated function will be used.
     :param qualname: a string representing the qualified name to be used. If None (default), the `__qualname__` will
         default to the one of `func_impl` if `func_signature` is a `Signature`, or to the name defined in
         `func_signature` if `func_signature` is a `str` and contains a non-empty name.
-    :param module_name: the name of the module to be set on the function (under __module__ ). If None (default),
-        `func_impl.__module__` will be used.
-    :param attrs: other keyword attributes that should be set on the function
+    :param module_name: the name of the module to be set on the function (under __module__ ). If None (default), the
+        `__module__` attribute of the decorated function will be used.
+    :param attrs: other keyword attributes that should be set on the function. Note that the full `__dict__` of the
+        decorated function is not automatically copied.
     """
     if func_signature is None:
         # make sure that user does not provide non-default other args
@@ -834,9 +849,10 @@ def with_signature(func_signature,             # type: Union[str, Signature]
     return replace_f
 
 
-def remove_signature_parameters(s, *param_names):
+def remove_signature_parameters(s,
+                                *param_names):
     """
-    Removes the provided parameters from the signature s (returns a new signature instance).
+    Removes the provided parameters from the signature `s` (returns a new `Signature` instance).
 
     :param s:
     :param param_names: a list of parameter names to remove
@@ -855,14 +871,14 @@ def add_signature_parameters(s,             # type: Signature
                              custom_idx=-1  # type: int
                              ):
     """
-    Adds the provided parameters to the signature `s` (returns a new signature instance).
+    Adds the provided parameters to the signature `s` (returns a new `Signature` instance).
 
     :param s: the original signature to edit
     :param first: a single element or a list of `Parameter` instances to be added at the beginning of the parameter's
         list
     :param last: a single element or a list of `Parameter` instances to be added at the end of the parameter's list
     :param custom: a single element or a list of `Parameter` instances to be added at a custom position in the list.
-        that position is determined with `custom_idx`
+        That position is determined with `custom_idx`
     :param custom_idx: the custom position to insert the `custom` parameters to.
     :return: a new signature created from the original one by adding the specified parameters.
     """
@@ -927,8 +943,15 @@ def with_partial(*preset_pos_args, **preset_kwargs):
     return apply_decorator
 
 
-def partial(f, *preset_pos_args, **preset_kwargs):
+def partial(f,                 # type: Callable
+            *preset_pos_args,
+            **preset_kwargs
+            ):
     """
+    Equivalent of `functools.partial` but relies on a dynamically-created function. As a result the function
+    looks nicer to users in terms of apparent documentation, name, etc.
+
+    See [documentation](./index.md#removing-parameters-easily) for details.
 
     :param preset_pos_args:
     :param preset_kwargs:
