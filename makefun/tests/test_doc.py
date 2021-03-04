@@ -1,4 +1,6 @@
 import sys
+from random import random
+
 import pytest
 
 try:  # python 3.3+
@@ -305,3 +307,24 @@ def test_wraps_functools(capsys):
 b=0
 hello!
 """
+
+
+def test_wraps_remove():
+    def inject_random_a(f):
+        """
+        A decorator that injects a random number inside the `a` argument,
+        removing it from the exposed signature
+        """
+        @wraps(f, remove_args='a')
+        def my_wrapper(*args, **kwargs):
+            # generate a random value for a and inject it in the args for f
+            kwargs['a'] = random()
+            return f(*args, **kwargs)
+
+        return my_wrapper
+
+    @inject_random_a
+    def summer(a, b):
+        return a + b
+
+    assert 12 <= summer(b=12) <= 13

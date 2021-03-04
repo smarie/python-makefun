@@ -115,6 +115,7 @@ is totally equivalent to `impl = create_function(<arguments>, func_impl=impl)` e
 ```python
 def wraps(f,
           new_sig: Union[str, Signature] = None,
+          remove_args: Union[str, Iterable[str]] = None,
           func_name: str = None,
           inject_as_first_arg: bool = False,
           add_source: bool = True,
@@ -135,7 +136,7 @@ It is similar to `functools.wraps`, but
     - the wrapper body will not be executed if the arguments provided are not compliant with the signature - instead a `TypeError` will be raised before entering the wrapper body. 
     - the arguments will always be received as keywords by the wrapper, when possible. See [documentation](./index.md#signature-preserving-function-wrappers) for details.
 
- - **you can modify the signature** of the resulting function, by providing a new one with `new_sig`. See [documentation](./index.md#editing-a-signature) for details.
+ - **you can modify the signature** of the resulting function, by providing a new one with `new_sig`. See [documentation](./index.md#editing-a-signature) for details. Note that you can now also easily remove arguments from the signature in order to inject them with your own - with the `remove_args` parameter, see [documentation](./index.md#to-inject-a-dynamically-baked-value).
 
 Comparison with `@with_signature`: `@wraps(f)` is equivalent to
 
@@ -159,14 +160,15 @@ See also [python documentation on @wraps](https://docs.python.org/3/library/func
 ```python
 def create_wrapper(wrapped,
                    wrapper,
-                   new_sig=None,               # type: Union[str, Signature]
-                   func_name=None,             # type: str
-                   inject_as_first_arg=False,  # type: bool
-                   add_source=True,             # type: bool
-                   add_impl=True,            # type: bool
-                   doc=None,                   # type: str
-                   qualname=None,              # type: str
-                   module_name=None,            # type: str
+                   new_sig: Union[str, Signature] = None,
+                   remove_args: Union[str, Iterable[str]] = None,
+                   func_name: str = None,
+                   inject_as_first_arg: bool = False,
+                   add_source: bool = True,
+                   add_impl: bool = True,
+                   doc: str = None,
+                   qualname: str = None,
+                   module_name: str = None,
                    **attrs
                    ):
 ```

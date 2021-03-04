@@ -35,6 +35,12 @@ except ImportError:
     pass
 
 
+if sys.version_info >= (3,):
+    string_types = str,
+else:
+    string_types = basestring,
+
+
 # macroscopic signature strings checker (we do not look inside params, `signature` will do it for us)
 FUNC_DEF = re.compile('(?s)^\\s*(?P<funcname>[_\\w][_\\w\\d]*)?\\s*'
                       '\\(\\s*(?P<params>.*?)\\s*\\)\\s*'
@@ -44,6 +50,7 @@ FUNC_DEF = re.compile('(?s)^\\s*(?P<funcname>[_\\w][_\\w\\d]*)?\\s*'
 def create_wrapper(wrapped,
                    wrapper,
                    new_sig=None,               # type: Union[str, Signature]
+                   remove_args=None,           # type: Union[str, Iterable[str]]
                    func_name=None,             # type: str
                    inject_as_first_arg=False,  # type: bool
                    add_source=True,             # type: bool
@@ -59,9 +66,9 @@ def create_wrapper(wrapped,
 
     See `@makefun.wraps`
     """
-    func_name, func_sig, doc, qualname, module_name, all_attrs = _get_args_for_wrapping(wrapped, new_sig, func_name,
-                                                                                        doc, qualname, module_name,
-                                                                                        attrs)
+    func_name, func_sig, doc, qualname, module_name, all_attrs = _get_args_for_wrapping(wrapped, new_sig, remove_args,
+                                                                                        func_name, doc, qualname,
+                                                                                        module_name, attrs)
 
     return create_function(func_sig, wrapper,
                            func_name=func_name,
@@ -660,6 +667,7 @@ def _get_callerframe(offset=0):
 
 def wraps(f,
           new_sig=None,         # type: Union[str, Signature]
+          remove_args=None,     # type: Union[str, Iterable[str]]
           func_name=None,             # type: str
           inject_as_first_arg=False,  # type: bool
           add_source=True,   # type: bool
@@ -681,8 +689,10 @@ def wraps(f,
         - the arguments will always be received as keywords by the wrapper, when possible. See
           [documentation](./index.md#signature-preserving-function-wrappers) for details.
 
-     - you can modify the signature of the resulting function, by providing a new one with `new_sig`. See
-       [documentation](./index.md#editing-a-signature) for details.
+     - you can modify the signature of the resulting function, by providing a new one with `new_sig` or by providing a
+       list of arguments to remove in `remove_args`. See [documentation](./index.md#editing-a-signature) for details.
+       Note that you can now also easily remove arguments from the signature in order to inject them with your own -
+       with the `remove_args` parameter, see [documentation](./index.md#to-inject-a-dynamically-baked-value).
 
     Comparison with `@with_signature`:`@wraps(f)` is equivalent to
 
@@ -704,7 +714,8 @@ def wraps(f,
 
     See also [python documentation on @wraps](https://docs.python.org/3/library/functools.html#functools.wraps)
     """
-    func_name, func_sig, doc, qualname, module_name, all_attrs = _get_args_for_wrapping(f, new_sig, func_name, doc,
+    func_name, func_sig, doc, qualname, module_name, all_attrs = _get_args_for_wrapping(f, new_sig, remove_args,
+                                                                                        func_name, doc,
                                                                                         qualname, module_name, attrs)
 
     return with_signature(func_sig,
@@ -717,12 +728,13 @@ def wraps(f,
                           **all_attrs)
 
 
-def _get_args_for_wrapping(wrapped, new_sig, func_name, doc, qualname, module_name, attrs):
+def _get_args_for_wrapping(wrapped, new_sig, remove_args, func_name, doc, qualname, module_name, attrs):
     """
     Internal method used by @wraps and create_wrapper
 
     :param wrapped:
     :param new_sig:
+    :param remove_args:
     :param func_name:
     :param doc:
     :param qualname:
@@ -731,7 +743,16 @@ def _get_args_for_wrapping(wrapped, new_sig, func_name, doc, qualname, module_na
     :return:
     """
     # the desired signature
-    func_sig = signature(wrapped) if new_sig is None else new_sig
+    if new_sig is not None:
+        if remove_args is not None:
+            raise ValueError("Only one of `remove_args` or `new_sig` should be provided")
+        func_sig = new_sig
+    else:
+        func_sig = signature(wrapped)
+        if remove_args:
+            if isinstance(remove_args, string_types):
+                remove_args = (remove_args,)
+            func_sig = remove_signature_parameters(func_sig, *remove_args)
 
     # the desired metadata
     if func_name is None:

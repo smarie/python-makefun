@@ -6,6 +6,8 @@
 
 [![Documentation](https://img.shields.io/badge/doc-latest-blue.svg)](https://smarie.github.io/python-makefun/) [![PyPI](https://img.shields.io/pypi/v/makefun.svg)](https://pypi.python.org/pypi/makefun/) [![Downloads](https://pepy.tech/badge/makefun)](https://pepy.tech/project/makefun) [![Downloads per week](https://pepy.tech/badge/makefun/week)](https://pepy.tech/project/makefun) [![GitHub stars](https://img.shields.io/github/stars/smarie/python-makefun.svg)](https://github.com/smarie/python-makefun/stargazers)
 
+!!! success "New `remove_args` parameter in [`@wraps`](./api_reference.md#wraps). See [below](#to-inject-a-dynamically-baked-value) for details !"
+
 `makefun` helps you create functions dynamically, with the signature of your choice. It was largely inspired by [`decorator`](https://github.com/micheles/decorator) and `functools`, and created mainly to cover some of their limitations.
 
 The typical use cases are:
@@ -308,6 +310,8 @@ They might save you a few lines of code if your use-case is not too specific.
 
 #### Removing parameters easily
 
+##### To replace them with a hardcoded value
+
 As goodies, `makefun` provides a [`partial`](./api_reference.md#partial) function that are equivalent to [`functools.partial`](https://docs.python.org/2/library/functools.html#functools.partial), except that it is fully signature-preserving and modifies the documentation with a nice helper message explaining that this is a partial view:
 
 ```python
@@ -355,6 +359,31 @@ def foo(x, y):
     :return:
     """
     return x + y
+```
+
+##### To inject a dynamically baked value
+
+[`@wraps`](./api_reference.md#wraps) now provides a `remove_args` parameter where you can pass one or several argument names.
+
+```python
+def inject_random_a(f):
+    """
+    A decorator that injects a random number inside the `a` argument, 
+    removing it from the exposed signature
+    """
+    @wraps(f, remove_args='a')
+    def my_wrapper(*args, **kwargs):
+        # generate a random value for a and inject it in the args for f
+        kwargs['a'] = random()
+        return f(*args, **kwargs)
+
+    return my_wrapper
+
+@inject_random_a
+def summer(a, b):
+    return a + b
+
+assert 12 <= summer(b=12) <= 13
 ```
 
 
