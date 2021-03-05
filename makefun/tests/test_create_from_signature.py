@@ -1,3 +1,5 @@
+import sys
+
 import pytest
 
 from makefun import create_function
@@ -23,7 +25,13 @@ def test_positional_only():
 
     func_signature = Signature(parameters=params)
 
-    with pytest.raises(SyntaxError):
-        dynamic_fun = create_function(func_signature, my_handler, func_name="foo")
-        print(dynamic_fun.__source__)
-        assert dynamic_fun(0, 1) == ((1,), {'a': 0})
+    if sys.version_info < (3, 8):
+        with pytest.raises(SyntaxError):
+            create_function(func_signature, my_handler, func_name="foo")
+    else:
+        dynamic_fun =create_function(func_signature, my_handler, func_name="foo")
+        assert "\n" + dynamic_fun.__source__ == """
+def foo(a, /, *args, **kwargs):
+    return _func_impl_(a, *args, **kwargs)
+"""
+        assert dynamic_fun(0, 1) == ((0, 1), {})
