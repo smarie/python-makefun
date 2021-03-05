@@ -1,10 +1,9 @@
 import sys
 
 import pytest
-from pytest_cases import cases_data
+from pytest_cases import parametrize_with_cases
 
 from makefun import create_function
-from makefun.tests import test_create_from_string_cases
 
 
 # Python 2 does not support function annotations; Python 3.0-3.4 do not support variable annotations.
@@ -115,18 +114,15 @@ foo(b,      # type: int
     assert dynamic_fun.__annotations__ == {'a': float, 'b': int, 'return': str}
 
 
-@cases_data(module=test_create_from_string_cases)
-def test_arguments(case_data):
+@parametrize_with_cases("params_str,inputs,expected", cases=".test_create_from_string_cases")
+def test_arguments(params_str, inputs, expected):
     """ Tests that the `PARAM_DEF` regexp works correctly """
 
     def generic_handler(*args, **kwargs):
         return args, kwargs
 
-    params_str, inputs, (eargs, ekwargs) = case_data.get()
-
     f = create_function("foo(%s)" % params_str, generic_handler)
 
     args, kwargs = eval("f(%s)" % inputs, globals(), locals())
 
-    assert args == eargs
-    assert kwargs == ekwargs
+    assert (args, kwargs) == expected
