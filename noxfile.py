@@ -142,9 +142,15 @@ def release(session):
     session_run(session, "twine upload dist/* -u smarie")  # -r testpypi
 
     # create the github release
-    session_run(session, "python ci_tools/github_release.py "
+    install_reqs(session, phase="release", phase_reqs=["click", "PyGithub"])
+    gh_token = os.environ['GH_TOKEN']
+    # keyring set https://docs.github.com/en/rest token
+    import keyring
+    gh_token = keyring.get_password("https://docs.github.com/en/rest", "token")
+    session_run(session, "python ci_tools/github_release.py -s {gh_token} "
                          "--repo-slug smarie/python-makefun -cf ./docs/changelog.md "
-                         "-d https://smarie.github.io/python-makefun/changelog/ {tag}".format(tag=current_tag))
+                         "-d https://smarie.github.io/python-makefun/changelog/ {tag}".format(gh_token=gh_token,
+                                                                                              tag=current_tag))
 
 
 # if __name__ == '__main__':
