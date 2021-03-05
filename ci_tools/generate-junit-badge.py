@@ -39,8 +39,9 @@ def get_test_stats(junit_xml='reports/junit/junit.xml'  # type: str
     return TestStats(success_percentage, success, runned, skipped)
 
 
-def download_badge(test_stats,                  # type: TestStats
-                   dest_folder='reports/junit'  # type: str
+def download_badge(test_stats,                   # type: TestStats
+                   dest_folder='reports/junit',  # type: str
+                   badge_name='junit-badge.svg'  # type: str
                    ):
     """
     Downloads the badge corresponding to the provided success percentage, from https://img.shields.io.
@@ -66,7 +67,7 @@ def download_badge(test_stats,                  # type: TestStats
     right_txt = "%s/%s" % (test_stats.success, test_stats.runned)
     url = 'https://img.shields.io/badge/%s-%s-%s.svg' % (left_txt, quote_plus(right_txt), color)
 
-    dest_file = path.join(dest_folder, 'junit-badge.svg')
+    dest_file = path.join(dest_folder, badge_name)
 
     print('Generating junit badge from : ' + url)
     response = requests.get(url, stream=True)
@@ -79,11 +80,20 @@ def download_badge(test_stats,                  # type: TestStats
 if __name__ == "__main__":
     # Execute only if run as a script.
     # Check the arguments
-    assert len(sys.argv[1:]) == 1, "a single mandatory argument is required: <threshold>"
-    threshold = float(sys.argv[1])
+    nbargs = len(sys.argv[1:])
+    if nbargs < 1:
+        raise ValueError("a mandatory argument is required: <threshold>, and an optional: <dest_folder>")
+    else:
+        threshold = float(sys.argv[1])
+        if nbargs < 2:
+            dest_folder = None
+        elif nbargs < 3:
+            dest_folder = sys.argv[2]
+        else:
+            raise ValueError("too many arguments received: 2 maximum (<threshold>, <dest_folder>)")
 
     # First retrieve the success percentage from the junit xml
-    test_stats = get_test_stats()
+    test_stats = get_test_stats(junit_xml='%s/junit.xml' % ('reports/junit' if dest_folder is None else dest_folder))
 
     # Validate against the threshold
     print("Success percentage is %s%%. Checking that it is >= %s" % (test_stats.success_percentage, threshold))
@@ -92,4 +102,4 @@ if __name__ == "__main__":
                         "" % (test_stats.success_percentage, threshold))
 
     # Download the badge
-    download_badge(test_stats)
+    download_badge(test_stats, dest_folder=dest_folder)
