@@ -1,0 +1,815 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      <link rel="shortcut icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.0.4">
+    
+    
+      
+        <title>API reference - makefun</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.77f3fd56.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.7fa14f5b.min.css">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+    
+      
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+      
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#api-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="makefun" class="md-header__button md-logo" aria-label="makefun">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            makefun
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              API reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="md-header__options">
+      
+    </div>
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/smarie/python-makefun/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="makefun" class="md-nav__button md-logo" aria-label="makefun">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    makefun
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/smarie/python-makefun/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          API reference
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        API reference
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#main-symbols" class="md-nav__link">
+    Main symbols
+  </a>
+  
+    <nav class="md-nav" aria-label="Main symbols">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create_function" class="md-nav__link">
+    create_function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with_signature" class="md-nav__link">
+    @with_signature
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wraps" class="md-nav__link">
+    @wraps
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create_wrapper" class="md-nav__link">
+    create_wrapper
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#partial" class="md-nav__link">
+    @partial
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with_partial" class="md-nav__link">
+    @with_partial
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#signature-editing-utils" class="md-nav__link">
+    Signature editing utils
+  </a>
+  
+    <nav class="md-nav" aria-label="Signature editing utils">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add_signature_parameters" class="md-nav__link">
+    add_signature_parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove_signature_parameters" class="md-nav__link">
+    remove_signature_parameters
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pseudo-compilation" class="md-nav__link">
+    Pseudo-compilation
+  </a>
+  
+    <nav class="md-nav" aria-label="Pseudo-compilation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#compile_fun" class="md-nav__link">
+    compile_fun
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        Changelog
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#main-symbols" class="md-nav__link">
+    Main symbols
+  </a>
+  
+    <nav class="md-nav" aria-label="Main symbols">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create_function" class="md-nav__link">
+    create_function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with_signature" class="md-nav__link">
+    @with_signature
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wraps" class="md-nav__link">
+    @wraps
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create_wrapper" class="md-nav__link">
+    create_wrapper
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#partial" class="md-nav__link">
+    @partial
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with_partial" class="md-nav__link">
+    @with_partial
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#signature-editing-utils" class="md-nav__link">
+    Signature editing utils
+  </a>
+  
+    <nav class="md-nav" aria-label="Signature editing utils">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add_signature_parameters" class="md-nav__link">
+    add_signature_parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove_signature_parameters" class="md-nav__link">
+    remove_signature_parameters
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pseudo-compilation" class="md-nav__link">
+    Pseudo-compilation
+  </a>
+  
+    <nav class="md-nav" aria-label="Pseudo-compilation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#compile_fun" class="md-nav__link">
+    compile_fun
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/smarie/python-makefun/edit/master/docs/api_reference.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="api-reference">API reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h1>
+<p>In general, using <code>help(symbol)</code> is the recommended way to get the latest documentation. In addition, this page provides an overview of the various elements in this package.</p>
+<h2 id="main-symbols">Main symbols<a class="headerlink" href="#main-symbols" title="Permanent link">&para;</a></h2>
+<h3 id="create_function"><code>create_function</code><a class="headerlink" href="#create_function" title="Permanent link">&para;</a></h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">create_function</span><span class="p">(</span><span class="n">func_signature</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Signature</span><span class="p">],</span>
+                    <span class="n">func_impl</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">],</span>
+                    <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">inject_as_first_arg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="n">add_source</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="n">add_impl</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="n">doc</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">qualname</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">attrs</span><span class="p">):</span>
+</code></pre></div>
+
+<p>Creates a function with signature <code>func_signature</code> that will call <code>func_impl</code> when called. All arguments received by the generated function will be propagated as keyword-arguments to <code>func_impl</code> when it is possible (so all the time, except for var-positional or positional-only arguments that get passed as *args. Note that positional-only does not yet exist in python but this case is already covered because it is supported by <code>Signature</code> objects).</p>
+<p><code>func_signature</code> can be provided in different formats:</p>
+<ul>
+<li>
+<p>as a string containing the name and signature without 'def' keyword, such as <code>'foo(a, b: int, *args, **kwargs)'</code>. In which case the name in the string will be used for the <code>__name__</code> and <code>__qualname__</code> of the created function by default.</p>
+</li>
+<li>
+<p>as a <code>Signature</code> object, for example created using <code>signature(f)</code> or handcrafted. Since a <code>Signature</code> object does not contain any name, in this case the <code>__name__</code> and <code>__qualname__</code> of the created function will be copied from <code>func_impl</code> by default.</p>
+</li>
+</ul>
+<p>All the other metadata of the created function are defined as follows:</p>
+<ul>
+<li>default <code>__name__</code> attribute (see above) can be overridden by providing a non-None <code>func_name</code></li>
+<li>default <code>__qualname__</code> attribute (see above) can be overridden by providing a non-None <code>qualname</code></li>
+<li><code>__annotations__</code> attribute is created to match the annotations in the signature.</li>
+<li><code>__doc__</code> attribute is copied from <code>func_impl.__doc__</code> except if overridden using <code>doc</code></li>
+<li><code>__module__</code> attribute is copied from <code>func_impl.__module__</code> except if overridden using <code>module_name</code></li>
+</ul>
+<p>Finally two new attributes are optionally created</p>
+<ul>
+<li><code>__source__</code> attribute: set if <code>add_source</code> is <code>True</code> (default), this attribute contains the source code of the generated function</li>
+<li><code>__func_impl__</code> attribute: set if <code>add_impl</code> is <code>True</code> (default), this attribute contains a pointer to <code>func_impl</code></li>
+</ul>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li>
+<p><code>func_signature</code>: either a string without 'def' such as "foo(a, b: int, <em>args, </em>*kwargs)" or "(a, b: int)", or a <code>Signature</code> object, for example from the output of <code>inspect.signature</code> or from the <code>funcsigs.signature</code> backport. Note that these objects can be created manually too. If the signature is provided as a string and contains a non-empty name, this name will be used instead of the one of the decorated function.</p>
+</li>
+<li>
+<p><code>func_impl</code>: the function that will be called when the generated function is executed. Its signature should be compliant with (=more generic than) <code>func_signature</code></p>
+</li>
+<li>
+<p><code>inject_as_first_arg</code>: if <code>True</code>, the created function will be injected as the first positional argument of <code>func_impl</code>. This can be handy in case the implementation is shared between several facades and needs to know from which context it was called. Default=<code>False</code></p>
+</li>
+<li>
+<p><code>func_name</code>: provide a non-<code>None</code> value to override the created function <code>__name__</code> and <code>__qualname__</code>. If this is <code>None</code> (default), the <code>__name__</code> will default to the one of <code>func_impl</code> if <code>func_signature</code> is a <code>Signature</code>, or to the name defined in <code>func_signature</code> if <code>func_signature</code> is a <code>str</code> and contains a non-empty name.</p>
+</li>
+<li>
+<p><code>add_source</code>: a boolean indicating if a '<strong>source</strong>' annotation should be added to the generated function (default: True)</p>
+</li>
+<li>
+<p><code>add_impl</code>: a boolean indicating if a '<strong>func_impl</strong>' annotation should be added to the generated function (default: True)</p>
+</li>
+<li>
+<p><code>doc</code>: a string representing the docstring that will be used to set the <strong>doc</strong> attribute on the generated function. If None (default), the doc of func_impl will be used.</p>
+</li>
+<li>
+<p><code>qualname</code>: a string representing the qualified name to be used. If None (default), the <code>__qualname__</code> will default to the one of <code>func_impl</code> if <code>func_signature</code> is a <code>Signature</code>, or to the name defined in <code>func_signature</code> if <code>func_signature</code> is a <code>str</code> and contains a non-empty name.</p>
+</li>
+<li>
+<p><code>module_name</code>: the name of the module to be set on the function (under <strong>module</strong> ). If None (default), <code>func_impl.__module__</code> will be used.</p>
+</li>
+<li>
+<p><code>attrs</code>: other keyword attributes that should be set on the function. Note that <code>func_impl.__dict__</code> is not automatically copied.</p>
+</li>
+</ul>
+<h3 id="with_signature"><code>@with_signature</code><a class="headerlink" href="#with_signature" title="Permanent link">&para;</a></h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">with_signature</span><span class="p">(</span><span class="n">func_signature</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Signature</span><span class="p">],</span>
+                   <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="n">inject_as_first_arg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                   <span class="n">add_source</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                   <span class="n">add_impl</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                   <span class="n">doc</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="n">qualname</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="o">**</span><span class="n">attrs</span>
+                   <span class="p">):</span>
+</code></pre></div>
+
+<p>A decorator for functions, to change their signature. The new signature should be compliant with the old one.</p>
+<div class="codehilite"><pre><span></span><code><span class="nd">@with_signature</span><span class="p">(</span><span class="o">&lt;</span><span class="n">arguments</span><span class="o">&gt;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">impl</span><span class="p">(</span><span class="o">...</span><span class="p">):</span>
+    <span class="o">...</span>
+</code></pre></div>
+
+<p>is totally equivalent to <code>impl = create_function(&lt;arguments&gt;, func_impl=impl)</code> except for one additional behaviour:</p>
+<ul>
+<li>
+<p>If <code>func_signature</code> is set to <code>None</code>, there is no <code>TypeError</code> as in create_function. Instead, this simply applies the new metadata (name, doc, module_name, attrs) to the decorated function without creating a wrapper. <code>add_source</code>, <code>add_impl</code> and <code>inject_as_first_arg</code> should <strong>not</strong> be set in this case.</p>
+</li>
+<li>
+<p><code>func_signature</code>: the new signature of the decorated function. Either a string without 'def' such as "foo(a, b: int, <em>args, </em>*kwargs)" or "(a, b: int)", or a <code>Signature</code> object, for example from the output of <code>inspect.signature</code> or from the <code>funcsigs.signature</code> backport. Note that these objects can be created manually too. If the signature is provided as a string and contains a non-empty name, this name will be used instead of the one of the decorated function. Finally <code>None</code> can be provided to indicate that user wants to only change the medatadata (func_name, doc, module_name, attrs) of the decorated function, without generating a new function.</p>
+</li>
+<li>
+<p><code>inject_as_first_arg</code>: if <code>True</code>, the created function will be injected as the first positional argument of <code>func_impl</code>. This can be handy in case the implementation is shared between several facades and needs to know from which context it was called. Default=<code>False</code></p>
+</li>
+<li>
+<p><code>func_name</code>: provide a non-<code>None</code> value to override the created function <code>__name__</code> and <code>__qualname__</code>. If this is <code>None</code> (default), the <code>__name__</code> will default to the one of <code>func_impl</code> if <code>func_signature</code> is a <code>Signature</code>, or to the name defined in <code>func_signature</code> if <code>func_signature</code> is a <code>str</code> and contains a non-empty name.</p>
+</li>
+<li>
+<p><code>add_source</code>: a boolean indicating if a '<strong>source</strong>' annotation should be added to the generated function (default: True)</p>
+</li>
+<li>
+<p><code>add_impl</code>: a boolean indicating if a '<strong>func_impl</strong>' annotation should be added to the generated function (default: True)</p>
+</li>
+<li>
+<p><code>doc</code>: a string representing the docstring that will be used to set the <strong>doc</strong> attribute on the generated function. If None (default), the doc of the decorated function will be used.</p>
+</li>
+<li>
+<p><code>qualname</code>: a string representing the qualified name to be used. If None (default), the <code>__qualname__</code> will default to the one of <code>func_impl</code> if <code>func_signature</code> is a <code>Signature</code>, or to the name defined in <code>func_signature</code> if <code>func_signature</code> is a <code>str</code> and contains a non-empty name.</p>
+</li>
+<li>
+<p><code>module_name</code>: the name of the module to be set on the function (under <strong>module</strong> ). If None (default), the <code>__module__</code> attribute of the decorated function will be used.</p>
+</li>
+<li>
+<p><code>attrs</code>: other keyword attributes that should be set on the function. Note that the full <code>__dict__</code> of the decorated function is not automatically copied.</p>
+</li>
+</ul>
+<h3 id="wraps"><code>@wraps</code><a class="headerlink" href="#wraps" title="Permanent link">&para;</a></h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">wraps</span><span class="p">(</span><span class="n">f</span><span class="p">,</span>
+          <span class="n">new_sig</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Signature</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+          <span class="n">remove_args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+          <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+          <span class="n">inject_as_first_arg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+          <span class="n">add_source</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+          <span class="n">add_impl</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+          <span class="n">doc</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+          <span class="n">qualname</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+          <span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+          <span class="o">**</span><span class="n">attrs</span>
+          <span class="p">):</span>
+</code></pre></div>
+
+<p>A decorator to create a signature-preserving wrapper function.</p>
+<p>It is similar to <code>functools.wraps</code>, but </p>
+<ul>
+<li>
+<p>relies on a proper dynamically-generated function. Therefore as opposed to <code>functools.wraps</code>, </p>
+<ul>
+<li>the wrapper body will not be executed if the arguments provided are not compliant with the signature - instead a <code>TypeError</code> will be raised before entering the wrapper body. </li>
+<li>the arguments will always be received as keywords by the wrapper, when possible. See <a href="..#signature-preserving-function-wrappers">documentation</a> for details.</li>
+</ul>
+</li>
+<li>
+<p><strong>you can modify the signature</strong> of the resulting function, by providing a new one with <code>new_sig</code>. See <a href="..#editing-a-signature">documentation</a> for details. Note that you can now also easily remove arguments from the signature in order to inject them with your own - with the <code>remove_args</code> parameter, see <a href="..#to-inject-a-dynamically-baked-value">documentation</a>.</p>
+</li>
+</ul>
+<p>Comparison with <code>@with_signature</code>: <code>@wraps(f)</code> is equivalent to</p>
+<div class="codehilite"><pre><span></span><code>`@with_signature(signature(f),
+                 func_name=f.__name__,
+                 doc=f.__doc__,
+                 module_name=f.__module__,
+                 qualname=f.__qualname__,
+                 __wrapped__=f,
+                 **f.__dict__,
+                 **attrs)`
+</code></pre></div>
+
+<p>In other words, as opposed to <code>@with_signature</code>, the metadata (doc, module name, etc.) is provided by the wrapped <code>f</code>, so that the created function seems to be identical (except for the signature if a non-None <code>new_sig</code> is provided). If <code>new_sig</code> is None, we set the additional <code>__wrapped__</code> attribute on the created function, to stay compliant with the <code>functools.wraps</code> convention.</p>
+<p>All options in <code>with_signature</code> remain available for overriding.</p>
+<p>See also <a href="https://docs.python.org/3/library/functools.html#functools.wraps">python documentation on @wraps</a></p>
+<h3 id="create_wrapper"><code>create_wrapper</code><a class="headerlink" href="#create_wrapper" title="Permanent link">&para;</a></h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">create_wrapper</span><span class="p">(</span><span class="n">wrapped</span><span class="p">,</span>
+                   <span class="n">wrapper</span><span class="p">,</span>
+                   <span class="n">new_sig</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Signature</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="n">remove_args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="n">inject_as_first_arg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                   <span class="n">add_source</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                   <span class="n">add_impl</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                   <span class="n">doc</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="n">qualname</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="o">**</span><span class="n">attrs</span>
+                   <span class="p">):</span>
+</code></pre></div>
+
+<p>Creates a signature-preserving wrapper function. <code>create_wrapper(wrapped, wrapper, **kwargs)</code> is equivalent to <code>wraps(wrapped, **kwargs)(wrapper)</code>.</p>
+<h3 id="partial"><code>@partial</code><a class="headerlink" href="#partial" title="Permanent link">&para;</a></h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">partial</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> 
+            <span class="o">*</span><span class="n">preset_pos_args</span><span class="p">,</span> 
+            <span class="o">**</span><span class="n">preset_kwargs</span>
+            <span class="p">):</span>
+</code></pre></div>
+
+<p>Equivalent of <code>functools.partial</code> but relies on a dynamically-created function. As a result the function
+looks nicer to users in terms of apparent documentation, name, etc.</p>
+<p>See <a href="..#removing-parameters-easily">documentation</a> for details.</p>
+<h3 id="with_partial"><code>@with_partial</code><a class="headerlink" href="#with_partial" title="Permanent link">&para;</a></h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">with_partial</span><span class="p">(</span><span class="o">*</span><span class="n">preset_pos_args</span><span class="p">,</span> 
+                 <span class="o">**</span><span class="n">preset_kwargs</span>
+                 <span class="p">):</span>
+</code></pre></div>
+
+<p>Decorator to 'partialize' a function using <a href="#partial"><code>partial</code></a>.</p>
+<h2 id="signature-editing-utils">Signature editing utils<a class="headerlink" href="#signature-editing-utils" title="Permanent link">&para;</a></h2>
+<h3 id="add_signature_parameters"><code>add_signature_parameters</code><a class="headerlink" href="#add_signature_parameters" title="Permanent link">&para;</a></h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">add_signature_parameters</span><span class="p">(</span><span class="n">s</span><span class="p">,</span>             <span class="c1"># type: Signature</span>
+                             <span class="n">first</span><span class="o">=</span><span class="p">(),</span>      <span class="c1"># type: Union[Parameter, Iterable[Parameter]]</span>
+                             <span class="n">last</span><span class="o">=</span><span class="p">(),</span>       <span class="c1"># type: Union[Parameter, Iterable[Parameter]]</span>
+                             <span class="n">custom</span><span class="o">=</span><span class="p">(),</span>     <span class="c1"># type: Union[Parameter, Iterable[Parameter]]</span>
+                             <span class="n">custom_idx</span><span class="o">=-</span><span class="mi">1</span>  <span class="c1"># type: int</span>
+                             <span class="p">):</span>
+</code></pre></div>
+
+<p>Adds the provided parameters to the signature <code>s</code> (returns a new <code>Signature</code> instance).</p>
+<ul>
+<li><code>s</code>: the original signature to edit</li>
+<li><code>first</code>: a single element or a list of <code>Parameter</code> instances to be added at the beginning of the parameter's list</li>
+<li><code>last</code>: a single element or a list of <code>Parameter</code> instances to be added at the end of the parameter's list</li>
+<li><code>custom</code>: a single element or a list of <code>Parameter</code> instances to be added at a custom position in the list. That position is determined with <code>custom_idx</code></li>
+<li><code>custom_idx</code>: the custom position to insert the <code>custom</code> parameters to.</li>
+</ul>
+<h3 id="remove_signature_parameters"><code>remove_signature_parameters</code><a class="headerlink" href="#remove_signature_parameters" title="Permanent link">&para;</a></h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">remove_signature_parameters</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> 
+                                <span class="o">*</span><span class="n">param_names</span><span class="p">):</span>
+</code></pre></div>
+
+<p>Removes the provided parameters from the signature <code>s</code> (returns a new <code>Signature</code> instance).</p>
+<h2 id="pseudo-compilation">Pseudo-compilation<a class="headerlink" href="#pseudo-compilation" title="Permanent link">&para;</a></h2>
+<h3 id="compile_fun"><code>compile_fun</code><a class="headerlink" href="#compile_fun" title="Permanent link">&para;</a></h3>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        <a href=".." class="md-footer__link md-footer__link--prev" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Home
+            </div>
+          </div>
+        </a>
+      
+      
+        <a href="../changelog/" class="md-footer__link md-footer__link--next" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Changelog
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../assets/javascripts/workers/search.fb4a9340.min.js", "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.9b151c6a.min.js"></script>
+      
+    
+  </body>
+</html>

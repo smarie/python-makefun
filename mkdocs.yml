@@ -5,7 +5,7 @@ docs_dir: .
 site_dir: ../site
 nav:
     - Home: index.md
-    # - API reference: api_reference.md
+    - API reference: api_reference.md
     - Changelog: changelog.md
 #    - Advanced Usage: advanced_usage.md
 theme: material  # readthedocs  mkdocs
