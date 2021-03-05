@@ -132,7 +132,7 @@ def release(session):
         shutil.rmtree(str(Folders.dist))
     session_run(session, "python setup.py sdist bdist_wheel")
 
-    if version[0].dirty:
+    if version[0].dirty or not version[0].exact:
         raise ValueError("You need to execute this action on a clean tag version with no local changes.")
 
     # publish the package on PyPi
