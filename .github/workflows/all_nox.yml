@@ -31,7 +31,7 @@ jobs:
 #          # $CONDA is an environment variable pointing to the root of the miniconda directory
 #          echo $CONDA/bin >> $GITHUB_PATH
       # 2) Setup conda
-      - name: Install conda
+      - name: Install conda v3.7
         uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
