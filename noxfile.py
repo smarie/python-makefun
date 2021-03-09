@@ -110,7 +110,7 @@ def docs(session):
 
 @nox.session(python=[PY37])
 def publish(session):
-    """Deploy the docs on github pages + pushes the coverage. Note: this rebuilds the docs"""
+    """Deploy the docs+reports on github pages. Note: this rebuilds the docs"""
 
     install_reqs(session, phase="mkdocs", phase_reqs=["mkdocs-material", "mkdocs", "pymdown-extensions", "pygments"])
 
@@ -124,13 +124,13 @@ def publish(session):
     # publish the docs
     session_run(session, "mkdocs gh-deploy -f ./docs/mkdocs.yml")
 
-    # publish the coverage
-    install_reqs(session, phase="codecov", phase_reqs=["codecov", "keyring"])
-    # keyring set https://app.codecov.io/gh/smarie/python-makefun token
-    import keyring
-    codecov_token = keyring.get_password("https://app.codecov.io/gh/smarie/python-makefun", "token")
-    # note: do not use --root nor -f ! otherwise "There was an error processing coverage reports"
-    session_run(session, 'codecov -t %s' % codecov_token)
+    # publish the coverage - now in github actions only
+    # install_reqs(session, phase="codecov", phase_reqs=["codecov", "keyring"])
+    # # keyring set https://app.codecov.io/gh/smarie/python-makefun token
+    # import keyring
+    # codecov_token = keyring.get_password("https://app.codecov.io/gh/smarie/python-makefun", "token")
+    # # note: do not use --root nor -f ! otherwise "There was an error processing coverage reports"
+    # session_run(session, 'codecov -t %s' % codecov_token)
 
 
 @nox.session(python=[PY37])

@@ -1,5 +1,5 @@
 # .github/workflows/tests.yml
-name: Tests
+name: Build
 on: push
 jobs:
   allnox:
@@ -57,8 +57,11 @@ jobs:
       - name: Run tests # on python ${{ matrix.python-version }}
         shell: bash -l {0}  # so that conda works
         run: nox -s tests  #-${{ matrix.python-version }}
-      # 6) Publish the doc, test reports and coverage reports
+      # 6) Publish the doc and test reports
       - name: Publish documentation, tests and coverage reports
         if: startsWith(matrix.os,'ubuntu')
         shell: bash -l {0}  # so that conda works
         run: nox -s publish
+      # 7) Publish coverage report
+      - name: Publish coverage report
+        uses: codecov/codecov-action@v1
