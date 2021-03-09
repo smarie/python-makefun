@@ -5,9 +5,9 @@ from pathlib import Path  # noqa
 import sys
 
 # add parent folder to python path so that we can import noxfile_utils.py
+# note that you need to "pip install makefun" for this file to work.
 sys.path.append(str(Path(__file__).parent / "ci_tools"))
-from noxfile_utils import PY27, PY37, PY36, PY35, PY38, session_run, power_session, install_reqs, rm_folder, \
-    rm_file  # noqa
+from nox_utils import PY27, PY37, PY36, PY35, PY38, session_run, power_session, install_reqs, rm_folder, rm_file  # noqa
 
 ALL_PY_VERSIONS = [PY38, PY37, PY36, PY35, PY27]
 

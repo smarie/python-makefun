@@ -21,7 +21,7 @@ jobs:
           echo $CONDA/bin >> $GITHUB_PATH
       # 4) Install nox
       - name: Add conda to system path
-        run: pip install nox
+        run: pip install nox makefun
       # 5) Run nox tests
       - name: Run nox tests
         run: nox -s tests
