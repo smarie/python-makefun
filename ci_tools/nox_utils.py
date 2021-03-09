@@ -191,7 +191,7 @@ def session_run(
         if stream is not None:
             session.run(*command, stdout=stream, stderr=stream, **kwargs)
         else:
-            session.run(*command.split(' '), **kwargs)
+            session.run(*command, **kwargs)
 
 
 def with_logfile(logs_dir: Path,
