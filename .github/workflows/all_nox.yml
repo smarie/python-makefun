@@ -3,8 +3,6 @@ name: Tests
 on: push
 jobs:
   allnox:
-    env:
-      name_suffix: ""
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -14,7 +12,7 @@ jobs:
           - os: ubuntu-latest
             python-version: "3.7"
             name_suffix: "+ publish doc and reports"
-    name: Run all tests on OS ${{ matrix.os }} and python ${{ matrix.python-version }} ${{ env.name_suffix }}
+    name: Run all tests on OS ${{ matrix.os }} and python ${{ matrix.python-version }} ${{ matrix.name_suffix }}
     runs-on: ${{ matrix.os }}
     steps:
       # 1) Checkout a copy of the repo
