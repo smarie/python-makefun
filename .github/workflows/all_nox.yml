@@ -19,7 +19,8 @@ jobs:
       # 1) Checkout a copy of the repo
       - name: Checkout code
         uses: actions/checkout@v2
-        fetch-depth: 0  # so that gh-deploy works
+        with:
+          fetch-depth: 0  # so that gh-deploy works
       # 2) Setup python version 3.8
 #      - name: Install python 3.7 for nox
 #        uses: actions/setup-python@v1
