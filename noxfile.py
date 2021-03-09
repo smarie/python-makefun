@@ -69,8 +69,8 @@ def tests(session, coverage, pkg_specs):
                      versions_dct=pkg_specs)
 
         # --coverage + html reports
-        session_run(session, "coverage run --source makefun -m "
-                             "pytest --junitxml={dst}/junit.xml --html={dst}/report.html"
+        session_run(session, "coverage run --branch --source makefun "
+                             "-m pytest --junitxml={dst}/junit.xml --html={dst}/report.html"
                              " -v makefun/tests/".format(dst=Folders.test_reports))
 
         # --generates the badge for the test results and fail build if less than x% tests pass
@@ -86,7 +86,7 @@ def tests(session, coverage, pkg_specs):
 
 @nox.session(python=[PY37])
 def docs(session):
-    """Generates the doc and serves it on a local http server. You can pass -- build instead or any other mkdocs arg."""
+    """Generates the doc and serves it on a local http server. Pass '-- build' to build statically instead."""
 
     install_reqs(session, phase="docs", phase_reqs=["mkdocs-material", "mkdocs", "pymdown-extensions", "pygments"])
 
@@ -101,20 +101,25 @@ def docs(session):
 def publish(session):
     """Deploy the docs on github pages + pushes the coverage. Note: this rebuilds the docs"""
 
-    # check that the doc has been generated with coverage
-    if not Folders.site.exists():
-        raise ValueError("Documentation has not been built yet. Please run 'nox -s docs'")
+    install_reqs(session, phase="mkdocs", phase_reqs=["mkdocs-material", "mkdocs", "pymdown-extensions", "pygments"])
 
+    # possibly rebuild the docs in a static way (mkdocs serve does not build locally)
+    session_run(session, "mkdocs build -f .\\docs\\mkdocs.yml")
+
+    # check that the doc has been generated with coverage
     if not Folders.site_reports.exists():
-        raise ValueError("Test reports have not been built yet. Please run 'nox -s tests-3.7 docs'")
+        raise ValueError("Test reports have not been built yet. Please run 'nox -s tests-3.7' first")
 
     # publish the docs
-    install_reqs(session, phase="mkdocs", phase_reqs=["mkdocs-material", "mkdocs", "pymdown-extensions", "pygments"])
     session_run(session, "mkdocs gh-deploy -f .\\docs\\mkdocs.yml")
 
     # publish the coverage
+    # keyring set https://app.codecov.io/gh/smarie/python-makefun token
+    import keyring
+    codecov_token = keyring.get_password("https://app.codecov.io/gh/smarie/python-makefun", "token")
     install_reqs(session, phase="codecov", phase_reqs=["codecov"])
-    session_run(session, "codecov")
+    # note: do not use --root nor -f ! otherwise "There was an error processing coverage reports"
+    session_run(session, 'codecov -t %s' % codecov_token)
 
 
 @nox.session(python=[PY37])
