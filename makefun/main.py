@@ -12,26 +12,26 @@ from types import FunctionType
 
 try:  # python 3.3+
     from inspect import signature, Signature, Parameter
-except ImportError:  # pragma: no cover
+except ImportError:
     from funcsigs import signature, Signature, Parameter
 
 try:
     from inspect import iscoroutinefunction
-except ImportError:  # pragma: no cover
+except ImportError:
     # let's assume there are no coroutine functions in old Python
     def iscoroutinefunction(f):
         return False
 
 try:
     from inspect import isgeneratorfunction
-except ImportError:  # pragma: no cover
+except ImportError:
     # assume no generator function in old Python versions
     def isgeneratorfunction(f):
         return False
 
 try:  # python 3.5+
     from typing import Callable, Any, Union, Iterable, Dict
-except ImportError:  # pragma: no cover
+except ImportError:
     pass
 
 

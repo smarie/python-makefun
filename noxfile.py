@@ -6,7 +6,8 @@ import sys
 
 # add parent folder to python path so that we can import noxfile_utils.py
 sys.path.append(str(Path(__file__).parent / "ci_tools"))
-from noxfile_utils import PY27, PY37, PY36, PY35, PY38, session_run, power_session, install_reqs, rm_folder  # noqa
+from noxfile_utils import PY27, PY37, PY36, PY35, PY38, session_run, power_session, install_reqs, rm_folder, \
+    rm_file  # noqa
 
 ALL_PY_VERSIONS = [PY38, PY37, PY36, PY35, PY27]
 
@@ -46,9 +47,12 @@ class Folders:
 def tests(session, coverage, pkg_specs):
     """Run the test suite, including test reports generation and coverage reports. """
 
-    # As soon as this runs, we delete the target site to avoid reporting wrong coverage/etc.
+    # As soon as this runs, we delete the target site and coverage files to avoid reporting wrong coverage/etc.
     rm_folder(Folders.site)
     rm_folder(Folders.test_reports_root)
+    # delete the coverage.xml and .coverage files
+    rm_file(Folders.root / ".coverage")
+    rm_file(Folders.root / "coverage.xml")
 
     # uncomment and edit if you wish to uninstall something without deleting the whole env
     # session_run(session, "pip uninstall pytest-asyncio --yes")

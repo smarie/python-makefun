@@ -103,5 +103,6 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# genrated
+# generated
 docs/reports
+coverage.xml

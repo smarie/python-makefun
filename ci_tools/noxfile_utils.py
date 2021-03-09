@@ -368,12 +368,23 @@ def install_reqs(
         session_install_any(phase, session, phase_reqs, use_conda_for=toml_use_conda_for, versions_dct=versions_dct)
 
 
+def rm_file(folder: Union[str, Path]
+            ):
+    """Since on windows Path.unlink throws permission error sometimes, os.remove is preferred."""
+    if isinstance(folder, str):
+        folder = Path(folder)
+
+    if folder.exists():
+        os.remove(str(folder))
+        # Folders.site.unlink()  --> possible PermissionError
+
+
 def rm_folder(folder: Union[str, Path]
               ):
-    """Since on windows Path.unlink throws permission error, shutil is preferred."""
+    """Since on windows Path.unlink throws permission error sometimes, shutil is preferred."""
     if isinstance(folder, str):
         folder = Path(folder)
 
     if folder.exists():
         shutil.rmtree(str(folder))
-        # Folders.site.unlink()  --> PermissionError
+        # Folders.site.unlink()  --> possible PermissionError
