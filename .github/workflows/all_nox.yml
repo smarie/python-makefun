@@ -1,0 +1,27 @@
+# .github/workflows/tests.yml
+name: Tests
+on: push
+jobs:
+  tests:
+    name:
+    runs-on: ubuntu-latest
+    steps:
+      # 1) Checkout a copy of the repo
+      - name: Checkout code
+        uses: actions/checkout@v2
+      # 2) Setup python version 3.8
+      - uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+          architecture: x64
+      # 3) Add Conda to PATH
+      - name: Add conda to system path
+        run: |
+          # $CONDA is an environment variable pointing to the root of the miniconda directory
+          echo $CONDA/bin >> $GITHUB_PATH
+      # 4) Install nox
+      - name: Add conda to system path
+        run: pip install nox
+      # 5) Run nox tests
+      - name: Run nox tests
+        run: nox -s tests
