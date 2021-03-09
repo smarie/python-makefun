@@ -36,22 +36,27 @@ jobs:
         with:
           auto-update-conda: true
           python-version: 3.7
+          activate-environment: noxenv
       - name: Conda info init
         shell: bash -l {0}
         run: conda info
       - name: Conda list init
-        shell: pwsh
+        shell: bash -l {0}
         run: conda list
       # 3) Install nox
       - name: Install noxfile requirements
+        shell: bash -l {0}
         run: pip install -r noxfile-requirements.txt
       # 4) conda list
-      - name: Conda list
+      - name: Conda list 2
+        shell: bash -l {0}
         run: conda list
       # 5) Run nox tests
       - name: Run tests # on python ${{ matrix.python-version }}
+        shell: bash -l {0}
         run: nox -s tests  #-${{ matrix.python-version }}
       # 6) Publish the doc, test reports and coverage reports
       - name: Publish documentation, tests and coverage reports
+        shell: bash -l {0}
         run: nox -s publish
         if: contains(${{ matrix.os }}, "ubuntu-latest")
