@@ -6,13 +6,13 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["2.7", "3.5", "3.6", "3.7", "3.8"]
+        # python-version: ["2.7", "3.5", "3.6", "3.7", "3.8"]
         include:
           # add a variable for reports + doc publish
           - os: ubuntu-latest
-            python-version: "3.7"
+#            python-version: "3.7"
             name_suffix: "+ publish doc and reports"
-    name: Run all tests on OS ${{ matrix.os }} and python ${{ matrix.python-version }} ${{ matrix.name_suffix }}
+    name: Run all tests on OS ${{ matrix.os }} ${{ matrix.name_suffix }} # and python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     steps:
       # 1) Checkout a copy of the repo
@@ -33,8 +33,9 @@ jobs:
       - name: Install noxfile requirements
         run: pip install -r noxfile-requirements.txt
       # 5) Run nox tests
-      - name: Run tests on python ${{ matrix.python-version }}
-        run: nox -s tests-${{ matrix.python-version }}
+      - name: Run tests # on python ${{ matrix.python-version }}
+        run: nox -s tests  #-${{ matrix.python-version }}
       # 6) Publish the doc, test reports and coverage reports
-      # - name: Publish documentation, tests and coverage reports
-      #  run: nox -s publish
+      - name: Publish documentation, tests and coverage reports
+        run: nox -s publish
+        if: contains(${{ matrix.os }}, "ubuntu-latest")
