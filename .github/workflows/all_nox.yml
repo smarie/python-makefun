@@ -4,6 +4,7 @@ on: push
 jobs:
   allnox:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         # python-version: ["2.7", "3.5", "3.6", "3.7", "3.8"]
@@ -24,12 +25,24 @@ jobs:
 #        with:
 #          python-version: 3.7
 #          architecture: x64
-      # 3) Add Conda to PATH
-      - name: Add conda to system path
-        run: |
-          # $CONDA is an environment variable pointing to the root of the miniconda directory
-          echo $CONDA/bin >> $GITHUB_PATH
-      # 4) Install nox
+      # 2) Add Conda to PATH
+#      - name: Add conda to system path
+#        run: |
+#          # $CONDA is an environment variable pointing to the root of the miniconda directory
+#          echo $CONDA/bin >> $GITHUB_PATH
+      # 2) Setup conda
+      - name: Install conda
+        uses: conda-incubator/setup-miniconda@v2
+          with:
+            auto-update-conda: true
+            python-version: 3.7
+      - name: Conda info init
+        shell: bash -l {0}
+        run: conda info
+      - name: Conda list init
+        shell: pwsh
+        run: conda list
+      # 3) Install nox
       - name: Install noxfile requirements
         run: pip install -r noxfile-requirements.txt
       # 4) conda list
