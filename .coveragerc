@@ -1,8 +1,0 @@
-[report]
-fail_under = 70
-show_missing = True
-exclude_lines =
-    # this line for all the python 2 not covered lines
-    except ImportError:
-    # we have to repeat this when exclude_lines is set
-    pragma: no cover

@@ -39,8 +39,9 @@ class Folders:
     dist = root / "dist"
     site = root / "site"
     site_reports = site / "reports"
-    test_reports_root = root / "docs" / "reports"
-    test_reports = test_reports_root / "junit"
+    reports_root = root / "docs" / "reports"
+    test_reports = reports_root / "junit"
+    coverage_reports = reports_root / "coverage"
 
 
 @power_session(envs=ENVS, logsdir=Folders.runlogs)
@@ -49,7 +50,7 @@ def tests(session, coverage, pkg_specs):
 
     # As soon as this runs, we delete the target site and coverage files to avoid reporting wrong coverage/etc.
     rm_folder(Folders.site)
-    rm_folder(Folders.test_reports_root)
+    rm_folder(Folders.reports_root)
     # delete the coverage.xml and .coverage files
     rm_file(Folders.root / ".coverage")
     rm_file(Folders.root / "coverage.xml")
@@ -72,10 +73,11 @@ def tests(session, coverage, pkg_specs):
         install_reqs(session, phase="coverage", phase_reqs=["coverage", "pytest-html", "requests", "xunitparser"],
                      versions_dct=pkg_specs)
 
-        # --coverage + html reports
-        session_run(session, "coverage run --branch --source makefun "
-                             "-m pytest --junitxml={dst}/junit.xml --html={dst}/report.html"
-                             " -v makefun/tests/".format(dst=Folders.test_reports))
+        # --coverage + junit html reports
+        session_run(session, "coverage run --source makefun "
+                             "-m pytest --junitxml={dst}/junit.xml --html={dst}/report.html -v makefun/tests/"
+                             "".format(dst=Folders.test_reports))
+        session_run(session, "coverage html -d {dst}".format(dst=Folders.coverage_reports))
 
         # --generates the badge for the test results and fail build if less than x% tests pass
         nox_logger.info("Generating badge for tests coverage")
