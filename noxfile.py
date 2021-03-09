@@ -125,10 +125,10 @@ def publish(session):
     session_run(session, "mkdocs gh-deploy -f ./docs/mkdocs.yml")
 
     # publish the coverage
+    install_reqs(session, phase="codecov", phase_reqs=["codecov", "keyring"])
     # keyring set https://app.codecov.io/gh/smarie/python-makefun token
     import keyring
     codecov_token = keyring.get_password("https://app.codecov.io/gh/smarie/python-makefun", "token")
-    install_reqs(session, phase="codecov", phase_reqs=["codecov"])
     # note: do not use --root nor -f ! otherwise "There was an error processing coverage reports"
     session_run(session, 'codecov -t %s' % codecov_token)
 
