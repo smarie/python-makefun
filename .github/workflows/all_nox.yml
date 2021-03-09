@@ -57,7 +57,7 @@ jobs:
         shell: bash -l {0}  # so that conda works
         run: nox -s tests  #-${{ matrix.python-version }}
       # 6) Publish the doc, test reports and coverage reports
-      - if: matrix.os == 'ubuntu-latest'
-          name: Publish documentation, tests and coverage reports
-          shell: bash -l {0}  # so that conda works
-          run: nox -s publish
+      - name: Publish documentation, tests and coverage reports
+        if: startsWith(matrix.os,'ubuntu')
+        shell: bash -l {0}  # so that conda works
+        run: nox -s publish
