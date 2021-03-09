@@ -19,6 +19,7 @@ jobs:
       # 1) Checkout a copy of the repo
       - name: Checkout code
         uses: actions/checkout@v2
+        fetch-depth: 0  # so that gh-deploy works
       # 2) Setup python version 3.8
 #      - name: Install python 3.7 for nox
 #        uses: actions/setup-python@v1
@@ -38,25 +39,25 @@ jobs:
           python-version: 3.7
           activate-environment: noxenv
       - name: Conda info init
-        shell: bash -l {0}
+        shell: bash -l {0}  # so that conda works
         run: conda info
       - name: Conda list init
-        shell: bash -l {0}
+        shell: bash -l {0}  # so that conda works
         run: conda list
       # 3) Install nox
       - name: Install noxfile requirements
-        shell: bash -l {0}
+        shell: bash -l {0}  # so that conda works
         run: pip install -r noxfile-requirements.txt
       # 4) conda list
       - name: Conda list 2
-        shell: bash -l {0}
+        shell: bash -l {0}  # so that conda works
         run: conda list
       # 5) Run nox tests
       - name: Run tests # on python ${{ matrix.python-version }}
-        shell: bash -l {0}
+        shell: bash -l {0}  # so that conda works
         run: nox -s tests  #-${{ matrix.python-version }}
       # 6) Publish the doc, test reports and coverage reports
-      - name: Publish documentation, tests and coverage reports
-        shell: bash -l {0}
-        run: nox -s publish
-        if: contains(${{ matrix.os }}, "ubuntu-latest")
+      - if: matrix.os == 'ubuntu-latest'
+          name: Publish documentation, tests and coverage reports
+          shell: bash -l {0}  # so that conda works
+          run: nox -s publish
