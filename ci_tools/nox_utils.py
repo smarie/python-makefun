@@ -77,10 +77,14 @@ def session_install_any(phase_name: str,
         versions_dct = dict()
     pkgs = [pkg + versions_dct.get(pkg, "") for pkg in pkgs if versions_dct.get(pkg, "") != DONT_INSTALL]
 
-    conda_pkgs = [pkg_req for pkg_req in pkgs if any(get_req_pkg_name(pkg_req) == c for c in use_conda_for)]
-    if len(conda_pkgs) > 0:
-        nox_logger.info("[%s] Installing requirements with conda: %s" % (phase_name, conda_pkgs))
-        session_conda_install(session, *conda_pkgs, logfile=logfile)
+    # install on conda... if the session uses conda backend
+    if not isinstance(session.virtualenv, nox.virtualenv.CondaEnv):
+        conda_pkgs = []
+    else:
+        conda_pkgs = [pkg_req for pkg_req in pkgs if any(get_req_pkg_name(pkg_req) == c for c in use_conda_for)]
+        if len(conda_pkgs) > 0:
+            nox_logger.info("[%s] Installing requirements with conda: %s" % (phase_name, conda_pkgs))
+            session_conda_install(session, *conda_pkgs, logfile=logfile)
 
     pip_pkgs = [pkg_req for pkg_req in pkgs if pkg_req not in conda_pkgs]
     # safety: make sure that nothing went modified or forgotten
