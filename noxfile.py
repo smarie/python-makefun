@@ -66,6 +66,9 @@ def tests(session, coverage, pkg_specs):
     # install self so that it is recognized by pytest
     session_run(session, "pip install -e . --no-deps")
 
+    # check that it can be imported even from a different folder
+    session_run(session, ['python', '-c', '"import os; os.chdir(\'./docs/\'); import makefun"'])
+
     # finally run all tests
     if not coverage:
         # simple: pytest only

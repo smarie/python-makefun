@@ -178,17 +178,20 @@ def session_run(
 ):
     """Run a nox session and capture in log file"""
 
+    if isinstance(command, str):
+        command = (command).split(' ')
+
     if logfile is not None:
         # logfile explicitly provided, use it
         with open(logfile, "a") as out:
-            session.run(*(command).split(' '), stdout=out, stderr=out, **kwargs)
+            session.run(*command, stdout=out, stderr=out, **kwargs)
     else:
         # is there a current log file handler open ? If so use it.
         stream = get_log_file_stream()
         if stream is not None:
-            session.run(*(command).split(' '), stdout=stream, stderr=stream, **kwargs)
+            session.run(*command, stdout=stream, stderr=stream, **kwargs)
         else:
-            session.run(*(command).split(' '), **kwargs)
+            session.run(*command.split(' '), **kwargs)
 
 
 def with_logfile(logs_dir: Path,
