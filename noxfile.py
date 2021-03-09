@@ -103,9 +103,9 @@ def docs(session):
 
     if session.posargs:
         # use posargs instead of "serve"
-        session_run(session, "mkdocs -f .\\docs\\mkdocs.yml %s" % " ".join(session.posargs))
+        session_run(session, "mkdocs -f ./docs/mkdocs.yml %s" % " ".join(session.posargs))
     else:
-        session_run(session, "mkdocs serve -f .\\docs\\mkdocs.yml")
+        session_run(session, "mkdocs serve -f ./docs/mkdocs.yml")
 
 
 @nox.session(python=[PY37])
@@ -115,14 +115,14 @@ def publish(session):
     install_reqs(session, phase="mkdocs", phase_reqs=["mkdocs-material", "mkdocs", "pymdown-extensions", "pygments"])
 
     # possibly rebuild the docs in a static way (mkdocs serve does not build locally)
-    session_run(session, "mkdocs build -f .\\docs\\mkdocs.yml")
+    session_run(session, "mkdocs build -f ./docs/mkdocs.yml")
 
     # check that the doc has been generated with coverage
     if not Folders.site_reports.exists():
         raise ValueError("Test reports have not been built yet. Please run 'nox -s tests-3.7' first")
 
     # publish the docs
-    session_run(session, "mkdocs gh-deploy -f .\\docs\\mkdocs.yml")
+    session_run(session, "mkdocs gh-deploy -f ./docs/mkdocs.yml")
 
     # publish the coverage
     # keyring set https://app.codecov.io/gh/smarie/python-makefun token
