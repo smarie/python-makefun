@@ -25,8 +25,8 @@ ENVS = {
 # set the default activated sessions, minimal for CI
 nox.options.sessions = ["tests"]  # , "docs", "gh_pages"
 nox.options.reuse_existing_virtualenvs = True  # this can be done using -r
-if platform.system() == "Windows":
-    nox.options.default_venv_backend = "conda"
+# if platform.system() == "Windows":  >> always use this for better control
+nox.options.default_venv_backend = "conda"
 # os.environ["NO_COLOR"] = "True"  # nox.options.nocolor = True does not work
 # nox.options.verbose = True
 

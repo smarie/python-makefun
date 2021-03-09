@@ -24,11 +24,11 @@ jobs:
         with:
           python-version: 3.7
           architecture: x64
-      # 3) Add Conda to PATH - not needed
-#      - name: Add conda to system path
-#        run: |
-#          # $CONDA is an environment variable pointing to the root of the miniconda directory
-#          echo $CONDA/bin >> $GITHUB_PATH
+      # 3) Add Conda to PATH
+      - name: Add conda to system path
+        run: |
+          # $CONDA is an environment variable pointing to the root of the miniconda directory
+          echo $CONDA/bin >> $GITHUB_PATH
       # 4) Install nox
       - name: Install noxfile requirements
         run: pip install -r noxfile-requirements.txt
