@@ -20,8 +20,8 @@ jobs:
           # $CONDA is an environment variable pointing to the root of the miniconda directory
           echo $CONDA/bin >> $GITHUB_PATH
       # 4) Install nox
-      - name: Add conda to system path
-        run: pip install nox makefun
+      - name: Install noxfile requirements
+        run: pip install -r noxfile-requirements.txt
       # 5) Run nox tests
       - name: Run nox tests
         run: nox -s tests
