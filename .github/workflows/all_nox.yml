@@ -32,6 +32,9 @@ jobs:
       # 4) Install nox
       - name: Install noxfile requirements
         run: pip install -r noxfile-requirements.txt
+      # 4) conda list
+      - name: Conda list
+        run: conda list
       # 5) Run nox tests
       - name: Run tests # on python ${{ matrix.python-version }}
         run: nox -s tests  #-${{ matrix.python-version }}
