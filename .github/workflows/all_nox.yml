@@ -19,11 +19,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       # 2) Setup python version 3.8
-      - name: Install python 3.7 for nox
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-          architecture: x64
+#      - name: Install python 3.7 for nox
+#        uses: actions/setup-python@v1
+#        with:
+#          python-version: 3.7
+#          architecture: x64
       # 3) Add Conda to PATH
       - name: Add conda to system path
         run: |
