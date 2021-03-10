@@ -56,7 +56,7 @@ jobs:
       # 5) Run nox tests
       - name: Run tests # on python ${{ matrix.python-version }}
         shell: bash -l {0}  # so that conda works
-        run: nox -s tests  #-${{ matrix.python-version }}
+        run: nox -s tests-3.7  #-${{ matrix.python-version }}
       # 6) Publish the doc and test reports
       - name: Publish documentation, tests and coverage reports
         if: startsWith(matrix.os,'ubuntu')
