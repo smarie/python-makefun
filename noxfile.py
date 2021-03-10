@@ -1,5 +1,4 @@
 import logging
-import platform
 
 import nox  # noqa
 from pathlib import Path  # noqa
@@ -131,7 +130,7 @@ def publish(session):
     # publish the coverage - now in github actions only
     # install_reqs(session, phase="codecov", phase_reqs=["codecov", "keyring"])
     # # keyring set https://app.codecov.io/gh/smarie/python-makefun token
-    # import keyring
+    # import keyring  # (note that this import is not from the session env but the main nox env)
     # codecov_token = keyring.get_password("https://app.codecov.io/gh/smarie/python-makefun", "token")
     # # note: do not use --root nor -f ! otherwise "There was an error processing coverage reports"
     # session_run(session, 'codecov -t %s -f %s' % (codecov_token, Folders.coverage_xml))
@@ -142,7 +141,7 @@ def release(session):
     """Create a release on github corresponding to the latest tag"""
 
     # Get current tag using setuptools_scm and make sure this is not a dirty/dev one
-    from setuptools_scm import get_version
+    from setuptools_scm import get_version  # (note that this import is not from the session env but the main nox env)
     from setuptools_scm.version import guess_next_dev_version
     version = []
 
@@ -170,7 +169,7 @@ def release(session):
         publish_on_pypi = True
 
         # keyring set https://docs.github.com/en/rest token
-        import keyring  # noqa
+        import keyring  # (note that this import is not from the session env but the main nox env)
         gh_token = keyring.get_password("https://docs.github.com/en/rest", "token")
         assert len(gh_token) > 0
 
