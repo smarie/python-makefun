@@ -77,13 +77,13 @@ jobs:
       # -------------- only on Ubuntu + MASTER PUSH (no pull request, no tag) -----------
 
       # 5) Publish the doc and test reports
-      - name: Publish documentation, tests and coverage reports
+      - name: [not on TAG] Publish documentation, tests and coverage reports
         if: startsWith(matrix.os,'ubuntu') && github.event_name == 'push' && startsWith(github.ref, 'refs/heads')
         shell: bash -l {0}  # so that conda works
         run: nox -s publish
 
       # 6) Publish coverage report
-      - name: Create codecov.yaml with correct paths
+      - name: [not on TAG] Create codecov.yaml with correct paths
         if: startsWith(matrix.os,'ubuntu') && github.event_name == 'push' && startsWith(github.ref, 'refs/heads')
         shell: bash
         run: |
@@ -92,7 +92,7 @@ jobs:
           fixes:
             - "/home/runner/work/smarie/python-makefun/::" # Correct paths
           EOF
-      - name: Publish coverage report
+      - name: [not on TAG] Publish coverage report
         if: startsWith(matrix.os,'ubuntu') && github.event_name == 'push' && startsWith(github.ref, 'refs/heads')
         uses: codecov/codecov-action@v1
         with:
@@ -101,13 +101,13 @@ jobs:
       # -------------- only on Ubuntu + TAG PUSH (no pull request) -----------
 
       # 7) Create github release and build the wheel
-      - name: Build wheel and create github release
+      - name: [TAG only] Build wheel and create github release
         if: startsWith(matrix.os,'ubuntu') && github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         shell: bash -l {0}  # so that conda works
         run: nox -s release -- ${{ secrets.GITHUB_TOKEN }}
 
       # 8) Publish the wheel on PyPi
-      - name: Deploy on PyPi
+      - name: [TAG only] Deploy on PyPi
         if: startsWith(matrix.os,'ubuntu') && github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
