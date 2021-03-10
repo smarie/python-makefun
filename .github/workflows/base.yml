@@ -89,6 +89,10 @@ jobs:
           files: ./docs/reports/coverage/coverage.xml
 
       # 7) ON TAGS: Create github release and deploy wheel on PyPi
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CONTEXT"
       - name: Build wheel and create github release
         if: startsWith(matrix.os,'ubuntu') && github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         shell: bash -l {0}  # so that conda works
