@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.10.2 - Github actions test
+
+ - Technical release: validation of the new github actions workflow.
+
 ### 1.10.1 - Github actions migration
 
  - Technical release: validation of the new github actions workflow for PyPi deployment.
