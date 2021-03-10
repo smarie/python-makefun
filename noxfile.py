@@ -54,9 +54,9 @@ def tests(session, coverage, pkg_specs):
     # As soon as this runs, we delete the target site and coverage files to avoid reporting wrong coverage/etc.
     rm_folder(Folders.site)
     rm_folder(Folders.reports_root)
-    # delete the .coverage files if any
+    # delete the .coverage files if any (they are not supposed to be any, but just in case)
     rm_file(Folders.root / ".coverage")
-    rm_file(Folders.root / "coverage.xml")  # not supposed to be here but...
+    rm_file(Folders.root / "coverage.xml")
 
     # uncomment and edit if you wish to uninstall something without deleting the whole env
     # session_run(session, "pip uninstall pytest-asyncio --yes")
