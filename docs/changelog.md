@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.10.1 - Github actions migration
+
+ - Technical release: validation of the new github actions workflow for PyPi deployment.
+
 ### 1.10.0 - Removing arguments easily in `@wraps`
 
  - `@wraps` now offers a `remove_params` argument allowing one to remove an argument from the exposed signature, typically to create and inject it in the wrapper. Fixes [#60](https://github.com/smarie/python-makefun/issues/60)
