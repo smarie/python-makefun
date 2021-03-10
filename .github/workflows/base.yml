@@ -21,6 +21,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0  # so that gh-deploy works
+
       # 2) Setup python version 3.8
 #      - name: Install python 3.7 for nox
 #        uses: actions/setup-python@v1
@@ -39,31 +40,35 @@ jobs:
           # auto-update-conda: true
           python-version: 3.7
           activate-environment: noxenv
-      - name: Conda info init
+      - name: Initial Conda info
         shell: bash -l {0}  # so that conda works
         run: conda info
-      - name: Conda list init
+      - name: Initial Conda list
         shell: bash -l {0}  # so that conda works
         run: conda list
+
       # 3) Install nox
       - name: Install noxfile requirements
         shell: bash -l {0}  # so that conda works
         run: pip install -r noxfile-requirements.txt
-      # 4) conda list
-      - name: Conda list 2
+      - name: Conda list after noxfile requirements installation
         shell: bash -l {0}  # so that conda works
         run: conda list
-      # 5) Run nox tests
-      - name: Run tests # on python ${{ matrix.python-version }}
+
+      # 4) Run nox tests
+      - name: Run nox tests on all python versions
         shell: bash -l {0}  # so that conda works
-        run: nox -s tests-3.7  #-${{ matrix.python-version }}
-      # 6) Publish the doc and test reports
+        run: nox -s tests
+
+      # 5) Publish the doc and test reports
       - name: Publish documentation, tests and coverage reports
-        if: startsWith(matrix.os,'ubuntu')
+        if: startsWith(matrix.os,'ubuntu')  # only on one os
         shell: bash -l {0}  # so that conda works
         run: nox -s publish
-      # 7) Publish coverage report
+
+      # 6) Publish coverage report
       - name: Create codecov.yaml with correct paths
+        if: startsWith(matrix.os,'ubuntu')  # only on one os
         shell: bash
         run: |
           cat << EOF > codecov.yml
@@ -71,13 +76,8 @@ jobs:
           fixes:
             - "/home/runner/work/smarie/python-makefun/::" # Correct paths
           EOF
-      - name: Make codecov.yaml available in artifacts for debugging
-        uses: actions/upload-artifact@v1
-        with:
-          name: codecov configuration
-          path: codecov.yml
       - name: Publish coverage report
-        # run: bash <(curl -s https://codecov.io/bash) # Upload to Codecov
+        if: startsWith(matrix.os,'ubuntu')  # only on one os
         uses: codecov/codecov-action@v1
         with:
           files: ./docs/reports/coverage/coverage.xml
