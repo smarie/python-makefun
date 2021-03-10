@@ -85,6 +85,8 @@ def tests(session, coverage, pkg_specs):
                              "".format(dst=Folders.test_reports))
         session_run(session, "coverage xml -o {covxml}".format(covxml=Folders.coverage_xml))
         session_run(session, "coverage html -d {dst}".format(dst=Folders.coverage_reports))
+        # delete this intermediate file, it is not needed anymore
+        rm_file(Folders.root / ".coverage")
 
         # --generates the badge for the test results and fail build if less than x% tests pass
         nox_logger.info("Generating badge for tests coverage")
