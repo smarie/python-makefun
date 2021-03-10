@@ -63,7 +63,21 @@ jobs:
         shell: bash -l {0}  # so that conda works
         run: nox -s publish
       # 7) Publish coverage report
+      - name: Create codecov.yaml with correct paths
+        shell: bash
+        run: |
+          cat << EOF > codecov.yml
+          # codecov.yml
+          fixes:
+            - "/home/runner/work/smarie/python-makefun/::" # Correct paths
+          EOF
+      - name: Make codecov.yaml available in artifacts for debugging
+        uses: actions/upload-artifact@v1
+        with:
+          name: codecov configuration
+          path: codecov.yml
       - name: Publish coverage report
+        # run: bash <(curl -s https://codecov.io/bash) # Upload to Codecov
         uses: codecov/codecov-action@v1
         with:
           files: ./.coverage
