@@ -24,6 +24,12 @@ jobs:
     name: Run all tests on OS ${{ matrix.os }} ${{ matrix.name_suffix }} # and python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     steps:
+      # 0) check the context of this job
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
       # 1) Checkout a copy of the repo
       - name: Checkout code
         uses: actions/checkout@v2
@@ -68,15 +74,17 @@ jobs:
         shell: bash -l {0}  # so that conda works
         run: nox -s tests
 
+      # -------------- only on Ubuntu + MASTER PUSH (no pull request, no tag) -----------
+
       # 5) Publish the doc and test reports
       - name: Publish documentation, tests and coverage reports
-        if: startsWith(matrix.os,'ubuntu')  # only on one os
+        if: startsWith(matrix.os,'ubuntu') && github.event_name == 'push' && startsWith(github.ref, 'refs/heads')
         shell: bash -l {0}  # so that conda works
         run: nox -s publish
 
       # 6) Publish coverage report
       - name: Create codecov.yaml with correct paths
-        if: startsWith(matrix.os,'ubuntu')  # only on one os
+        if: startsWith(matrix.os,'ubuntu') && github.event_name == 'push' && startsWith(github.ref, 'refs/heads')
         shell: bash
         run: |
           cat << EOF > codecov.yml
@@ -85,20 +93,20 @@ jobs:
             - "/home/runner/work/smarie/python-makefun/::" # Correct paths
           EOF
       - name: Publish coverage report
-        if: startsWith(matrix.os,'ubuntu')  # only on one os
+        if: startsWith(matrix.os,'ubuntu') && github.event_name == 'push' && startsWith(github.ref, 'refs/heads')
         uses: codecov/codecov-action@v1
         with:
           files: ./docs/reports/coverage/coverage.xml
 
-      # 7) ON TAGS: Create github release and deploy wheel on PyPi
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJSON(github) }}
-        run: echo "$GITHUB_CONTEXT"
+      # -------------- only on Ubuntu + TAG PUSH (no pull request) -----------
+
+      # 7) Create github release and build the wheel
       - name: Build wheel and create github release
         if: startsWith(matrix.os,'ubuntu') && github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         shell: bash -l {0}  # so that conda works
         run: nox -s release -- ${{ secrets.GITHUB_TOKEN }}
+
+      # 8) Publish the wheel on PyPi
       - name: Deploy on PyPi
         if: startsWith(matrix.os,'ubuntu') && github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         uses: pypa/gh-action-pypi-publish@release/v1
