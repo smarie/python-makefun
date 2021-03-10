@@ -80,4 +80,4 @@ jobs:
         # run: bash <(curl -s https://codecov.io/bash) # Upload to Codecov
         uses: codecov/codecov-action@v1
         with:
-          files: ./.coverage
+          files: ./docs/reports/coverage/coverage.xml

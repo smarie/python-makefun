@@ -44,6 +44,7 @@ class Folders:
     reports_root = root / "docs" / "reports"
     test_reports = reports_root / "junit"
     coverage_reports = reports_root / "coverage"
+    coverage_xml = coverage_reports / "coverage.xml"
 
 
 @power_session(envs=ENVS, logsdir=Folders.runlogs)
@@ -53,9 +54,9 @@ def tests(session, coverage, pkg_specs):
     # As soon as this runs, we delete the target site and coverage files to avoid reporting wrong coverage/etc.
     rm_folder(Folders.site)
     rm_folder(Folders.reports_root)
-    # delete the coverage.xml and .coverage files
+    # delete the .coverage files if any
     rm_file(Folders.root / ".coverage")
-    rm_file(Folders.root / "coverage.xml")
+    rm_file(Folders.root / "coverage.xml")  # not supposed to be here but...
 
     # uncomment and edit if you wish to uninstall something without deleting the whole env
     # session_run(session, "pip uninstall pytest-asyncio --yes")
@@ -82,6 +83,7 @@ def tests(session, coverage, pkg_specs):
         session_run(session, "coverage run --source makefun "
                              "-m pytest --junitxml={dst}/junit.xml --html={dst}/report.html -v makefun/tests/"
                              "".format(dst=Folders.test_reports))
+        session_run(session, "coverage xml -o {covxml}".format(covxml=Folders.coverage_xml))
         session_run(session, "coverage html -d {dst}".format(dst=Folders.coverage_reports))
 
         # --generates the badge for the test results and fail build if less than x% tests pass
@@ -130,7 +132,7 @@ def publish(session):
     # import keyring
     # codecov_token = keyring.get_password("https://app.codecov.io/gh/smarie/python-makefun", "token")
     # # note: do not use --root nor -f ! otherwise "There was an error processing coverage reports"
-    # session_run(session, 'codecov -t %s' % codecov_token)
+    # session_run(session, 'codecov -t %s -f %s' % (codecov_token, Folders.coverage_xml))
 
 
 @nox.session(python=[PY37])
