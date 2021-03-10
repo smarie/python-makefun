@@ -141,7 +141,7 @@ def publish(session):
 def release(session):
     """Create a release on github corresponding to the latest tag"""
 
-    # TODO get current tag using setuptools_scm and make sure this is not a dirty/dev one
+    # Get current tag using setuptools_scm and make sure this is not a dirty/dev one
     from setuptools_scm import get_version
     from setuptools_scm.version import guess_next_dev_version
     version = []
@@ -159,18 +159,33 @@ def release(session):
     if version[0].dirty or not version[0].exact:
         raise ValueError("You need to execute this action on a clean tag version with no local changes.")
 
+    # Did we receive a token through positional arguments ? (nox -s release -- <token>)
+    if len(session.posargs) == 1:
+        # Run from within github actions - no need to publish on pypi
+        gh_token = session.posargs[0]
+        publish_on_pypi = False
+
+    elif len(session.posargs) == 0:
+        # Run from local commandline - assume we want to manually publish on PyPi
+        publish_on_pypi = True
+
+        # keyring set https://docs.github.com/en/rest token
+        import keyring  # noqa
+        gh_token = keyring.get_password("https://docs.github.com/en/rest", "token")
+        assert len(gh_token) > 0
+
+    else:
+        raise ValueError("Only a single positional arg is allowed for now")
+
     # publish the package on PyPi
-    # keyring set https://upload.pypi.org/legacy/ your-username
-    # keyring set https://test.pypi.org/legacy/ your-username
-    install_reqs(session, phase="PyPi", phase_reqs=["twine"])
-    session_run(session, "twine upload dist/* -u smarie")  # -r testpypi
+    if publish_on_pypi:
+        # keyring set https://upload.pypi.org/legacy/ your-username
+        # keyring set https://test.pypi.org/legacy/ your-username
+        install_reqs(session, phase="PyPi", phase_reqs=["twine"])
+        session_run(session, "twine upload dist/* -u smarie")  # -r testpypi
 
     # create the github release
     install_reqs(session, phase="release", phase_reqs=["click", "PyGithub"])
-
-    # keyring set https://docs.github.com/en/rest token
-    import keyring  # noqa
-    gh_token = keyring.get_password("https://docs.github.com/en/rest", "token")
     session_run(session, "python ci_tools/github_release.py -s {gh_token} "
                          "--repo-slug smarie/python-makefun -cf ./docs/changelog.md "
                          "-d https://smarie.github.io/python-makefun/changelog/ {tag}".format(gh_token=gh_token,
