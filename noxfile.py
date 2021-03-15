@@ -7,7 +7,7 @@ import sys
 # add parent folder to python path so that we can import noxfile_utils.py
 # note that you need to "pip install makefun" for this file to work.
 sys.path.append(str(Path(__file__).parent / "ci_tools"))
-from nox_utils import PY27, PY37, PY36, PY35, PY38, session_run, power_session, install_reqs, rm_folder, rm_file  # noqa
+from nox_utils import PY27, PY37, PY36, PY35, PY38, power_session, rm_folder, rm_file, PowerSession  # noqa
 
 ALL_PY_VERSIONS = [PY38, PY37, PY36, PY35, PY27]
 
@@ -47,7 +47,7 @@ class Folders:
 
 
 @power_session(envs=ENVS, logsdir=Folders.runlogs)
-def tests(session, coverage, pkg_specs):
+def tests(session: PowerSession, coverage, pkg_specs):
     """Run the test suite, including test reports generation and coverage reports. """
 
     # As soon as this runs, we delete the target site and coverage files to avoid reporting wrong coverage/etc.
@@ -61,83 +61,83 @@ def tests(session, coverage, pkg_specs):
     # session_run(session, "pip uninstall pytest-asyncio --yes")
 
     # install all requirements
-    install_reqs(session, setup=True, install=True, tests=True, versions_dct=pkg_specs)
+    session.install_reqs(setup=True, install=True, tests=True, versions_dct=pkg_specs)
 
     # install self so that it is recognized by pytest
-    session_run(session, "pip install -e . --no-deps")
+    session.run2("pip install -e . --no-deps")
 
     # check that it can be imported even from a different folder
-    session_run(session, ['python', '-c', '"import os; os.chdir(\'./docs/\'); import makefun"'])
+    session.run2(['python', '-c', '"import os; os.chdir(\'./docs/\'); import makefun"'])
 
     # finally run all tests
     if not coverage:
         # simple: pytest only
-        session_run(session, "python -m pytest -v makefun/tests/")
+        session.run2("python -m pytest -v makefun/tests/")
     else:
         # coverage + junit html reports + badge generation
-        install_reqs(session, phase="coverage", phase_reqs=["coverage", "pytest-html", "requests", "xunitparser"],
-                     versions_dct=pkg_specs)
+        session.install_reqs(phase="coverage", phase_reqs=["coverage", "pytest-html", "requests", "xunitparser"],
+                             versions_dct=pkg_specs)
 
         # --coverage + junit html reports
-        session_run(session, "coverage run --source makefun "
+        session.run2("coverage run --source makefun "
                              "-m pytest --junitxml={dst}/junit.xml --html={dst}/report.html -v makefun/tests/"
                              "".format(dst=Folders.test_reports))
-        session_run(session, "coverage xml -o {covxml}".format(covxml=Folders.coverage_xml))
-        session_run(session, "coverage html -d {dst}".format(dst=Folders.coverage_reports))
+        session.run2("coverage xml -o {covxml}".format(covxml=Folders.coverage_xml))
+        session.run2("coverage html -d {dst}".format(dst=Folders.coverage_reports))
         # delete this intermediate file, it is not needed anymore
         rm_file(Folders.root / ".coverage")
 
         # --generates the badge for the test results and fail build if less than x% tests pass
         nox_logger.info("Generating badge for tests coverage")
-        session_run(session, "python ci_tools/generate-junit-badge.py 100 %s" % Folders.test_reports)
+        session.run2("python ci_tools/generate-junit-badge.py 100 %s" % Folders.test_reports)
 
         # TODO instead of pushing to codecov we could generate the cov reports ourselves
-        # session.run(*"coverage run".split(' '))     # this executes pytest + reporting
-        # session.run(*"coverage report".split(' '))  # this shows in terminal + fails under XX%, same as --cov-report term --cov-fail-under=70  # noqa
-        # session.run(*"coverage html".split(' '))    # same than --cov-report html:<dir>
-        # session.run(*"coverage xml".split(' '))     # same than --cov-report xml:<file>
+        # session.run2("coverage run")     # this executes pytest + reporting
+        # session.run2("coverage report")  # this shows in terminal + fails under XX%, same as --cov-report term --cov-fail-under=70  # noqa
+        # session.run2("coverage html")    # same than --cov-report html:<dir>
+        # session.run2("coverage xml")     # same than --cov-report xml:<file>
 
 
-@nox.session(python=[PY37])
-def docs(session):
+@power_session(python=[PY37])
+def docs(session: PowerSession):
     """Generates the doc and serves it on a local http server. Pass '-- build' to build statically instead."""
 
-    install_reqs(session, phase="docs", phase_reqs=["mkdocs-material", "mkdocs", "pymdown-extensions", "pygments"])
+    session.install_reqs(phase="docs", phase_reqs=["mkdocs-material", "mkdocs", "pymdown-extensions", "pygments"])
 
     if session.posargs:
         # use posargs instead of "serve"
-        session_run(session, "mkdocs -f ./docs/mkdocs.yml %s" % " ".join(session.posargs))
+        session.run2("mkdocs -f ./docs/mkdocs.yml %s" % " ".join(session.posargs))
     else:
-        session_run(session, "mkdocs serve -f ./docs/mkdocs.yml")
+        session.run2("mkdocs serve -f ./docs/mkdocs.yml")
 
 
-@nox.session(python=[PY37])
-def publish(session):
+@power_session(python=[PY37])
+def publish(session: PowerSession):
     """Deploy the docs+reports on github pages. Note: this rebuilds the docs"""
 
-    install_reqs(session, phase="mkdocs", phase_reqs=["mkdocs-material", "mkdocs", "pymdown-extensions", "pygments"])
+    session.install_reqs(phase="mkdocs", phase_reqs=["mkdocs-material", "mkdocs", "pymdown-extensions", "pygments"])
 
     # possibly rebuild the docs in a static way (mkdocs serve does not build locally)
-    session_run(session, "mkdocs build -f ./docs/mkdocs.yml")
+    session.run2("mkdocs build -f ./docs/mkdocs.yml")
 
     # check that the doc has been generated with coverage
     if not Folders.site_reports.exists():
         raise ValueError("Test reports have not been built yet. Please run 'nox -s tests-3.7' first")
 
     # publish the docs
-    session_run(session, "mkdocs gh-deploy -f ./docs/mkdocs.yml")
+    session.run2("mkdocs gh-deploy -f ./docs/mkdocs.yml")
 
     # publish the coverage - now in github actions only
-    # install_reqs(session, phase="codecov", phase_reqs=["codecov", "keyring"])
+    # session.install_reqs(phase="codecov", phase_reqs=["codecov", "keyring"])
     # # keyring set https://app.codecov.io/gh/smarie/python-makefun token
     # import keyring  # (note that this import is not from the session env but the main nox env)
     # codecov_token = keyring.get_password("https://app.codecov.io/gh/smarie/python-makefun", "token")
     # # note: do not use --root nor -f ! otherwise "There was an error processing coverage reports"
-    # session_run(session, 'codecov -t %s -f %s' % (codecov_token, Folders.coverage_xml))
+    # session.run2('codecov -t %s -f %s' % (codecov_token, Folders.coverage_xml))
 
 
-@nox.session(python=[PY37])
-def release(session):
+@power_session(python=[PY37])
+def release(session: PowerSession):
     """Create a release on github corresponding to the latest tag"""
 
     # Get current tag using setuptools_scm and make sure this is not a dirty/dev one
@@ -151,9 +151,9 @@ def release(session):
     current_tag = get_version(".", version_scheme=my_scheme)
 
     # create the package
-    install_reqs(session, phase="setup.py#dist", phase_reqs=["setuptools_scm"])
+    session.install_reqs(phase="setup.py#dist", phase_reqs=["setuptools_scm"])
     rm_folder(Folders.dist)
-    session_run(session, "python setup.py sdist bdist_wheel")
+    session.run2("python setup.py sdist bdist_wheel")
 
     if version[0].dirty or not version[0].exact:
         raise ValueError("You need to execute this action on a clean tag version with no local changes.")
@@ -180,12 +180,12 @@ def release(session):
     if publish_on_pypi:
         # keyring set https://upload.pypi.org/legacy/ your-username
         # keyring set https://test.pypi.org/legacy/ your-username
-        install_reqs(session, phase="PyPi", phase_reqs=["twine"])
-        session_run(session, "twine upload dist/* -u smarie")  # -r testpypi
+        session.install_reqs(phase="PyPi", phase_reqs=["twine"])
+        session.run2("twine upload dist/* -u smarie")  # -r testpypi
 
     # create the github release
-    install_reqs(session, phase="release", phase_reqs=["click", "PyGithub"])
-    session_run(session, "python ci_tools/github_release.py -s {gh_token} "
+    session.install_reqs(phase="release", phase_reqs=["click", "PyGithub"])
+    session.run2("python ci_tools/github_release.py -s {gh_token} "
                          "--repo-slug smarie/python-makefun -cf ./docs/changelog.md "
                          "-d https://smarie.github.io/python-makefun/changelog/ {tag}".format(gh_token=gh_token,
                                                                                               tag=current_tag))
