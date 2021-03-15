@@ -128,3 +128,13 @@ def test_wraps_dict():
         pass
 
     assert g._mark is True
+
+
+def test_issue_62():
+    """https://github.com/smarie/python-makefun/issues/62"""
+
+    def f(a, b):
+        return a+b
+
+    fp = partial(f, 0)
+    assert fp(-1) == -1

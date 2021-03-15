@@ -1027,7 +1027,8 @@ def gen_partial_sig(f, preset_pos_args, preset_kwargs):
     new_params_with_default = []
     for i, (p_name, p) in enumerate(orig_sig.parameters.items()):
         if i < len(preset_pos_args):
-            break
+            # preset positional arg: disappears from signature
+            continue
         try:
             overridden_p_default = preset_kwargs.pop(p_name)
             # override definition
