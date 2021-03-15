@@ -12,6 +12,9 @@ except ImportError:
     from funcsigs import signature, Signature, Parameter
 
 
+PY2 = sys.version_info < (3, )
+
+
 def test_create_facades(capsys):
     """
     Simple test to create multiple functions with the same body
@@ -251,11 +254,11 @@ def test_so_partial(capsys):
 
     assert captured.out == """Help on function foo in module makefun.tests.test_so:
 
-foo(a, b=10, c=1)
-    <This function is equivalent to 'foo(a, b=10, c=1)', see original 'foo' doc below.>
+foo{sig}
+    <This function is equivalent to 'foo{sig}', see original 'foo' doc below.>
     Return (a+b)*c.
 
-"""
+""".format(sig="(a, b=10, c=1)" if PY2 else "(a, *, b=10, c=1)")
 
 
 def test_so_partial2(capsys):
@@ -270,7 +273,13 @@ def test_so_partial2(capsys):
         print(a, b)
         print(x, y)
 
-    test(1, 2)
+    if not PY2:
+        # true keywords-only
+        with pytest.raises(TypeError):
+            test(1, 2)  # TypeError: test() takes 0 positional arguments but 2 were given
+
+    test(x=1, y=2)
+
     help(test)
 
     @with_partial(a='hello', b='world')
@@ -289,19 +298,19 @@ def test_so_partial2(capsys):
 1 2
 Help on function test in module makefun.tests.test_so:
 
-test(x, y, a='hello', b='world')
-    <This function is equivalent to 'test(x, y, a='hello', b='world')'.>
+test{sig}
+    <This function is equivalent to 'test{sig}'.>
 
 Help on function test in module makefun.tests.test_so:
 
-test(x, y, a='hello', b='world')
-    <This function is equivalent to 'test(x, y, a='hello', b='world')', see original 'test' doc below.>
+test{sig}
+    <This function is equivalent to 'test{sig}', see original 'test' doc below.>
     Here is a doc
 
-"""
+""".format(sig="(a='hello', b='world', x, y)" if PY2 else "(*, a='hello', b='world', x, y)")
 
     if (3, 0) <= sys.version_info < (3, 6):
         # in older versions of python, the order of **kwargs is not guaranteed (see PEP 468)
         assert captured.out.replace('a=hello', 'b=world') == ref_str.replace('a=hello', 'b=world')
     else:
-        assert captured.out == ref_str
+        assert captured.out.replace("=KW_ONLY_ARG!", "") == ref_str

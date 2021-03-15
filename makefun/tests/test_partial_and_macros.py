@@ -1,4 +1,5 @@
 import functools
+import pytest
 import sys
 
 import makefun
@@ -6,6 +7,9 @@ try:
     from inspect import signature
 except ImportError:
     from funcsigs import signature
+
+
+PY2 = sys.version_info < (3, )
 
 
 def test_doc():
@@ -20,26 +24,27 @@ def test_doc():
         return x + y
 
     ref_bar = functools.partial(foo, x=12)
-    bar = makefun.partial(foo, x=12)
 
-    # not possible: the signature from functools is clunky
-    # assert str(signature(ref_bar)) == str(signature(bar))
-    PY3 = not sys.version_info < (3, )
-    assert str(signature(ref_bar)) == "(x=12, y)" if not PY3 else "(*, x=12, y)"
-    # todo we could also add keyword-only..
-    assert str(signature(bar)) == "(y, x=12)"
+    ref_sig_str = "(x=12, y)" if PY2 else "(*, x=12, y)"
+    assert str(signature(ref_bar)) == ref_sig_str
+
+    bar = makefun.partial(foo, x=12)
+    assert str(signature(bar)).replace("=KW_ONLY_ARG!", "") == str(signature(ref_bar))
 
     bar.__name__ = 'bar'
     help(bar)
-    assert bar(1) == 13
-    assert bar.__doc__ == """<This function is equivalent to 'foo(y, x=12)', see original 'foo' doc below.>
+    with pytest.raises(TypeError):
+        bar(1)
+    assert bar(y=1) == 13
+    assert bar.__doc__.replace("=KW_ONLY_ARG!", "") \
+           == """<This function is equivalent to 'foo%s', see original 'foo' doc below.>
 
         a `foo` function
 
         :param x:
         :param y:
         :return:
-        """
+        """ % ref_sig_str
 
 
 def test_partial():
@@ -58,10 +63,18 @@ def test_partial():
         print(a)
         print(x, y)
 
-    foo(1, 2)
+    if not PY2:
+        # true keyword-only
+        with pytest.raises(TypeError):
+            foo(1, 2)
+
+    foo(1, a=2)
     help(foo)
 
-    assert foo.__doc__ == """<This function is equivalent to 'foo(x, a, y='hello')', see original 'foo' doc below.>
+    ref_sig_str = "(x, y='hello', a)" if PY2 else "(x, *, y='hello', a)"
+
+    assert foo.__doc__.replace("=KW_ONLY_ARG!", "") \
+           == """<This function is equivalent to 'foo%s', see original 'foo' doc below.>
 
         a `foo` function
 
@@ -69,7 +82,7 @@ def test_partial():
         :param y:
         :param a:
         :return:
-        """
+        """ % ref_sig_str
 
 
 def test_issue_57():
@@ -88,8 +101,9 @@ def test_issue_57():
     # check metadata
     assert n.i == 1
     # check signature
-    assert n.__doc__ == """<This function is equivalent to 'f(b=2)', see original 'f' doc below.>
-hey"""
+    ref_str = "(b=2)" if PY2 else "(*, b=2)"
+    assert n.__doc__ == """<This function is equivalent to 'f%s', see original 'f' doc below.>
+hey""" % ref_str
     # check implementation: the default value from the signature (from @wraps) is the one that applies here
     assert n() == 2
 
@@ -109,3 +123,45 @@ def test_create_with_partial():
     assert m.__doc__ == """partial(func, *args, **keywords) - new function with partial application
     of the given arguments and keywords.
 """
+
+
+def test_args_order_and_kind():
+    """Make sure that the order remains ok"""
+
+    def f(a, b, c, **d):
+        return a + b + c + sum(d)
+
+    # reference: functools.partial
+    fp_ref = functools.partial(f, b=0)
+
+    # except in python 2, all kwargs following the predefined arg become kw-only
+    if sys.version_info < (3,):
+        assert str(signature(fp_ref)) == "(a, b=0, c, **d)"
+    else:
+        assert str(signature(fp_ref)) == "(a, *, b=0, c, **d)"
+
+    # our makefun.partial
+    fp = makefun.partial(f, b=0)
+
+    # same behaviour
+    assert str(signature(fp_ref)) == str(signature(fp)).replace("=KW_ONLY_ARG!", "")
+
+    # positional-only behaviour
+    if sys.version_info >= (3, 8):
+        from ._test_py38 import make_pos_only_f
+        f = make_pos_only_f()
+
+        # it is possible to keyword-partialize a positional-only argument...
+        fp_ref = functools.partial(f, b=0)
+
+        # but 'signature' does not support it !
+        with pytest.raises(ValueError):
+            signature(fp_ref)
+
+        # assert str(signature(fp_ref)) == "(c, /, *, d, **e)"
+
+        # so we do not support it
+        with pytest.raises(NotImplementedError):
+            makefun.partial(f, b=0)
+
+        # assert str(signature(fp_ref)) == str(signature(fp))

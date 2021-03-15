@@ -30,12 +30,13 @@ except ImportError:
         return False
 
 try:  # python 3.5+
-    from typing import Callable, Any, Union, Iterable, Dict
+    from typing import Callable, Any, Union, Iterable, Dict, Tuple, Mapping
 except ImportError:
     pass
 
 
-if sys.version_info >= (3,):
+PY2 = sys.version_info < (3,)
+if not PY2:
     string_types = str,
 else:
     string_types = basestring,
@@ -965,8 +966,8 @@ def with_partial(*preset_pos_args, **preset_kwargs):
 
 
 def partial(f,                 # type: Callable
-            *preset_pos_args,
-            **preset_kwargs
+            *preset_pos_args,  # type: Any
+            **preset_kwargs    # type: Any
             ):
     """
     Equivalent of `functools.partial` but relies on a dynamically-created function. As a result the function
@@ -1004,10 +1005,37 @@ def partial(f,                 # type: Callable
     return partial_f
 
 
-def gen_partial_sig(f, preset_pos_args, preset_kwargs):
+if PY2:
+    # In python 2 keyword-only arguments do not exist.
+    # so if they do not have a default value, we set them with a default value
+    # that is this singleton. This is the only way we can have the same behaviour
+    # in python 2 in terms of order of arguments, than what funcools.partial does.
+    class KwOnly:
+        def __str__(self):
+            return repr(self)
+
+        def __repr__(self):
+            return "KW_ONLY_ARG!"
+
+    KW_ONLY = KwOnly()
+else:
+    KW_ONLY = None
+
+
+def gen_partial_sig(f,                # type: Callable
+                    preset_pos_args,  # type: Tuple[Any]
+                    preset_kwargs,    # type: Mapping[str, Any]
+                    ):
     """
     Returns the signature of partial(f, *preset_pos_args, **preset_kwargs)
     Raises explicit errors in case of non-matching argument names.
+
+    By default the behaviour is the same as `functools.partial`:
+
+     - partialized positional arguments disappear from the signature
+     - partialized keyword arguments remain in the signature in the same order, but all keyword arguments after them
+       in the parameters order become keyword-only (if python 2, they do not become keyword-only as this is not allowed
+       in the compiler, but we pass them a bad default value "KEYWORD_ONLY")
 
     :param f:
     :param preset_pos_args:
@@ -1024,23 +1052,55 @@ def gen_partial_sig(f, preset_pos_args, preset_kwargs):
 
     # then the keywords. If they have a new value override it
     new_params = []
-    new_params_with_default = []
+    kwonly_flag = False
     for i, (p_name, p) in enumerate(orig_sig.parameters.items()):
         if i < len(preset_pos_args):
             # preset positional arg: disappears from signature
             continue
         try:
+            # is this parameter overridden in `preset_kwargs` ?
             overridden_p_default = preset_kwargs.pop(p_name)
-            # override definition
-            p = Parameter(name=p.name, kind=p.kind, default=overridden_p_default, annotation=p.annotation)
         except KeyError:
-            pass
-        if p.default is not p.empty:
-            new_params_with_default.append(p)
-        else:
-            new_params.append(p)
+            # no: it will appear "as is" in the signature, in the same order
 
-    new_sig = Signature(parameters=tuple(new_params + new_params_with_default),
+            # However we need to change the kind if the kind is not already "keyword only"
+            # positional only:  Parameter.POSITIONAL_ONLY, VAR_POSITIONAL
+            # both: POSITIONAL_OR_KEYWORD
+            # keyword only: KEYWORD_ONLY, VAR_KEYWORD
+            if kwonly_flag and p.kind not in (Parameter.VAR_KEYWORD, Parameter.KEYWORD_ONLY):
+                if PY2:
+                    # Special : we can not make if Keyword-only, but we can not leave it without default value
+                    new_kind = p.kind
+                    # set a default value of
+                    new_default = p.default if p.default is not Parameter.empty else KW_ONLY
+                else:
+                    new_kind = Parameter.KEYWORD_ONLY
+                    new_default = p.default
+                p = Parameter(name=p.name, kind=new_kind, default=new_default, annotation=p.annotation)
+
+        else:
+            # yes: override definition with the default. Note that the parameter will remain in the signature
+            # but as "keyword only" (and so will be all following args)
+            if p.kind is Parameter.POSITIONAL_ONLY:
+                raise NotImplementedError("Predefining a positional-only argument using keyword is not supported as in "
+                                          "python 3.8.8, 'signature()' does not support such functions and raises a"
+                                          "ValueError. Please report this issue if support needs to be added in the "
+                                          "future.")
+
+            if not PY2 and p.kind not in (Parameter.VAR_KEYWORD, Parameter.KEYWORD_ONLY):
+                # change kind to keyword-only
+                new_kind = Parameter.KEYWORD_ONLY
+            else:
+                new_kind = p.kind
+            p = Parameter(name=p.name, kind=new_kind, default=overridden_p_default, annotation=p.annotation)
+
+            # from now on, all other parameters need to be keyword-only
+            kwonly_flag = True
+
+        # preserve order
+        new_params.append(p)
+
+    new_sig = Signature(parameters=tuple(new_params),
                         return_annotation=orig_sig.return_annotation)
 
     if len(preset_kwargs) > 0:
