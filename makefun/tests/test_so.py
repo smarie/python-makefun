@@ -252,13 +252,16 @@ def test_so_partial(capsys):
     with capsys.disabled():
         print(captured.out)
 
+    sig_actual_call = "(a, b=10, c=1)"
+    sig = sig_actual_call if PY2 else "(a, *, b=10, c=1)"
+
     assert captured.out == """Help on function foo in module makefun.tests.test_so:
 
 foo{sig}
-    <This function is equivalent to 'foo{sig}', see original 'foo' doc below.>
+    <This function is equivalent to 'foo{sig_actual_call}', see original 'foo' doc below.>
     Return (a+b)*c.
 
-""".format(sig="(a, b=10, c=1)" if PY2 else "(a, *, b=10, c=1)")
+""".format(sig=sig, sig_actual_call=sig_actual_call)
 
 
 def test_so_partial2(capsys):
@@ -294,23 +297,53 @@ def test_so_partial2(capsys):
     with capsys.disabled():
         print(captured.out)
 
-    ref_str = """hello world
+        sig_actual_call = "(a='hello', b='world', x, y)"
+        sig = "(a='hello', b='world', x=KW_ONLY_ARG!, y=KW_ONLY_ARG!)" if PY2 else "(*, a='hello', b='world', x, y)"
+
+        ref_str = """hello world
 1 2
 Help on function test in module makefun.tests.test_so:
 
 test{sig}
-    <This function is equivalent to 'test{sig}'.>
+    <This function is equivalent to 'test{sig_actual_call}'.>
 
 Help on function test in module makefun.tests.test_so:
 
 test{sig}
-    <This function is equivalent to 'test{sig}', see original 'test' doc below.>
+    <This function is equivalent to 'test{sig_actual_call}', see original 'test' doc below.>
     Here is a doc
 
-""".format(sig="(a='hello', b='world', x, y)" if PY2 else "(*, a='hello', b='world', x, y)")
+""".format(sig=sig, sig_actual_call=sig_actual_call)
 
-    if (3, 0) <= sys.version_info < (3, 6):
-        # in older versions of python, the order of **kwargs is not guaranteed (see PEP 468)
-        assert captured.out.replace('a=hello', 'b=world') == ref_str.replace('a=hello', 'b=world')
-    else:
-        assert captured.out.replace("=KW_ONLY_ARG!", "") == ref_str
+        if (3, 0) <= sys.version_info < (3, 6):
+            # in older versions of python, the order of **kwargs is not guaranteed (see PEP 468)
+            assert captured.out.replace('a=hello', 'b=world') == ref_str.replace('a=hello', 'b=world')
+        else:
+            assert captured.out == ref_str
+
+
+def test_so_partial_posargs(capsys):
+    """Checks that the generated documentation is ok even in case of positional preset arg"""
+
+    def test(a, b, x, y):
+        print(a, b)
+        print(x, y)
+
+    fp = partial(test, 'hello', b='world')
+
+    help(fp)
+
+    captured = capsys.readouterr()
+    with capsys.disabled():
+        print(captured.out)
+
+        sig_actual_call = "('hello', b='world', x, y)"
+        sig = "(b='world', x=KW_ONLY_ARG!, y=KW_ONLY_ARG!)" if PY2 else "(*, b='world', x, y)"
+
+        ref_str = """Help on function test in module makefun.tests.test_so:
+
+test{sig}
+    <This function is equivalent to 'test{sig_actual_call}'.>
+
+""".format(sig=sig, sig_actual_call=sig_actual_call)
+        assert captured.out == ref_str

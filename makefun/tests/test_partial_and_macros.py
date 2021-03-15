@@ -29,6 +29,8 @@ def test_doc():
     assert str(signature(ref_bar)) == ref_sig_str
 
     bar = makefun.partial(foo, x=12)
+
+    # same behaviour - except in python 2 where our "KW_ONLY_ARG!" appear
     assert str(signature(bar)).replace("=KW_ONLY_ARG!", "") == str(signature(ref_bar))
 
     bar.__name__ = 'bar'
@@ -36,7 +38,10 @@ def test_doc():
     with pytest.raises(TypeError):
         bar(1)
     assert bar(y=1) == 13
-    assert bar.__doc__.replace("=KW_ONLY_ARG!", "") \
+
+    sig_actual_call = ref_sig_str.replace("*, ", "")
+
+    assert bar.__doc__ \
            == """<This function is equivalent to 'foo%s', see original 'foo' doc below.>
 
         a `foo` function
@@ -44,7 +49,7 @@ def test_doc():
         :param x:
         :param y:
         :return:
-        """ % ref_sig_str
+        """ % sig_actual_call
 
 
 def test_partial():
@@ -71,7 +76,7 @@ def test_partial():
     foo(1, a=2)
     help(foo)
 
-    ref_sig_str = "(x, y='hello', a)" if PY2 else "(x, *, y='hello', a)"
+    sig_actual_call = "(x, y='hello', a)"  # if PY2 else "(x, *, y='hello', a)"
 
     assert foo.__doc__.replace("=KW_ONLY_ARG!", "") \
            == """<This function is equivalent to 'foo%s', see original 'foo' doc below.>
@@ -82,7 +87,7 @@ def test_partial():
         :param y:
         :param a:
         :return:
-        """ % ref_sig_str
+        """ % sig_actual_call
 
 
 def test_issue_57():
@@ -101,9 +106,11 @@ def test_issue_57():
     # check metadata
     assert n.i == 1
     # check signature
-    ref_str = "(b=2)" if PY2 else "(*, b=2)"
+    sig_actual_call = "(b=2)"
+    # sig = sig_actual_call if PY2 else "(*, b=2)"
+
     assert n.__doc__ == """<This function is equivalent to 'f%s', see original 'f' doc below.>
-hey""" % ref_str
+hey""" % sig_actual_call
     # check implementation: the default value from the signature (from @wraps) is the one that applies here
     assert n() == 2
 
@@ -143,7 +150,7 @@ def test_args_order_and_kind():
     # our makefun.partial
     fp = makefun.partial(f, b=0)
 
-    # same behaviour
+    # same behaviour - except in python 2 where our "KW_ONLY_ARG!" appear
     assert str(signature(fp_ref)) == str(signature(fp)).replace("=KW_ONLY_ARG!", "")
 
     # positional-only behaviour

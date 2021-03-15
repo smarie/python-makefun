@@ -763,9 +763,10 @@ def _get_args_for_wrapping(wrapped, new_sig, remove_args, func_name, doc, qualna
         if isinstance(wrapped, functools.partial) and new_sig is None \
                 and doc == functools.partial(lambda: True).__doc__:
             # this is the default generic partial doc. generate a better doc, since we know that the sig is not messed with
+            orig_sig = signature(wrapped.func)
             doc = gen_partial_doc(getattr_partial_aware(wrapped.func, '__name__', None),
                                   getattr_partial_aware(wrapped.func, '__doc__', None),
-                                  func_sig, wrapped.args, wrapped.keywords)
+                                  orig_sig, func_sig, wrapped.args)
     if qualname is None:
         qualname = getattr_partial_aware(wrapped, '__qualname__', None)
     if module_name is None:
@@ -982,7 +983,8 @@ def partial(f,                 # type: Callable
     # TODO do we need to mimic `partial`'s behaviour concerning positional args?
 
     # (1) remove/change all preset arguments from the signature
-    new_sig = gen_partial_sig(f, preset_pos_args, preset_kwargs)
+    orig_sig = signature(f)
+    new_sig = gen_partial_sig(orig_sig, preset_pos_args, preset_kwargs)
 
     if _is_generator_func(f):
         if sys.version_info >= (3, 3):
@@ -1000,7 +1002,7 @@ def partial(f,                 # type: Callable
 
     # update the doc.
     # Note that partial_f is generated above with a proper __name__ and __doc__ identical to the wrapped ones
-    partial_f.__doc__ = gen_partial_doc(partial_f.__name__, partial_f.__doc__, new_sig, preset_pos_args, preset_kwargs)
+    partial_f.__doc__ = gen_partial_doc(partial_f.__name__, partial_f.__doc__, orig_sig, new_sig, preset_pos_args)
 
     return partial_f
 
@@ -1022,7 +1024,7 @@ else:
     KW_ONLY = None
 
 
-def gen_partial_sig(f,                # type: Callable
+def gen_partial_sig(orig_sig,         # type: Signature
                     preset_pos_args,  # type: Tuple[Any]
                     preset_kwargs,    # type: Mapping[str, Any]
                     ):
@@ -1042,7 +1044,6 @@ def gen_partial_sig(f,                # type: Callable
     :param preset_kwargs:
     :return:
     """
-    orig_sig = signature(f)
     preset_kwargs = copy(preset_kwargs)
 
     # remove the first n positional, and assign/change default values for the keyword
@@ -1109,29 +1110,39 @@ def gen_partial_sig(f,                # type: Callable
     return new_sig
 
 
-def gen_partial_doc(wrapped_name, wrapped_doc, new_sig, preset_pos_args, preset_kwargs):
+def gen_partial_doc(wrapped_name, wrapped_doc, orig_sig, new_sig, preset_pos_args):
     """
     Generate a documentation indicating which positional arguments and keyword arguments are set in this
     partial implementation, and appending the wrapped function doc.
 
     :param wrapped_name:
     :param wrapped_doc:
+    :param orig_sig:
     :param new_sig:
     :param preset_pos_args:
-    :param preset_kwargs:
     :return:
     """
-    # First include all preset positional argument names...
-    argstring = ', '.join([("%s" % a) for a in preset_pos_args])
+    # generate the "equivalent signature": this is the original signature,
+    # where all values injected by partial appear
+    all_strs = []
+    kw_only = False
+    for i, (p_name, p) in enumerate(orig_sig.parameters.items()):
+        if i < len(preset_pos_args):
+            # use the preset positional. Use repr() instead of str() so that e.g. "yes" appears with quotes
+            all_strs.append(repr(preset_pos_args[i]))
+        else:
+            # use the one in the new signature
+            pnew = new_sig.parameters[p_name]
+            if not kw_only:
+                if (PY2 and pnew.default is KW_ONLY) or pnew.kind == Parameter.KEYWORD_ONLY:
+                    kw_only = True
 
-    # then all arguments remaining in the signature (changing their default value if overridden)
-    for p_name, p in new_sig.parameters.items():
-        try:
-            p_overridden_default = preset_kwargs[p_name]
-            p = Parameter(name=p.name, kind=p.kind, default=p_overridden_default, annotation=p.annotation)
-        except KeyError:
-            pass
-        argstring = "%s, %s" % (argstring, p) if len(argstring) > 0 else str(p)
+            if PY2 and kw_only:
+                all_strs.append(str(pnew).replace("=%s" % KW_ONLY, ""))
+            else:
+                all_strs.append(str(pnew))
+
+    argstring = ", ".join(all_strs)
 
     # Write the final docstring
     if wrapped_doc is None or len(wrapped_doc) == 0:
