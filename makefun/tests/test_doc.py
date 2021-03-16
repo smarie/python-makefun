@@ -12,7 +12,8 @@ except ImportError:
 from makefun import create_function, add_signature_parameters, remove_signature_parameters, with_signature, wraps, \
     create_wrapper
 
-python_version = sys.version_info.major
+
+PY2 = sys.version_info < (3,)
 
 
 @pytest.mark.parametrize('decorator', [False, True], ids="decorator={}".format)
@@ -343,10 +344,15 @@ def test_wraps_add(prepend):
         else:
             decorator = wraps(f, append_args='a')
 
-        @decorator
-        def my_wrapper(*args, a, **kwargs):
-            # a is automatically extracted from the sig
-            return a + f(*args, **kwargs)
+        if PY2:
+            def my_wrapper(*args, **kwargs):
+                a = kwargs.pop('a')
+                return a + f(*args, **kwargs)
+        else:
+            from ._test_py35 import get_my_wrapper
+            my_wrapper = get_my_wrapper(f)
+
+        my_wrapper = decorator(my_wrapper)
 
         return my_wrapper
 

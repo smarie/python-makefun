@@ -32,3 +32,11 @@ def make_ref_function2():
         pass
 
     return ref
+
+
+def get_my_wrapper(f):
+    def my_wrapper(*args, a, **kwargs):
+        # a is automatically extracted from the sig
+        return a + f(*args, **kwargs)
+
+    return my_wrapper
