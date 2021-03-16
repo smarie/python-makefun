@@ -5,9 +5,14 @@ from pathlib import Path  # noqa
 import sys
 
 # add parent folder to python path so that we can import noxfile_utils.py
-# note that you need to "pip install makefun" for this file to work.
+# note that you need to "pip install -r noxfile-requiterements.txt" for this file to work.
 sys.path.append(str(Path(__file__).parent / "ci_tools"))
 from nox_utils import PY27, PY37, PY36, PY35, PY38, power_session, rm_folder, rm_file, PowerSession  # noqa
+
+
+pkg_name = "makefun"
+gh_org = "smarie"
+gh_repo = "python-makefun"
 
 ALL_PY_VERSIONS = [PY38, PY37, PY36, PY35, PY27]
 
@@ -67,21 +72,21 @@ def tests(session: PowerSession, coverage, pkg_specs):
     session.run2("pip install -e . --no-deps")
 
     # check that it can be imported even from a different folder
-    session.run2(['python', '-c', '"import os; os.chdir(\'./docs/\'); import makefun"'])
+    session.run2(['python', '-c', '"import os; os.chdir(\'./docs/\'); import %s"' % pkg_name])
 
     # finally run all tests
     if not coverage:
         # simple: pytest only
-        session.run2("python -m pytest -v makefun/tests/")
+        session.run2("python -m pytest -v %s/tests/" % pkg_name)
     else:
         # coverage + junit html reports + badge generation
         session.install_reqs(phase="coverage", phase_reqs=["coverage", "pytest-html", "requests", "xunitparser"],
                              versions_dct=pkg_specs)
 
         # --coverage + junit html reports
-        session.run2("coverage run --source makefun "
-                     "-m pytest --junitxml={dst}/junit.xml --html={dst}/report.html -v makefun/tests/"
-                     "".format(dst=Folders.test_reports))
+        session.run2("coverage run --source {pkg_name} "
+                     "-m pytest --junitxml={dst}/junit.xml --html={dst}/report.html -v {pkg_name}/tests/"
+                     "".format(pkg_name=pkg_name, dst=Folders.test_reports))
         # session.run2("coverage report")  # this shows in terminal + fails under XX%, same as --cov-report term --cov-fail-under=70  # noqa
         session.run2("coverage xml -o {covxml}".format(covxml=Folders.coverage_xml))
         session.run2("coverage html -d {dst}".format(dst=Folders.coverage_reports))
@@ -124,9 +129,9 @@ def publish(session: PowerSession):
 
     # publish the coverage - now in github actions only
     # session.install_reqs(phase="codecov", phase_reqs=["codecov", "keyring"])
-    # # keyring set https://app.codecov.io/gh/smarie/python-makefun token
+    # # keyring set https://app.codecov.io/gh/<org>/<repo> token
     # import keyring  # (note that this import is not from the session env but the main nox env)
-    # codecov_token = keyring.get_password("https://app.codecov.io/gh/smarie/python-makefun", "token")
+    # codecov_token = keyring.get_password("https://app.codecov.io/gh/<org>/<repo>>", "token")
     # # note: do not use --root nor -f ! otherwise "There was an error processing coverage reports"
     # session.run2('codecov -t %s -f %s' % (codecov_token, Folders.coverage_xml))
 
@@ -181,9 +186,9 @@ def release(session: PowerSession):
     # create the github release
     session.install_reqs(phase="release", phase_reqs=["click", "PyGithub"])
     session.run2("python ci_tools/github_release.py -s {gh_token} "
-                 "--repo-slug smarie/python-makefun -cf ./docs/changelog.md "
-                 "-d https://smarie.github.io/python-makefun/changelog/ {tag}"
-                 "".format(gh_token=gh_token, tag=current_tag))
+                 "--repo-slug {gh_org}/{gh_repo} -cf ./docs/changelog.md "
+                 "-d https://{gh_org}.github.io/{gh_repo}/changelog/ {tag}"
+                 "".format(gh_token=gh_token, gh_org=gh_org, gh_repo=gh_repo, tag=current_tag))
 
 
 # if __name__ == '__main__':
