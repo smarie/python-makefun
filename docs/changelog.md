@@ -1,5 +1,17 @@
 # Changelog
 
+### 1.11.0 - `partial` bugfixes and improvements + new `wraps` parameters
+
+ - `@wraps` now has new arguments `prepend_arg` and `append_arg` to quickly prepend or append a new parameter to a function signature. Fixes [#65](https://github.com/smarie/python-makefun/issues/65)
+
+ - `add_signature_parameters` can now receive string parameter names in its `first` and `last` arguments.
+
+ - Improved generated docstring for `partial` with better support for preset positional args.
+
+ - `partial`'s behaviour is now aligned with the one in `functools.partial` in terms of arguments order and kind. Fixes [#64](https://github.com/smarie/python-makefun/issues/64)
+
+ - Bug fix: passing preset positional arguments to `partial` does not wipe out the rest of the signature any more. Fixes [#62](https://github.com/smarie/python-makefun/issues/62)
+
 ### 1.10.2 - Github actions test
 
  - Technical release: validation of the new github actions workflow.
