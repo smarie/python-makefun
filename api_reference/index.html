@@ -635,6 +635,8 @@
 <h3 id="wraps"><code>@wraps</code><a class="headerlink" href="#wraps" title="Permanent link">&para;</a></h3>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">wraps</span><span class="p">(</span><span class="n">f</span><span class="p">,</span>
           <span class="n">new_sig</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Signature</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+          <span class="n">prepend_args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+          <span class="n">append_args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
           <span class="n">remove_args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
           <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
           <span class="n">inject_as_first_arg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -658,7 +660,7 @@
 </ul>
 </li>
 <li>
-<p><strong>you can modify the signature</strong> of the resulting function, by providing a new one with <code>new_sig</code>. See <a href="..#editing-a-signature">documentation</a> for details. Note that you can now also easily remove arguments from the signature in order to inject them with your own - with the <code>remove_args</code> parameter, see <a href="..#to-inject-a-dynamically-baked-value">documentation</a>.</p>
+<p><strong>you can modify the signature</strong> of the resulting function, by providing a new one with <code>new_sig</code> or by providing a list of arguments to remove in <code>remove_args</code>, to prepend in <code>prepend_args</code>, or to append in <code>append_args</code>. See documentation on <a href="..#editing-a-signature">full</a> and <a href="..#to-inject-a-dynamically-baked-value">quick</a> signature edits for details.</p>
 </li>
 </ul>
 <p>Comparison with <code>@with_signature</code>: <code>@wraps(f)</code> is equivalent to</p>
@@ -672,13 +674,57 @@
                  **attrs)`
 </code></pre></div>
 
-<p>In other words, as opposed to <code>@with_signature</code>, the metadata (doc, module name, etc.) is provided by the wrapped <code>f</code>, so that the created function seems to be identical (except for the signature if a non-None <code>new_sig</code> is provided). If <code>new_sig</code> is None, we set the additional <code>__wrapped__</code> attribute on the created function, to stay compliant with the <code>functools.wraps</code> convention.</p>
-<p>All options in <code>with_signature</code> remain available for overriding.</p>
+<p>In other words, as opposed to <code>@with_signature</code>, the metadata (doc, module name, etc.) is provided by the wrapped <code>wrapped_fun</code>, so that the created function seems to be identical (except possiblyfor the signature). Note that all options in <code>with_signature</code> can still be overrided using parameters of <code>@wraps</code>.</p>
+<p>If the signature is <em>not</em> modified through <code>new_sig</code>, <code>remove_args</code>, <code>append_args</code> or <code>prepend_args</code>, the additional <code>__wrapped__</code> attribute  on the created function, to stay consistent with the <code>functools.wraps</code> behaviour.</p>
 <p>See also <a href="https://docs.python.org/3/library/functools.html#functools.wraps">python documentation on @wraps</a></p>
+<p><strong>Parameters</strong></p>
+<ul>
+<li>
+<p><code>wrapped_fun</code>: the function that you intend to wrap with the decorated function. As in <code>functools.wraps</code>, <code>wrapped_fun</code> is used as the default reference for the exposed signature, <code>__name__</code>, <code>__qualname__</code>, <code>__doc__</code> and <code>__dict__</code>.</p>
+</li>
+<li>
+<p><code>new_sig</code>: the new signature of the decorated function. By default it is <code>None</code> and means "same signature as in <code>wrapped_fun</code>" (similar behaviour as in <code>functools.wraps</code>) If you wish to modify the exposed signature you can either use <code>remove/prepend/append_args</code>, or pass a non-None <code>new_sig</code>. It can be either a string without 'def' such as "foo(a, b: int, <em>args, </em>*kwargs)" of "(a, b: int)", or a <code>Signature</code> object, for example from the output of <code>inspect.signature</code> or from the <code>funcsigs.signature</code> backport. Note that these objects can be created manually too. If the signature is provided as a string and contains a non-empty name, this name will be used instead of the one of <code>wrapped_fun</code>.</p>
+</li>
+<li>
+<p><code>prepend_args</code>: a string or list of strings to prepend to the signature of <code>wrapped_fun</code>. These extra arguments should not be passed to <code>wrapped_fun</code>, as it does not know them. This is typically used to easily create a wrapper with additional arguments, without having to manipulate the signature objects.</p>
+</li>
+<li>
+<p><code>append_args</code>: a string or list of strings to append to the signature of <code>wrapped_fun</code>. These extra arguments should not be passed to <code>wrapped_fun</code>, as it does not know them. This is typically used to easily create a wrapper with additional arguments, without having to manipulate the signature objects.</p>
+</li>
+<li>
+<p><code>remove_args</code>: a string or list of strings to remove from the signature of <code>wrapped_fun</code>. These arguments should be injected in the received <code>kwargs</code> before calling <code>wrapped_fun</code>, as it requires them. This is typically used to easily create a wrapper with less arguments, without having to manipulate the signature objects.</p>
+</li>
+<li>
+<p><code>func_name</code>: provide a non-<code>None</code> value to override the created function <code>__name__</code> and <code>__qualname__</code>. If this is <code>None</code> (default), the <code>__name__</code> will default to the ones of <code>wrapped_fun</code> if <code>new_sig</code> is <code>None</code> or is a <code>Signature</code>, or to the name defined in <code>new_sig</code> if <code>new_sig</code> is a <code>str</code> and contains a non-empty name.</p>
+</li>
+<li>
+<p><code>inject_as_first_arg</code>: if <code>True</code>, the created function will be injected as the first positional argument of the decorated function. This can be handy in case the implementation is shared between several facades and needs to know from which context it was called. Default=<code>False</code></p>
+</li>
+<li>
+<p><code>add_source</code>: a boolean indicating if a '<strong>source</strong>' annotation should be added to the generated function (default: True)</p>
+</li>
+<li>
+<p><code>add_impl</code>: a boolean indicating if a '<strong>func_impl</strong>' annotation should be added to the generated function (default: True)</p>
+</li>
+<li>
+<p><code>doc</code>: a string representing the docstring that will be used to set the <strong>doc</strong> attribute on the generated function. If None (default), the doc of <code>wrapped_fun</code> will be used. If <code>wrapped_fun</code> is an instance of <code>functools.partial</code>, a special enhanced doc will be generated.</p>
+</li>
+<li>
+<p><code>qualname</code>: a string representing the qualified name to be used. If None (default), the <code>__qualname__</code> will default to the one of <code>wrapped_fun</code>, or the one in <code>new_sig</code> if <code>new_sig</code> is provided as a string with a non-empty function name.</p>
+</li>
+<li>
+<p><code>module_name</code>: the name of the module to be set on the function (under <strong>module</strong> ). If None (default), the <code>__module__</code> attribute of <code>wrapped_fun</code> will be used.</p>
+</li>
+<li>
+<p><code>attrs</code>: other keyword attributes that should be set on the function. Note that the full <code>__dict__</code> of <code>wrapped_fun</code> is automatically copied.</p>
+</li>
+</ul>
 <h3 id="create_wrapper"><code>create_wrapper</code><a class="headerlink" href="#create_wrapper" title="Permanent link">&para;</a></h3>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">create_wrapper</span><span class="p">(</span><span class="n">wrapped</span><span class="p">,</span>
                    <span class="n">wrapper</span><span class="p">,</span>
                    <span class="n">new_sig</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Signature</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="n">prepend_args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="n">append_args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                    <span class="n">remove_args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                    <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                    <span class="n">inject_as_first_arg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -691,7 +737,7 @@
                    <span class="p">):</span>
 </code></pre></div>
 
-<p>Creates a signature-preserving wrapper function. <code>create_wrapper(wrapped, wrapper, **kwargs)</code> is equivalent to <code>wraps(wrapped, **kwargs)(wrapper)</code>.</p>
+<p>Creates a signature-preserving wrapper function. <code>create_wrapper(wrapped, wrapper, **kwargs)</code> is equivalent to <code>wraps(wrapped, **kwargs)(wrapper)</code>. See <a href="#wraps"><code>@wraps</code></a></p>
 <h3 id="partial"><code>@partial</code><a class="headerlink" href="#partial" title="Permanent link">&para;</a></h3>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">partial</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> 
             <span class="o">*</span><span class="n">preset_pos_args</span><span class="p">,</span> 
@@ -712,8 +758,8 @@ looks nicer to users in terms of apparent documentation, name, etc.</p>
 <h2 id="signature-editing-utils">Signature editing utils<a class="headerlink" href="#signature-editing-utils" title="Permanent link">&para;</a></h2>
 <h3 id="add_signature_parameters"><code>add_signature_parameters</code><a class="headerlink" href="#add_signature_parameters" title="Permanent link">&para;</a></h3>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">add_signature_parameters</span><span class="p">(</span><span class="n">s</span><span class="p">,</span>             <span class="c1"># type: Signature</span>
-                             <span class="n">first</span><span class="o">=</span><span class="p">(),</span>      <span class="c1"># type: Union[Parameter, Iterable[Parameter]]</span>
-                             <span class="n">last</span><span class="o">=</span><span class="p">(),</span>       <span class="c1"># type: Union[Parameter, Iterable[Parameter]]</span>
+                             <span class="n">first</span><span class="o">=</span><span class="p">(),</span>      <span class="c1"># type: Union[str, Parameter, Iterable[Union[str, Parameter]]]</span>
+                             <span class="n">last</span><span class="o">=</span><span class="p">(),</span>       <span class="c1"># type: Union[str, Parameter, Iterable[Union[str, Parameter]]]</span>
                              <span class="n">custom</span><span class="o">=</span><span class="p">(),</span>     <span class="c1"># type: Union[Parameter, Iterable[Parameter]]</span>
                              <span class="n">custom_idx</span><span class="o">=-</span><span class="mi">1</span>  <span class="c1"># type: int</span>
                              <span class="p">):</span>
@@ -722,8 +768,8 @@ looks nicer to users in terms of apparent documentation, name, etc.</p>
 <p>Adds the provided parameters to the signature <code>s</code> (returns a new <code>Signature</code> instance).</p>
 <ul>
 <li><code>s</code>: the original signature to edit</li>
-<li><code>first</code>: a single element or a list of <code>Parameter</code> instances to be added at the beginning of the parameter's list</li>
-<li><code>last</code>: a single element or a list of <code>Parameter</code> instances to be added at the end of the parameter's list</li>
+<li><code>first</code>: a single element or a list of <code>Parameter</code> instances to be added at the beginning of the parameter's list. Strings can also be provided, in which case the parameter kind will be created based on best guess.</li>
+<li><code>last</code>: a single element or a list of <code>Parameter</code> instances to be added at the end of the parameter's list. Strings can also be provided, in which case the parameter kind will be created based on best guess.</li>
 <li><code>custom</code>: a single element or a list of <code>Parameter</code> instances to be added at a custom position in the list. That position is determined with <code>custom_idx</code></li>
 <li><code>custom_idx</code>: the custom position to insert the <code>custom</code> parameters to.</li>
 </ul>

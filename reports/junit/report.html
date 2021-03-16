@@ -243,7 +243,7 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
 }
 </script>
     <h1>report.html</h1>
-    <p>Report generated on 15-Mar-2021 at 11:27:33 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.1.1</p>
+    <p>Report generated on 16-Mar-2021 at 10:46:29 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.1.1</p>
     <h2>Environment</h2>
     <table id="environment">
       <tr>
@@ -265,8 +265,8 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
         <td>Python</td>
         <td>3.7.10</td></tr></table>
     <h2>Summary</h2>
-    <p>68 tests ran in 0.57 seconds. </p>
-    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">68 passed</span>, <input checked="true" class="filter" data-test-result="skipped" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">2 skipped</span>, <input checked="true" class="filter" data-test-result="failed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">0 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
+    <p>73 tests ran in 0.57 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">73 passed</span>, <input checked="true" class="filter" data-test-result="skipped" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">2 skipped</span>, <input checked="true" class="filter" data-test-result="failed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">0 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
     <h2>Results</h2>
     <table id="results-table">
       <thead id="results-table-head">
@@ -768,6 +768,24 @@ func_impl called !
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
+          <td class="col-name">makefun/tests/test_doc.py::test_wraps_add[prepend=True]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">makefun/tests/test_doc.py::test_wraps_add[prepend=False]</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
           <td class="col-name">makefun/tests/test_generators_coroutines.py::test_generator</td>
           <td class="col-duration">0.00</td>
           <td class="col-links"></td></tr>
@@ -876,6 +894,15 @@ func_impl called !
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
+          <td class="col-name">makefun/tests/test_issues.py::test_issue_62</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
           <td class="col-name">makefun/tests/test_partial_and_macros.py::test_doc</td>
           <td class="col-duration">0.00</td>
           <td class="col-links"></td></tr>
@@ -883,8 +910,8 @@ func_impl called !
           <td class="extra" colspan="4">
             <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Help on function bar in module makefun.tests.test_partial_and_macros:
 
-bar(y, x=12)
-    &lt;This function is equivalent to &#x27;foo(y, x=12)&#x27;, see original &#x27;foo&#x27; doc below.&gt;
+bar(*, x=12, y)
+    &lt;This function is equivalent to &#x27;foo(x=12, y)&#x27;, see original &#x27;foo&#x27; doc below.&gt;
     
     a `foo` function
     
@@ -905,8 +932,8 @@ bar(y, x=12)
 1 hello
 Help on function foo in module makefun.tests.test_partial_and_macros:
 
-foo(x, a, y=&#x27;hello&#x27;)
-    &lt;This function is equivalent to &#x27;foo(x, a, y=&#x27;hello&#x27;)&#x27;, see original &#x27;foo&#x27; doc below.&gt;
+foo(x, *, y=&#x27;hello&#x27;, a)
+    &lt;This function is equivalent to &#x27;foo(x, y=&#x27;hello&#x27;, a)&#x27;, see original &#x27;foo&#x27; doc below.&gt;
     
     a `foo` function
     
@@ -929,6 +956,15 @@ foo(x, a, y=&#x27;hello&#x27;)
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">makefun/tests/test_partial_and_macros.py::test_create_with_partial</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">makefun/tests/test_partial_and_macros.py::test_args_order_and_kind</td>
           <td class="col-duration">0.00</td>
           <td class="col-links"></td></tr>
         <tr>
@@ -997,6 +1033,15 @@ hello()
         <tr>
           <td class="col-result">Passed</td>
           <td class="col-name">makefun/tests/test_so.py::test_so_partial2</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">makefun/tests/test_so.py::test_so_partial_posargs</td>
           <td class="col-duration">0.00</td>
           <td class="col-links"></td></tr>
         <tr>
