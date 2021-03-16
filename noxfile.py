@@ -80,8 +80,9 @@ def tests(session: PowerSession, coverage, pkg_specs):
 
         # --coverage + junit html reports
         session.run2("coverage run --source makefun "
-                             "-m pytest --junitxml={dst}/junit.xml --html={dst}/report.html -v makefun/tests/"
-                             "".format(dst=Folders.test_reports))
+                     "-m pytest --junitxml={dst}/junit.xml --html={dst}/report.html -v makefun/tests/"
+                     "".format(dst=Folders.test_reports))
+        # session.run2("coverage report")  # this shows in terminal + fails under XX%, same as --cov-report term --cov-fail-under=70  # noqa
         session.run2("coverage xml -o {covxml}".format(covxml=Folders.coverage_xml))
         session.run2("coverage html -d {dst}".format(dst=Folders.coverage_reports))
         # delete this intermediate file, it is not needed anymore
@@ -90,12 +91,6 @@ def tests(session: PowerSession, coverage, pkg_specs):
         # --generates the badge for the test results and fail build if less than x% tests pass
         nox_logger.info("Generating badge for tests coverage")
         session.run2("python ci_tools/generate-junit-badge.py 100 %s" % Folders.test_reports)
-
-        # TODO instead of pushing to codecov we could generate the cov reports ourselves
-        # session.run2("coverage run")     # this executes pytest + reporting
-        # session.run2("coverage report")  # this shows in terminal + fails under XX%, same as --cov-report term --cov-fail-under=70  # noqa
-        # session.run2("coverage html")    # same than --cov-report html:<dir>
-        # session.run2("coverage xml")     # same than --cov-report xml:<file>
 
 
 @power_session(python=[PY37])
@@ -186,9 +181,9 @@ def release(session: PowerSession):
     # create the github release
     session.install_reqs(phase="release", phase_reqs=["click", "PyGithub"])
     session.run2("python ci_tools/github_release.py -s {gh_token} "
-                         "--repo-slug smarie/python-makefun -cf ./docs/changelog.md "
-                         "-d https://smarie.github.io/python-makefun/changelog/ {tag}".format(gh_token=gh_token,
-                                                                                              tag=current_tag))
+                 "--repo-slug smarie/python-makefun -cf ./docs/changelog.md "
+                 "-d https://smarie.github.io/python-makefun/changelog/ {tag}"
+                 "".format(gh_token=gh_token, tag=current_tag))
 
 
 # if __name__ == '__main__':
