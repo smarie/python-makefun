@@ -6,7 +6,7 @@
 
 [![Documentation](https://img.shields.io/badge/doc-latest-blue.svg)](https://smarie.github.io/python-makefun/) [![PyPI](https://img.shields.io/pypi/v/makefun.svg)](https://pypi.python.org/pypi/makefun/) [![Downloads](https://pepy.tech/badge/makefun)](https://pepy.tech/project/makefun) [![Downloads per week](https://pepy.tech/badge/makefun/week)](https://pepy.tech/project/makefun) [![GitHub stars](https://img.shields.io/github/stars/smarie/python-makefun.svg)](https://github.com/smarie/python-makefun/stargazers)
 
-!!! success "New `remove_args` parameter in [`@wraps`](./api_reference.md#wraps). See [below](#to-inject-a-dynamically-baked-value) for details !"
+!!! success "New `prepend_args`, `append_args`, and `remove_args` parameters in [`@wraps`](./api_reference.md#wraps). See [below](#easier-edits) for details !"
 
 `makefun` helps you create functions dynamically, with the signature of your choice. It was largely inspired by [`decorator`](https://github.com/micheles/decorator) and `functools`, and created mainly to cover some of their limitations.
 
@@ -258,7 +258,7 @@ def foo_wrapper(z, *args, **kwargs):
     return z, output
         
 # call it
-assert foo_wrapper(3, 2) == 3, (2, 0)
+assert foo_wrapper(3, 2) == (3, (2, 0))
 ```
 
 yields
@@ -307,6 +307,30 @@ modified signature: (z, c, o=True)
 
 They might save you a few lines of code if your use-case is not too specific.
 
+##### Easier edits
+
+Now [`@wraps`](./api_reference.md#wraps) supports three new parameters to easily add or remove parameters to a signature: `append_args`, `prepend_args`, and `remove_args`. The above example can therefore be simplified to
+
+```python
+from makefun import wraps
+
+def foo(b, a=0):
+    print("foo called: b=%s, a=%s" % (b, a))
+    return b, a
+
+@wraps(foo, prepend_args='z')
+def foo_wrapper(z, *args, **kwargs):
+    print("foo_wrapper called ! z=%s" % z)
+    # call the foo function 
+    output = foo(*args, **kwargs)
+    # return augmented output
+    return z, output
+        
+# call it
+assert foo_wrapper(3, 2) == (3, (2, 0))
+```
+
+See [api documentation](./api_reference.md#wraps) for details.
 
 #### Removing parameters easily
 
@@ -363,7 +387,7 @@ def foo(x, y):
 
 ##### To inject a dynamically baked value
 
-[`@wraps`](./api_reference.md#wraps) now provides a `remove_args` parameter where you can pass one or several argument names.
+As mentioned [previously](#easier-edits), [`@wraps`](./api_reference.md#wraps) provides a `remove_args` parameter where you can pass one or several argument names.
 
 ```python
 def inject_random_a(f):

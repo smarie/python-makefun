@@ -331,6 +331,25 @@ def test_wraps_remove():
     assert 12 <= summer(b=12) <= 13
 
 
+def test_wraps_add_doc():
+    from makefun import wraps
+
+    def foo(b, a=0):
+        print("foo called: b=%s, a=%s" % (b, a))
+        return b, a
+
+    @wraps(foo, prepend_args='z')
+    def foo_wrapper(z, *args, **kwargs):
+        print("foo_wrapper called ! z=%s" % z)
+        # call the foo function
+        output = foo(*args, **kwargs)
+        # return augmented output
+        return z, output
+
+    # call it
+    assert foo_wrapper(3, 2) == (3, (2, 0))
+
+
 @pytest.mark.parametrize("prepend", [True, False], ids="prepend={}".format)
 def test_wraps_add(prepend):
 

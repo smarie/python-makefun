@@ -138,7 +138,7 @@ It is similar to `functools.wraps`, but
     - the wrapper body will not be executed if the arguments provided are not compliant with the signature - instead a `TypeError` will be raised before entering the wrapper body. 
     - the arguments will always be received as keywords by the wrapper, when possible. See [documentation](./index.md#signature-preserving-function-wrappers) for details.
 
- - **you can modify the signature** of the resulting function, by providing a new one with `new_sig` or by providing a list of arguments to remove in `remove_args`, to prepend in `prepend_args`, or to append in `append_args`. See documentation on [full](./index.md#editing-a-signature) and [quick](./index.md#to-inject-a-dynamically-baked-value) signature edits for details.
+ - **you can modify the signature** of the resulting function, by providing a new one with `new_sig` or by providing a list of arguments to remove in `remove_args`, to prepend in `prepend_args`, or to append in `append_args`. See documentation on [full](./index.md#editing-a-signature) and [quick](./index.md#easier-edits) signature edits for details.
 
 Comparison with `@with_signature`: `@wraps(f)` is equivalent to
 
