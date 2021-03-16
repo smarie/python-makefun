@@ -51,14 +51,16 @@ FUNC_DEF = re.compile('(?s)^\\s*(?P<funcname>[_\\w][_\\w\\d]*)?\\s*'
 def create_wrapper(wrapped,
                    wrapper,
                    new_sig=None,               # type: Union[str, Signature]
+                   prepend_args=None,          # type: Union[str, Parameter, Iterable[Union[str, Parameter]]]
+                   append_args=None,           # type: Union[str, Parameter, Iterable[Union[str, Parameter]]]
                    remove_args=None,           # type: Union[str, Iterable[str]]
                    func_name=None,             # type: str
                    inject_as_first_arg=False,  # type: bool
-                   add_source=True,             # type: bool
-                   add_impl=True,            # type: bool
+                   add_source=True,            # type: bool
+                   add_impl=True,              # type: bool
                    doc=None,                   # type: str
                    qualname=None,              # type: str
-                   module_name=None,            # type: str
+                   module_name=None,           # type: str
                    **attrs
                    ):
     """
@@ -67,17 +69,9 @@ def create_wrapper(wrapped,
 
     See `@makefun.wraps`
     """
-    func_name, func_sig, doc, qualname, module_name, all_attrs = _get_args_for_wrapping(wrapped, new_sig, remove_args,
-                                                                                        func_name, doc, qualname,
-                                                                                        module_name, attrs)
-
-    return create_function(func_sig, wrapper,
-                           func_name=func_name,
-                           inject_as_first_arg=inject_as_first_arg,
-                           add_source=add_source, add_impl=add_impl,
-                           doc=doc, qualname=qualname,
-                           module_name=module_name,
-                           **all_attrs)
+    return wraps(wrapped, new_sig=new_sig, prepend_args=prepend_args, append_args=append_args, remove_args=remove_args,
+                 func_name=func_name, inject_as_first_arg=inject_as_first_arg, add_source=add_source,
+                 add_impl=add_impl, doc=doc, qualname=qualname, module_name=module_name, **attrs)(wrapper)
 
 
 def getattr_partial_aware(obj, att_name, *att_default):
@@ -666,16 +660,18 @@ def _get_callerframe(offset=0):
     return frame
 
 
-def wraps(f,
-          new_sig=None,         # type: Union[str, Signature]
-          remove_args=None,     # type: Union[str, Iterable[str]]
+def wraps(wrapped_fun,
+          new_sig=None,               # type: Union[str, Signature]
+          prepend_args=None,          # type: Union[str, Parameter, Iterable[Union[str, Parameter]]]
+          append_args=None,           # type: Union[str, Parameter, Iterable[Union[str, Parameter]]]
+          remove_args=None,           # type: Union[str, Iterable[str]]
           func_name=None,             # type: str
           inject_as_first_arg=False,  # type: bool
-          add_source=True,   # type: bool
-          add_impl=True,  # type: bool
-          doc=None,         # type: str
-          qualname=None,    # type: str
-          module_name=None,  # type: str
+          add_source=True,            # type: bool
+          add_impl=True,              # type: bool
+          doc=None,                   # type: str
+          qualname=None,              # type: str
+          module_name=None,           # type: str
           **attrs
           ):
     """
@@ -691,9 +687,8 @@ def wraps(f,
           [documentation](./index.md#signature-preserving-function-wrappers) for details.
 
      - you can modify the signature of the resulting function, by providing a new one with `new_sig` or by providing a
-       list of arguments to remove in `remove_args`. See [documentation](./index.md#editing-a-signature) for details.
-       Note that you can now also easily remove arguments from the signature in order to inject them with your own -
-       with the `remove_args` parameter, see [documentation](./index.md#to-inject-a-dynamically-baked-value).
+       list of arguments to remove in `remove_args`, to prepend in `prepend_args`, or to append in `append_args`.
+       See [documentation](./index.md#editing-a-signature) for details.
 
     Comparison with `@with_signature`:`@wraps(f)` is equivalent to
 
@@ -707,15 +702,58 @@ def wraps(f,
                          **attrs)`
 
     In other words, as opposed to `@with_signature`, the metadata (doc, module name, etc.) is provided by the wrapped
-    `f`, so that the created function seems to be identical (except for the signature if a non-None `new_sig` is
-    provided). If `new_sig` is None, we set the additional `__wrapped__` attribute on the created function, to stay
-    compliant with the `functools.wraps` convention.
+    `wrapped_fun`, so that the created function seems to be identical (except possiblyfor the signature).
+    Note that all options in `with_signature` can still be overrided using parameters of `@wraps`.
 
-    All options in `with_signature` remain available for overriding.
+    If the signature is *not* modified through `new_sig`, `remove_args`, `append_args` or `prepend_args`, the
+    additional `__wrapped__` attribute  on the created function, to stay consistent with the `functools.wraps`
+    behaviour.
 
     See also [python documentation on @wraps](https://docs.python.org/3/library/functools.html#functools.wraps)
+
+    :param wrapped_fun: the function that you intend to wrap with the decorated function. As in `functools.wraps`,
+        `wrapped_fun` is used as the default reference for the exposed signature, `__name__`, `__qualname__`, `__doc__`
+        and `__dict__`.
+    :param new_sig: the new signature of the decorated function. By default it is `None` and means "same signature as
+        in `wrapped_fun`" (similar behaviour as in `functools.wraps`). If you wish to modify the exposed signature
+        you can either use `remove/prepend/append_args`, or pass a non-None `new_sig`. It can be either a string
+        without 'def' such as "foo(a, b: int, *args, **kwargs)" of "(a, b: int)", or a `Signature` object, for example
+        from the output of `inspect.signature` or from the `funcsigs.signature` backport. Note that these objects can
+        be created manually too. If the signature is provided as a string and contains a non-empty name, this name
+        will be used instead of the one of `wrapped_fun`.
+    :param prepend_args: a string or list of strings to prepend to the signature of `wrapped_fun`. These extra arguments
+        should not be passed to `wrapped_fun`, as it does not know them. This is typically used to easily create a
+        wrapper with additional arguments, without having to manipulate the signature objects.
+    :param append_args: a string or list of strings to append to the signature of `wrapped_fun`. These extra arguments
+        should not be passed to `wrapped_fun`, as it does not know them. This is typically used to easily create a
+        wrapper with additional arguments, without having to manipulate the signature objects.
+    :param remove_args: a string or list of strings to remove from the signature of `wrapped_fun`. These arguments
+        should be injected in the received `kwargs` before calling `wrapped_fun`, as it requires them. This is typically
+        used to easily create a wrapper with less arguments, without having to manipulate the signature objects.
+    :param func_name: provide a non-`None` value to override the created function `__name__` and `__qualname__`. If this
+        is `None` (default), the `__name__` will default to the ones of `wrapped_fun` if `new_sig` is `None` or is a
+        `Signature`, or to the name defined in `new_sig` if `new_sig` is a `str` and contains a non-empty name.
+    :param inject_as_first_arg: if `True`, the created function will be injected as the first positional argument of
+        the decorated function. This can be handy in case the implementation is shared between several facades and needs
+        to know from which context it was called. Default=`False`
+    :param add_source: a boolean indicating if a '__source__' annotation should be added to the generated function
+        (default: True)
+    :param add_impl: a boolean indicating if a '__func_impl__' annotation should be added to the generated function
+        (default: True)
+    :param doc: a string representing the docstring that will be used to set the __doc__ attribute on the generated
+        function. If None (default), the doc of `wrapped_fun` will be used. If `wrapped_fun` is an instance of
+        `functools.partial`, a special enhanced doc will be generated.
+    :param qualname: a string representing the qualified name to be used. If None (default), the `__qualname__` will
+        default to the one of `wrapped_fun`, or the one in `new_sig` if `new_sig` is provided as a string with a
+        non-empty function name.
+    :param module_name: the name of the module to be set on the function (under __module__ ). If None (default), the
+        `__module__` attribute of `wrapped_fun` will be used.
+    :param attrs: other keyword attributes that should be set on the function. Note that the full `__dict__` of
+        `wrapped_fun` is automatically copied.
+    :return: a decorator
     """
-    func_name, func_sig, doc, qualname, module_name, all_attrs = _get_args_for_wrapping(f, new_sig, remove_args,
+    func_name, func_sig, doc, qualname, module_name, all_attrs = _get_args_for_wrapping(wrapped_fun, new_sig, remove_args,
+                                                                                        prepend_args, append_args,
                                                                                         func_name, doc,
                                                                                         qualname, module_name, attrs)
 
@@ -729,13 +767,16 @@ def wraps(f,
                           **all_attrs)
 
 
-def _get_args_for_wrapping(wrapped, new_sig, remove_args, func_name, doc, qualname, module_name, attrs):
+def _get_args_for_wrapping(wrapped, new_sig, remove_args, prepend_args, append_args,
+                           func_name, doc, qualname, module_name, attrs):
     """
     Internal method used by @wraps and create_wrapper
 
     :param wrapped:
     :param new_sig:
     :param remove_args:
+    :param prepend_args:
+    :param append_args:
     :param func_name:
     :param doc:
     :param qualname:
@@ -744,25 +785,44 @@ def _get_args_for_wrapping(wrapped, new_sig, remove_args, func_name, doc, qualna
     :return:
     """
     # the desired signature
+    has_new_sig = False
     if new_sig is not None:
-        if remove_args is not None:
-            raise ValueError("Only one of `remove_args` or `new_sig` should be provided")
+        if remove_args is not None or prepend_args is not None or append_args is not None:
+            raise ValueError("Only one of `[remove/prepend/append]_args` or `new_sig` should be provided")
         func_sig = new_sig
+        has_new_sig = True
     else:
         func_sig = signature(wrapped)
         if remove_args:
             if isinstance(remove_args, string_types):
                 remove_args = (remove_args,)
             func_sig = remove_signature_parameters(func_sig, *remove_args)
+            has_new_sig = True
+
+        if prepend_args:
+            if isinstance(prepend_args, string_types):
+                prepend_args = (prepend_args,)
+        else:
+            prepend_args = ()
+
+        if append_args:
+            if isinstance(append_args, string_types):
+                append_args = (append_args,)
+        else:
+            append_args = ()
+
+        if prepend_args or append_args:
+            has_new_sig = True
+            func_sig = add_signature_parameters(func_sig, first=prepend_args, last=append_args)
 
     # the desired metadata
     if func_name is None:
         func_name = getattr_partial_aware(wrapped, '__name__', None)
     if doc is None:
         doc = getattr(wrapped, '__doc__', None)
-        if isinstance(wrapped, functools.partial) and new_sig is None \
+        if isinstance(wrapped, functools.partial) and not has_new_sig \
                 and doc == functools.partial(lambda: True).__doc__:
-            # this is the default generic partial doc. generate a better doc, since we know that the sig is not messed with
+            # the default generic partial doc. Generate a better doc, since we know that the sig is not messed with
             orig_sig = signature(wrapped.func)
             doc = gen_partial_doc(getattr_partial_aware(wrapped.func, '__name__', None),
                                   getattr_partial_aware(wrapped.func, '__doc__', None),
@@ -774,7 +834,7 @@ def _get_args_for_wrapping(wrapped, new_sig, remove_args, func_name, doc, qualna
 
     # attributes: start from the wrapped dict, add '__wrapped__' if needed, and override with all attrs.
     all_attrs = copy(getattr_partial_aware(wrapped, '__dict__'))
-    if new_sig is None:
+    if not has_new_sig:
         # there was no change of signature so we can safely set the __wrapped__ attribute
         all_attrs['__wrapped__'] = wrapped
     all_attrs.update(attrs)
@@ -888,8 +948,8 @@ def remove_signature_parameters(s,
 
 
 def add_signature_parameters(s,             # type: Signature
-                             first=(),      # type: Union[Parameter, Iterable[Parameter]]
-                             last=(),       # type: Union[Parameter, Iterable[Parameter]]
+                             first=(),      # type: Union[str, Parameter, Iterable[Union[str, Parameter]]]
+                             last=(),       # type: Union[str, Parameter, Iterable[Union[str, Parameter]]]
                              custom=(),     # type: Union[Parameter, Iterable[Parameter]]
                              custom_idx=-1  # type: int
                              ):
@@ -898,8 +958,9 @@ def add_signature_parameters(s,             # type: Signature
 
     :param s: the original signature to edit
     :param first: a single element or a list of `Parameter` instances to be added at the beginning of the parameter's
-        list
-    :param last: a single element or a list of `Parameter` instances to be added at the end of the parameter's list
+        list. Strings can also be provided, in which case the parameter kind will be created based on best guess.
+    :param last: a single element or a list of `Parameter` instances to be added at the end of the parameter's list.
+        Strings can also be provided, in which case the parameter kind will be created based on best guess.
     :param custom: a single element or a list of `Parameter` instances to be added at a custom position in the list.
         That position is determined with `custom_idx`
     :param custom_idx: the custom position to insert the `custom` parameters to.
@@ -923,8 +984,28 @@ def add_signature_parameters(s,             # type: Signature
             lst.insert(custom_idx, custom)
 
     # prepend but keep the order
+    first_param_kind = None
     try:
         for param in reversed(first):
+            if isinstance(param, string_types):
+                # Create a Parameter with auto-guessed 'kind'
+                if first_param_kind is None:
+                    # by default use this
+                    first_param_kind = Parameter.POSITIONAL_OR_KEYWORD
+                    try:
+                        # check the first parameter kind
+                        first_param_kind = next(iter(params.values())).kind
+                    except StopIteration:
+                        # no parameter - ok
+                        pass
+                # if the first parameter is a pos-only or a varpos we have to change to pos only.
+                if first_param_kind in (Parameter.POSITIONAL_ONLY, Parameter.VAR_POSITIONAL):
+                    first_param_kind = Parameter.POSITIONAL_ONLY
+                param = Parameter(name=param, kind=first_param_kind)
+            else:
+                # remember the kind
+                first_param_kind = param.kind
+
             if param.name in params:
                 raise ValueError("Parameter with name '%s' is present twice in the signature to create" % param.name)
             else:
@@ -937,8 +1018,28 @@ def add_signature_parameters(s,             # type: Signature
             lst.insert(0, first)
 
     # append
+    last_param_kind = None
     try:
         for param in last:
+            if isinstance(param, string_types):
+                # Create a Parameter with auto-guessed 'kind'
+                if last_param_kind is None:
+                    # by default use this
+                    last_param_kind = Parameter.POSITIONAL_OR_KEYWORD
+                    try:
+                        # check the last parameter kind
+                        last_param_kind = next(reversed(params.values())).kind
+                    except StopIteration:
+                        # no parameter - ok
+                        pass
+                # if the last parameter is a keyword-only or a varkw we have to change to kw only.
+                if last_param_kind in (Parameter.KEYWORD_ONLY, Parameter.VAR_KEYWORD):
+                    last_param_kind = Parameter.KEYWORD_ONLY
+                param = Parameter(name=param, kind=last_param_kind)
+            else:
+                # remember the kind
+                last_param_kind = param.kind
+
             if param.name in params:
                 raise ValueError("Parameter with name '%s' is present twice in the signature to create" % param.name)
             else:

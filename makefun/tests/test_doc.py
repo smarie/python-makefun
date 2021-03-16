@@ -328,3 +328,33 @@ def test_wraps_remove():
         return a + b
 
     assert 12 <= summer(b=12) <= 13
+
+
+@pytest.mark.parametrize("prepend", [True, False], ids="prepend={}".format)
+def test_wraps_add(prepend):
+
+    def add_a_to_result(f):
+        """
+        A decorator that injects a random number inside the `a` argument,
+        removing it from the exposed signature
+        """
+        if prepend:
+            decorator = wraps(f, prepend_args='a')
+        else:
+            decorator = wraps(f, append_args='a')
+
+        @decorator
+        def my_wrapper(*args, a, **kwargs):
+            # a is automatically extracted from the sig
+            return a + f(*args, **kwargs)
+
+        return my_wrapper
+
+    @add_a_to_result
+    def identity(b):
+        return b
+
+    assert identity(b=12, a=0.5) == 12.5
+
+    ref_str = "(a, b)" if prepend else "(b, a)"
+    assert str(signature(identity)) == ref_str

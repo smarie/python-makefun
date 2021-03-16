@@ -115,6 +115,8 @@ is totally equivalent to `impl = create_function(<arguments>, func_impl=impl)` e
 ```python
 def wraps(f,
           new_sig: Union[str, Signature] = None,
+          prepend_args: Union[str, Parameter, Iterable[Union[str, Parameter]]] = None,
+          append_args: Union[str, Parameter, Iterable[Union[str, Parameter]]] = None,
           remove_args: Union[str, Iterable[str]] = None,
           func_name: str = None,
           inject_as_first_arg: bool = False,
@@ -136,7 +138,7 @@ It is similar to `functools.wraps`, but
     - the wrapper body will not be executed if the arguments provided are not compliant with the signature - instead a `TypeError` will be raised before entering the wrapper body. 
     - the arguments will always be received as keywords by the wrapper, when possible. See [documentation](./index.md#signature-preserving-function-wrappers) for details.
 
- - **you can modify the signature** of the resulting function, by providing a new one with `new_sig`. See [documentation](./index.md#editing-a-signature) for details. Note that you can now also easily remove arguments from the signature in order to inject them with your own - with the `remove_args` parameter, see [documentation](./index.md#to-inject-a-dynamically-baked-value).
+ - **you can modify the signature** of the resulting function, by providing a new one with `new_sig` or by providing a list of arguments to remove in `remove_args`, to prepend in `prepend_args`, or to append in `append_args`. See documentation on [full](./index.md#editing-a-signature) and [quick](./index.md#to-inject-a-dynamically-baked-value) signature edits for details.
 
 Comparison with `@with_signature`: `@wraps(f)` is equivalent to
 
@@ -149,11 +151,40 @@ Comparison with `@with_signature`: `@wraps(f)` is equivalent to
                      **f.__dict__,
                      **attrs)`
 
-In other words, as opposed to `@with_signature`, the metadata (doc, module name, etc.) is provided by the wrapped `f`, so that the created function seems to be identical (except for the signature if a non-None `new_sig` is provided). If `new_sig` is None, we set the additional `__wrapped__` attribute on the created function, to stay compliant with the `functools.wraps` convention.
+In other words, as opposed to `@with_signature`, the metadata (doc, module name, etc.) is provided by the wrapped `wrapped_fun`, so that the created function seems to be identical (except possiblyfor the signature). Note that all options in `with_signature` can still be overrided using parameters of `@wraps`.
 
-All options in `with_signature` remain available for overriding.
+If the signature is *not* modified through `new_sig`, `remove_args`, `append_args` or `prepend_args`, the additional `__wrapped__` attribute  on the created function, to stay consistent with the `functools.wraps` behaviour.
 
 See also [python documentation on @wraps](https://docs.python.org/3/library/functools.html#functools.wraps)
+
+**Parameters**
+
+ - `wrapped_fun`: the function that you intend to wrap with the decorated function. As in `functools.wraps`, `wrapped_fun` is used as the default reference for the exposed signature, `__name__`, `__qualname__`, `__doc__` and `__dict__`.
+   
+ - `new_sig`: the new signature of the decorated function. By default it is `None` and means "same signature as in `wrapped_fun`" (similar behaviour as in `functools.wraps`) If you wish to modify the exposed signature you can either use `remove/prepend/append_args`, or pass a non-None `new_sig`. It can be either a string without 'def' such as "foo(a, b: int, *args, **kwargs)" of "(a, b: int)", or a `Signature` object, for example from the output of `inspect.signature` or from the `funcsigs.signature` backport. Note that these objects can be created manually too. If the signature is provided as a string and contains a non-empty name, this name will be used instead of the one of `wrapped_fun`.
+   
+ - `prepend_args`: a string or list of strings to prepend to the signature of `wrapped_fun`. These extra arguments should not be passed to `wrapped_fun`, as it does not know them. This is typically used to easily create a wrapper with additional arguments, without having to manipulate the signature objects.
+   
+ - `append_args`: a string or list of strings to append to the signature of `wrapped_fun`. These extra arguments should not be passed to `wrapped_fun`, as it does not know them. This is typically used to easily create a wrapper with additional arguments, without having to manipulate the signature objects.
+   
+ - `remove_args`: a string or list of strings to remove from the signature of `wrapped_fun`. These arguments should be injected in the received `kwargs` before calling `wrapped_fun`, as it requires them. This is typically used to easily create a wrapper with less arguments, without having to manipulate the signature objects.
+   
+ - `func_name`: provide a non-`None` value to override the created function `__name__` and `__qualname__`. If this is `None` (default), the `__name__` will default to the ones of `wrapped_fun` if `new_sig` is `None` or is a `Signature`, or to the name defined in `new_sig` if `new_sig` is a `str` and contains a non-empty name.
+   
+ - `inject_as_first_arg`: if `True`, the created function will be injected as the first positional argument of the decorated function. This can be handy in case the implementation is shared between several facades and needs to know from which context it was called. Default=`False`
+   
+ - `add_source`: a boolean indicating if a '__source__' annotation should be added to the generated function (default: True)
+   
+ - `add_impl`: a boolean indicating if a '__func_impl__' annotation should be added to the generated function (default: True)
+   
+ - `doc`: a string representing the docstring that will be used to set the __doc__ attribute on the generated function. If None (default), the doc of `wrapped_fun` will be used. If `wrapped_fun` is an instance of `functools.partial`, a special enhanced doc will be generated.
+   
+ - `qualname`: a string representing the qualified name to be used. If None (default), the `__qualname__` will default to the one of `wrapped_fun`, or the one in `new_sig` if `new_sig` is provided as a string with a non-empty function name.
+   
+ - `module_name`: the name of the module to be set on the function (under __module__ ). If None (default), the `__module__` attribute of `wrapped_fun` will be used.
+   
+ - `attrs`: other keyword attributes that should be set on the function. Note that the full `__dict__` of `wrapped_fun` is automatically copied.
+
 
 ### `create_wrapper`
 
@@ -161,6 +192,8 @@ See also [python documentation on @wraps](https://docs.python.org/3/library/func
 def create_wrapper(wrapped,
                    wrapper,
                    new_sig: Union[str, Signature] = None,
+                   prepend_args: Union[str, Parameter, Iterable[Union[str, Parameter]]] = None,
+                   append_args: Union[str, Parameter, Iterable[Union[str, Parameter]]] = None,
                    remove_args: Union[str, Iterable[str]] = None,
                    func_name: str = None,
                    inject_as_first_arg: bool = False,
@@ -173,7 +206,7 @@ def create_wrapper(wrapped,
                    ):
 ```
 
-Creates a signature-preserving wrapper function. `create_wrapper(wrapped, wrapper, **kwargs)` is equivalent to `wraps(wrapped, **kwargs)(wrapper)`.
+Creates a signature-preserving wrapper function. `create_wrapper(wrapped, wrapper, **kwargs)` is equivalent to `wraps(wrapped, **kwargs)(wrapper)`. See [`@wraps`](#wraps)
 
 ### `@partial`
 
@@ -205,8 +238,8 @@ Decorator to 'partialize' a function using [`partial`](#partial).
 
 ```python
 def add_signature_parameters(s,             # type: Signature
-                             first=(),      # type: Union[Parameter, Iterable[Parameter]]
-                             last=(),       # type: Union[Parameter, Iterable[Parameter]]
+                             first=(),      # type: Union[str, Parameter, Iterable[Union[str, Parameter]]]
+                             last=(),       # type: Union[str, Parameter, Iterable[Union[str, Parameter]]]
                              custom=(),     # type: Union[Parameter, Iterable[Parameter]]
                              custom_idx=-1  # type: int
                              ):
@@ -215,8 +248,8 @@ def add_signature_parameters(s,             # type: Signature
 Adds the provided parameters to the signature `s` (returns a new `Signature` instance).
 
  - `s`: the original signature to edit
- - `first`: a single element or a list of `Parameter` instances to be added at the beginning of the parameter's list
- - `last`: a single element or a list of `Parameter` instances to be added at the end of the parameter's list
+ - `first`: a single element or a list of `Parameter` instances to be added at the beginning of the parameter's list. Strings can also be provided, in which case the parameter kind will be created based on best guess.
+ - `last`: a single element or a list of `Parameter` instances to be added at the end of the parameter's list. Strings can also be provided, in which case the parameter kind will be created based on best guess.
  - `custom`: a single element or a list of `Parameter` instances to be added at a custom position in the list. That position is determined with `custom_idx`
  - `custom_idx`: the custom position to insert the `custom` parameters to.
 
