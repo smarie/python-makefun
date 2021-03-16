@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.11.1 - bugfix
+
+ - Fixed a bug happening when trying to generate a function where `float('inf')` is used as a default value. Fixes [#63](https://github.com/smarie/python-makefun/issues/63).
+
 ### 1.11.0 - `partial` bugfixes and improvements + new `wraps` parameters
 
  - `@wraps` now has new arguments `prepend_arg` and `append_arg` to quickly prepend or append a new parameter to a function signature. Fixes [#65](https://github.com/smarie/python-makefun/issues/65)
