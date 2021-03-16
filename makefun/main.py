@@ -351,6 +351,11 @@ def get_signature_string(func_name, func_signature, evaldict):
     return "%s%s:" % (func_name, s)
 
 
+TYPES_WITH_SAFE_REPR = (int, str, bytes, bool)
+# IMPORTANT note: float is not in the above list because not all floats have a repr that is valid for the
+# compiler: float('nan'), float('-inf') and float('inf') or float('+inf') have an invalid repr.
+
+
 def _signature_symbol_needs_protection(symbol, evaldict):
     """
     Helper method for signature symbols (defaults, type hints) protection.
@@ -359,7 +364,7 @@ def _signature_symbol_needs_protection(symbol, evaldict):
     :param symbol:
     :return:
     """
-    if symbol is not None and symbol is not Parameter.empty and not isinstance(symbol, (int, str, float, bool)):
+    if symbol is not None and symbol is not Parameter.empty and not isinstance(symbol, TYPES_WITH_SAFE_REPR):
         try:
             # check if the repr() of the default value is equal to itself.
             return eval(repr(symbol), evaldict) != symbol

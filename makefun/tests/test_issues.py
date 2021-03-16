@@ -2,6 +2,11 @@ import sys
 
 import pytest
 
+try:  # python 3.3+
+    from inspect import signature, Signature, Parameter
+except ImportError:
+    from funcsigs import signature, Signature, Parameter
+
 from makefun import wraps, with_signature, partial
 
 
@@ -138,3 +143,13 @@ def test_issue_62():
 
     fp = partial(f, 0)
     assert fp(-1) == -1
+
+
+def test_issue_63():
+    """https://github.com/smarie/python-makefun/issues/63"""
+    def a(foo=float("inf")):
+        pass
+
+    @with_signature(signature(a))
+    def test(*args, **kwargs):
+        return a(*args, **kwargs)
