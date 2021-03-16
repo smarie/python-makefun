@@ -512,7 +512,7 @@
 <p>In general, using <code>help(symbol)</code> is the recommended way to get the latest documentation. In addition, this page provides an overview of the various elements in this package.</p>
 <h2 id="main-symbols">Main symbols<a class="headerlink" href="#main-symbols" title="Permanent link">&para;</a></h2>
 <h3 id="create_function"><code>create_function</code><a class="headerlink" href="#create_function" title="Permanent link">&para;</a></h3>
-<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">create_function</span><span class="p">(</span><span class="n">func_signature</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Signature</span><span class="p">],</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_function</span><span class="p">(</span><span class="n">func_signature</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Signature</span><span class="p">],</span>
                     <span class="n">func_impl</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">],</span>
                     <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                     <span class="n">inject_as_first_arg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -523,7 +523,6 @@
                     <span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                     <span class="o">**</span><span class="n">attrs</span><span class="p">):</span>
 </code></pre></div>
-
 <p>Creates a function with signature <code>func_signature</code> that will call <code>func_impl</code> when called. All arguments received by the generated function will be propagated as keyword-arguments to <code>func_impl</code> when it is possible (so all the time, except for var-positional or positional-only arguments that get passed as *args. Note that positional-only does not yet exist in python but this case is already covered because it is supported by <code>Signature</code> objects).</p>
 <p><code>func_signature</code> can be provided in different formats:</p>
 <ul>
@@ -581,7 +580,7 @@
 </li>
 </ul>
 <h3 id="with_signature"><code>@with_signature</code><a class="headerlink" href="#with_signature" title="Permanent link">&para;</a></h3>
-<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">with_signature</span><span class="p">(</span><span class="n">func_signature</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Signature</span><span class="p">],</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">with_signature</span><span class="p">(</span><span class="n">func_signature</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Signature</span><span class="p">],</span>
                    <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                    <span class="n">inject_as_first_arg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                    <span class="n">add_source</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -592,13 +591,11 @@
                    <span class="o">**</span><span class="n">attrs</span>
                    <span class="p">):</span>
 </code></pre></div>
-
 <p>A decorator for functions, to change their signature. The new signature should be compliant with the old one.</p>
-<div class="codehilite"><pre><span></span><code><span class="nd">@with_signature</span><span class="p">(</span><span class="o">&lt;</span><span class="n">arguments</span><span class="o">&gt;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="nd">@with_signature</span><span class="p">(</span><span class="o">&lt;</span><span class="n">arguments</span><span class="o">&gt;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">impl</span><span class="p">(</span><span class="o">...</span><span class="p">):</span>
     <span class="o">...</span>
 </code></pre></div>
-
 <p>is totally equivalent to <code>impl = create_function(&lt;arguments&gt;, func_impl=impl)</code> except for one additional behaviour:</p>
 <ul>
 <li>
@@ -633,7 +630,7 @@
 </li>
 </ul>
 <h3 id="wraps"><code>@wraps</code><a class="headerlink" href="#wraps" title="Permanent link">&para;</a></h3>
-<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">wraps</span><span class="p">(</span><span class="n">f</span><span class="p">,</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">wraps</span><span class="p">(</span><span class="n">f</span><span class="p">,</span>
           <span class="n">new_sig</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Signature</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
           <span class="n">prepend_args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
           <span class="n">append_args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -648,7 +645,6 @@
           <span class="o">**</span><span class="n">attrs</span>
           <span class="p">):</span>
 </code></pre></div>
-
 <p>A decorator to create a signature-preserving wrapper function.</p>
 <p>It is similar to <code>functools.wraps</code>, but </p>
 <ul>
@@ -660,11 +656,11 @@
 </ul>
 </li>
 <li>
-<p><strong>you can modify the signature</strong> of the resulting function, by providing a new one with <code>new_sig</code> or by providing a list of arguments to remove in <code>remove_args</code>, to prepend in <code>prepend_args</code>, or to append in <code>append_args</code>. See documentation on <a href="..#editing-a-signature">full</a> and <a href="..#to-inject-a-dynamically-baked-value">quick</a> signature edits for details.</p>
+<p><strong>you can modify the signature</strong> of the resulting function, by providing a new one with <code>new_sig</code> or by providing a list of arguments to remove in <code>remove_args</code>, to prepend in <code>prepend_args</code>, or to append in <code>append_args</code>. See documentation on <a href="..#editing-a-signature">full</a> and <a href="..#easier-edits">quick</a> signature edits for details.</p>
 </li>
 </ul>
 <p>Comparison with <code>@with_signature</code>: <code>@wraps(f)</code> is equivalent to</p>
-<div class="codehilite"><pre><span></span><code>`@with_signature(signature(f),
+<div class="highlight"><pre><span></span><code>`@with_signature(signature(f),
                  func_name=f.__name__,
                  doc=f.__doc__,
                  module_name=f.__module__,
@@ -673,7 +669,6 @@
                  **f.__dict__,
                  **attrs)`
 </code></pre></div>
-
 <p>In other words, as opposed to <code>@with_signature</code>, the metadata (doc, module name, etc.) is provided by the wrapped <code>wrapped_fun</code>, so that the created function seems to be identical (except possiblyfor the signature). Note that all options in <code>with_signature</code> can still be overrided using parameters of <code>@wraps</code>.</p>
 <p>If the signature is <em>not</em> modified through <code>new_sig</code>, <code>remove_args</code>, <code>append_args</code> or <code>prepend_args</code>, the additional <code>__wrapped__</code> attribute  on the created function, to stay consistent with the <code>functools.wraps</code> behaviour.</p>
 <p>See also <a href="https://docs.python.org/3/library/functools.html#functools.wraps">python documentation on @wraps</a></p>
@@ -720,7 +715,7 @@
 </li>
 </ul>
 <h3 id="create_wrapper"><code>create_wrapper</code><a class="headerlink" href="#create_wrapper" title="Permanent link">&para;</a></h3>
-<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">create_wrapper</span><span class="p">(</span><span class="n">wrapped</span><span class="p">,</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_wrapper</span><span class="p">(</span><span class="n">wrapped</span><span class="p">,</span>
                    <span class="n">wrapper</span><span class="p">,</span>
                    <span class="n">new_sig</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Signature</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                    <span class="n">prepend_args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -736,35 +731,31 @@
                    <span class="o">**</span><span class="n">attrs</span>
                    <span class="p">):</span>
 </code></pre></div>
-
 <p>Creates a signature-preserving wrapper function. <code>create_wrapper(wrapped, wrapper, **kwargs)</code> is equivalent to <code>wraps(wrapped, **kwargs)(wrapper)</code>. See <a href="#wraps"><code>@wraps</code></a></p>
 <h3 id="partial"><code>@partial</code><a class="headerlink" href="#partial" title="Permanent link">&para;</a></h3>
-<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">partial</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> 
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">partial</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> 
             <span class="o">*</span><span class="n">preset_pos_args</span><span class="p">,</span> 
             <span class="o">**</span><span class="n">preset_kwargs</span>
             <span class="p">):</span>
 </code></pre></div>
-
 <p>Equivalent of <code>functools.partial</code> but relies on a dynamically-created function. As a result the function
 looks nicer to users in terms of apparent documentation, name, etc.</p>
 <p>See <a href="..#removing-parameters-easily">documentation</a> for details.</p>
 <h3 id="with_partial"><code>@with_partial</code><a class="headerlink" href="#with_partial" title="Permanent link">&para;</a></h3>
-<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">with_partial</span><span class="p">(</span><span class="o">*</span><span class="n">preset_pos_args</span><span class="p">,</span> 
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">with_partial</span><span class="p">(</span><span class="o">*</span><span class="n">preset_pos_args</span><span class="p">,</span> 
                  <span class="o">**</span><span class="n">preset_kwargs</span>
                  <span class="p">):</span>
 </code></pre></div>
-
 <p>Decorator to 'partialize' a function using <a href="#partial"><code>partial</code></a>.</p>
 <h2 id="signature-editing-utils">Signature editing utils<a class="headerlink" href="#signature-editing-utils" title="Permanent link">&para;</a></h2>
 <h3 id="add_signature_parameters"><code>add_signature_parameters</code><a class="headerlink" href="#add_signature_parameters" title="Permanent link">&para;</a></h3>
-<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">add_signature_parameters</span><span class="p">(</span><span class="n">s</span><span class="p">,</span>             <span class="c1"># type: Signature</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">add_signature_parameters</span><span class="p">(</span><span class="n">s</span><span class="p">,</span>             <span class="c1"># type: Signature</span>
                              <span class="n">first</span><span class="o">=</span><span class="p">(),</span>      <span class="c1"># type: Union[str, Parameter, Iterable[Union[str, Parameter]]]</span>
                              <span class="n">last</span><span class="o">=</span><span class="p">(),</span>       <span class="c1"># type: Union[str, Parameter, Iterable[Union[str, Parameter]]]</span>
                              <span class="n">custom</span><span class="o">=</span><span class="p">(),</span>     <span class="c1"># type: Union[Parameter, Iterable[Parameter]]</span>
                              <span class="n">custom_idx</span><span class="o">=-</span><span class="mi">1</span>  <span class="c1"># type: int</span>
                              <span class="p">):</span>
 </code></pre></div>
-
 <p>Adds the provided parameters to the signature <code>s</code> (returns a new <code>Signature</code> instance).</p>
 <ul>
 <li><code>s</code>: the original signature to edit</li>
@@ -774,10 +765,9 @@ looks nicer to users in terms of apparent documentation, name, etc.</p>
 <li><code>custom_idx</code>: the custom position to insert the <code>custom</code> parameters to.</li>
 </ul>
 <h3 id="remove_signature_parameters"><code>remove_signature_parameters</code><a class="headerlink" href="#remove_signature_parameters" title="Permanent link">&para;</a></h3>
-<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">remove_signature_parameters</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> 
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">remove_signature_parameters</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> 
                                 <span class="o">*</span><span class="n">param_names</span><span class="p">):</span>
 </code></pre></div>
-
 <p>Removes the provided parameters from the signature <code>s</code> (returns a new <code>Signature</code> instance).</p>
 <h2 id="pseudo-compilation">Pseudo-compilation<a class="headerlink" href="#pseudo-compilation" title="Permanent link">&para;</a></h2>
 <h3 id="compile_fun"><code>compile_fun</code><a class="headerlink" href="#compile_fun" title="Permanent link">&para;</a></h3>
