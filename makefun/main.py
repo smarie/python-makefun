@@ -839,8 +839,14 @@ def _get_args_for_wrapping(wrapped, new_sig, remove_args, prepend_args, append_a
 
     # attributes: start from the wrapped dict, add '__wrapped__' if needed, and override with all attrs.
     all_attrs = copy(getattr_partial_aware(wrapped, '__dict__'))
-    if not has_new_sig:
-        # there was no change of signature so we can safely set the __wrapped__ attribute
+    if has_new_sig:
+        # change of signature: delete the __wrapped__ attribute if any
+        try:
+            del all_attrs['__wrapped__']
+        except KeyError:
+            pass
+    else:
+        # no change of signature: we can safely set the __wrapped__ attribute
         all_attrs['__wrapped__'] = wrapped
     all_attrs.update(attrs)
 

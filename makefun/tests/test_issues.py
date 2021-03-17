@@ -153,3 +153,34 @@ def test_issue_63():
     @with_signature(signature(a))
     def test(*args, **kwargs):
         return a(*args, **kwargs)
+
+
+def test_issue_66():
+    """Chain of @wraps with sig mod https://github.com/smarie/python-makefun/issues/66"""
+
+    def a(foo):
+        return foo + 1
+
+    assert a(1) == 2
+
+    # create a first wrapper that is signature-preserving
+
+    @wraps(a)
+    def wrapper(foo):
+        return a(foo) - 1
+
+    assert wrapper(1) == 1
+
+    # the __wrapped__ attr is here:
+    assert wrapper.__wrapped__ is a
+
+    # create a second wrapper that is not signature-preserving
+
+    @wraps(wrapper, append_args="bar")
+    def second_wrapper(foo, bar):
+        return wrapper(foo) + bar
+
+    assert second_wrapper(1, -1) == 0
+
+    with pytest.raises(AttributeError):
+        second_wrapper.__wrapped__
