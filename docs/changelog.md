@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.11.2 - bugfix with chained `@wraps`
+
+ - Fixed issue where `@wraps` does not remove the `__wrapped__` attribute when it wraps an already-wrapped function, and modifies its signature. Fixes [#66](https://github.com/smarie/python-makefun/issues/66)
+
 ### 1.11.1 - bugfix
 
  - Fixed a bug happening when trying to generate a function where `float('inf')` is used as a default value. Fixes [#63](https://github.com/smarie/python-makefun/issues/63).
