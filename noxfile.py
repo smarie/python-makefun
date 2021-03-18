@@ -35,7 +35,7 @@ nox.options.default_venv_backend = "conda"
 # nox.options.verbose = True
 
 nox_logger = logging.getLogger("nox")
-nox_logger.setLevel(logging.INFO)
+# nox_logger.setLevel(logging.INFO)  NO !!!! this prevents the "verbose" nox flag to work !
 
 
 class Folders:
@@ -62,11 +62,24 @@ def tests(session: PowerSession, coverage, pkg_specs):
     rm_file(Folders.root / ".coverage")
     rm_file(Folders.root / "coverage.xml")
 
+    # CI-only dependencies
+    # Did we receive a flag through positional arguments ? (nox -s tests -- <flag>)
+    # install_keyrings_alt = False
+    # if len(session.posargs) == 1:
+    #     assert session.posargs[0] == "keyrings.alt"
+    #     install_keyrings_alt = True
+    # elif len(session.posargs) > 1:
+    #     raise ValueError("Only a single positional argument is accepted, received: %r" % session.posargs)
+
     # uncomment and edit if you wish to uninstall something without deleting the whole env
-    # session_run(session, "pip uninstall pytest-asyncio --yes")
+    # session.run2("pip uninstall pytest-asyncio --yes")
 
     # install all requirements
     session.install_reqs(setup=True, install=True, tests=True, versions_dct=pkg_specs)
+
+    # install CI-only dependencies
+    # if install_keyrings_alt:
+    #     session.install2("keyrings.alt")
 
     # install self so that it is recognized by pytest
     session.run2("pip install -e . --no-deps")
