@@ -64,10 +64,10 @@ def tests(session: PowerSession, coverage, pkg_specs):
 
     # CI-only dependencies
     # Did we receive a flag through positional arguments ? (nox -s tests -- <flag>)
-    # install_keyrings_alt = False
+    # install_ci_deps = False
     # if len(session.posargs) == 1:
     #     assert session.posargs[0] == "keyrings.alt"
-    #     install_keyrings_alt = True
+    #     install_ci_deps = True
     # elif len(session.posargs) > 1:
     #     raise ValueError("Only a single positional argument is accepted, received: %r" % session.posargs)
 
@@ -78,8 +78,18 @@ def tests(session: PowerSession, coverage, pkg_specs):
     session.install_reqs(setup=True, install=True, tests=True, versions_dct=pkg_specs)
 
     # install CI-only dependencies
-    # if install_keyrings_alt:
+    # if install_ci_deps:
     #     session.install2("keyrings.alt")
+
+    # list all (conda list alone does not work correctly on github actions)
+    # session.run2("conda list")
+    conda_prefix = Path(session.bin)
+    if conda_prefix.name == "bin":
+        conda_prefix = conda_prefix.parent
+    session.run2("conda list", env={"CONDA_PREFIX": str(conda_prefix), "CONDA_DEFAULT_ENV": session.get_session_id()})
+
+    # Fail if the assumed python version is not the actual one
+    session.run2("python ci_tools/check_python_version.py %s" % session.python)
 
     # install self so that it is recognized by pytest
     session.run2("pip install -e . --no-deps")
