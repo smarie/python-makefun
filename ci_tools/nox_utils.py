@@ -1,12 +1,16 @@
-import shutil
+import asyncio
 from collections import namedtuple
 from inspect import signature, isfunction
 import logging
+from pathlib import Path
+import shutil
+import subprocess
+import sys
 import os
 
+from typing import Sequence, Dict, Union, Iterable, IO, Mapping, Tuple
+
 from makefun import wraps, remove_signature_parameters
-from typing import Sequence, Dict, Union, Iterable
-from pathlib import Path
 
 import nox
 from nox.sessions import Session
@@ -85,11 +89,11 @@ class PowerSession(Session):
     Our nox session improvements
     """
 
-    # ------------ commanline runners -----------
+    # ------------ commandline runners -----------
 
     def run2(self,
              command: Union[Iterable[str], str],
-             logfile=None,
+             logfile: Union[bool, str, Path] = True,
              **kwargs):
         """
         An improvement of session.run that is able to
@@ -98,28 +102,18 @@ class PowerSession(Session):
          - use a log file
 
         :param command:
-        :param logfile:
+        :param logfile: None/False (normal nox behaviour), or True (using nox file handler), or a file path.
         :param kwargs:
         :return:
         """
         if isinstance(command, str):
             command = command.split(' ')
 
-        if logfile is not None:
-            # logfile explicitly provided, use it
-            with open(logfile, "a") as out:
-                self.run(*command, stdout=out, stderr=out, **kwargs)
-        else:
-            # is there a current log file handler open ? If so use it.
-            stream = get_log_file_stream()
-            if stream is not None:
-                self.run(*command, stdout=stream, stderr=stream, **kwargs)
-            else:
-                self.run(*command, **kwargs)
+        self.run(*command, logfile=logfile, **kwargs)
 
     def run_multi(self,
                   cmds: str,
-                  logfile=None,
+                  logfile: Union[bool, str, Path] = True,
                   **kwargs):
         """
         An improvement of session.run that is able to
@@ -128,7 +122,7 @@ class PowerSession(Session):
          - use a log file
 
         :param cmds:
-        :param logfile:
+        :param logfile: None/False (normal nox behaviour), or True (using nox file handler), or a file path.
         :param kwargs:
         :return:
         """
@@ -210,7 +204,7 @@ class PowerSession(Session):
                     pkgs: Sequence[str],
                     use_conda_for: Sequence[str] = (),
                     versions_dct: Dict[str, str] = None,
-                    logfile=None
+                    logfile: Union[bool, str, Path] = True,
                     ):
         """Install the `pkgs` provided with `session.install(*pkgs)`, except for those present in `use_conda_for`"""
 
@@ -238,47 +232,33 @@ class PowerSession(Session):
             nox_logger.info("[%s] Installing requirements with pip: %s" % (phase_name, pip_pkgs))
             self.install2(*pip_pkgs, logfile=logfile)
 
-    def conda_install2(self, *conda_pkgs, logfile=None):
+    def conda_install2(self,
+                       *conda_pkgs,
+                       logfile: Union[bool, str, Path] = True,
+                       **kwargs
+                       ):
         """
-        Same as session.conda_install() but uses the log if present explicitly or in a FileHandler.
+        Same as session.conda_install() but with support for `logfile`.
 
-        :param session:
-        :param pip_pkgs:
-        :param logfile:
+        :param conda_pkgs:
+        :param logfile: None/False (normal nox behaviour), or True (using nox file handler), or a file path.
         :return:
         """
-        if logfile is not None:
-            with open(logfile, "a") as out:
-                self.conda_install(*conda_pkgs, silent=False, stdout=out, stderr=out)
-        else:
-            # get the log file handler if needed
-            logfile_stream = get_log_file_stream()
+        return self.conda_install(*conda_pkgs, logfile=logfile, **kwargs)
 
-            if logfile_stream is not None:
-                self.conda_install(*conda_pkgs, silent=False, stdout=logfile_stream, stderr=logfile_stream)
-            else:
-                self.conda_install(*conda_pkgs)
-
-    def install2(self, *pip_pkgs, logfile=None):
+    def install2(self,
+                 *pip_pkgs,
+                 logfile: Union[bool, str, Path] = True,
+                 **kwargs
+                 ):
         """
-        Same as session.install() but uses the log if present explicitly or in a FileHandler.
+        Same as session.install() but with support for `logfile`.
 
-        :param session:
         :param pip_pkgs:
-        :param logfile:
+        :param logfile: None/False (normal nox behaviour), or True (using nox file handler), or a file path.
         :return:
         """
-        if logfile is not None:
-            with open(logfile, "a") as out:
-                self.install(*pip_pkgs, silent=False, stdout=out, stderr=out)
-        else:
-            # get the log file handler if needed
-            logfile_stream = get_log_file_stream()
-
-            if logfile_stream is not None:
-                self.install(*pip_pkgs, silent=False, stdout=logfile_stream, stderr=logfile_stream)
-            else:
-                self.install(*pip_pkgs)
+        return self.install(*pip_pkgs, logfile=logfile, **kwargs)
 
     def get_session_id(self):
         """Return the session id"""
@@ -547,3 +527,182 @@ def rm_folder(folder: Union[str, Path]
     if folder.exists():
         shutil.rmtree(str(folder))
         # Folders.site.unlink()  --> possible PermissionError
+
+
+# --- the patch of popen able to tee to logfile --
+
+
+import nox.popen as nox_popen_module
+orig_nox_popen = nox_popen_module.popen
+
+
+class LogFileStreamCtx:
+    def __init__(self, logfile_stream):
+        self.logfile_stream = logfile_stream
+
+    def __enter__(self):
+        return self.logfile_stream
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+
+def patched_popen(
+    args: Sequence[str],
+    env: Mapping[str, str] = None,
+    silent: bool = False,
+    stdout: Union[int, IO] = None,
+    stderr: Union[int, IO] = subprocess.STDOUT,
+    logfile: Union[bool, str, Path] = None,
+    **kwargs
+) -> Tuple[int, str]:
+    """
+    Our patch of nox.popen.popen().
+
+    Current behaviour in `nox` is
+
+     - when `silent=True` (default), process err is redirected to STDOUT and process out is captured in a PIPE and sent
+       to the logger (that does not displaying it :) )
+
+     - when `silent=False` (explicitly set, or when nox is run with verbose flag), process out and process err are both
+       redirected to STDOUT.
+
+    Our implementation allows us to be a little more flexible:
+
+     - if logfile is True or a string/Path, both process err and process out are both TEE-ed to logfile
+     - at the same time, the above behaviour remains.
+
+    :param args:
+    :param env:
+    :param silent:
+    :param stdout:
+    :param stderr:
+    :param logfile: None/False (normal nox behaviour), or True (using nox file handler), or a file path.
+    :return:
+    """
+    logfile_stream = get_log_file_stream()
+
+    if logfile in (None, False) or (logfile is True and logfile_stream is None):
+        # execute popen as usual
+        return orig_nox_popen(args=args, env=env, silent=silent, stdout=stdout, stderr=stderr, **kwargs)
+
+    else:
+        # we'll need to tee the popen
+        if logfile is True:
+            ctx = LogFileStreamCtx
+        else:
+            ctx = lambda _: open(logfile, "a")
+
+        with ctx(logfile_stream) as log_file_stream:
+            if silent and stdout is not None:
+                raise ValueError(
+                    "Can not specify silent and stdout; passing a custom stdout always silences the commands output in "
+                    "Nox's log."
+                )
+
+            shell = kwargs.get("shell", False)
+            if shell:
+                raise ValueError("Using shell=True is not yet supported with async streaming to log files")
+
+            if stdout is not None or stderr is not subprocess.STDOUT:
+                raise ValueError("Using custom streams is not yet supported with async popen")
+
+            # old way
+            # proc = subprocess.Popen(args, env=env, stdout=stdout, stderr=stderr)
+
+            # New way: use asyncio to stream correctly
+            # Note: if keyboard interrupts do not work we should check
+            #  https://mail.python.org/pipermail/async-sig/2017-August/000374.html maybe or the following threads.
+
+            # define the async coroutines
+            async def async_popen():
+                process = await asyncio.create_subprocess_exec(*args, env=env, stdout=asyncio.subprocess.PIPE,
+                                                               stderr=asyncio.subprocess.PIPE, **kwargs)
+
+                # bind the out and err streams - see https://stackoverflow.com/a/59041913/7262247
+                # to mimic nox behaviour we only use a single capturing list
+                outlines = []
+                await asyncio.wait([
+                    # process out is only redirected to STDOUT if not silent
+                    _read_stream(process.stdout, lambda l: tee(l, sinklist=outlines, sinkstream=log_file_stream,
+                                                               quiet=silent, verbosepipe=sys.stdout)),
+                    # process err is always redirected to STDOUT (quiet=False) with a specific label
+                    _read_stream(process.stderr, lambda l: tee(l, sinklist=outlines, sinkstream=log_file_stream,
+                                                               quiet=False, verbosepipe=sys.stdout, label="ERR:"))
+                ])
+                return_code = await process.wait()  # make sur the process has ended and retrieve its return code
+                return return_code, outlines
+
+            # run the coroutine in the event loop
+            loop = asyncio.get_event_loop()
+            return_code, outlines = loop.run_until_complete(async_popen())
+
+            # just in case, flush everything
+            log_file_stream.flush()
+            sys.stdout.flush()
+            sys.stderr.flush()
+
+            if silent:
+                # same behaviour as in nox: this will be passed to the logger, and it will act depending on verbose flag
+                out = "\n".join(outlines) if len(outlines) > 0 else ""
+            else:
+                # already written to stdout, no need to capture
+                out = ""
+
+            return return_code, out
+
+
+async def _read_stream(stream, callback):
+    """Helper async coroutine to read from a stream line by line and write them in callback"""
+    while True:
+        line = await stream.readline()
+        if line:
+            callback(line)
+        else:
+            break
+
+
+def tee(linebytes, sinklist, sinkstream, verbosepipe, quiet, label=""):
+    """
+    Helper routine to read a line, decode it, and append it to several sinks:
+
+     - an optional `sinklist` list that will receive the decoded string in its "append" method
+     - an optional `sinkstream` stream that will receive the decoded string in its "writelines" method
+     - an optional `verbosepipe` stream that will receive only when quiet=False, the decoded string through a print
+
+    append it to the sink, and if quiet=False, write it to pipe too.
+    """
+    line = linebytes.decode('utf-8').rstrip()
+
+    if sinklist is not None:
+        sinklist.append(line)
+
+    if sinkstream is not None:
+        sinkstream.write(line + "\n")
+        sinkstream.flush()
+
+    if not quiet and verbosepipe is not None:
+        print(label, line, file=verbosepipe)
+        verbosepipe.flush()
+
+
+def patch_popen():
+    nox_popen_module.popen = patched_popen
+
+    from nox.command import popen
+    if popen is not patched_popen:
+        nox.command.popen = patched_popen
+
+    # change event loop on windows
+    # see https://stackoverflow.com/a/44639711/7262247
+    # and https://docs.python.org/3/library/asyncio-platforms.html#subprocess-support-on-windows
+    if 'win32' in sys.platform:
+        # Windows specific event-loop policy & cmd
+        asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+        # cmds = [['C:/Windows/system32/HOSTNAME.EXE']]
+
+    # loop = asyncio.ProactorEventLoop()
+    # asyncio.set_event_loop(loop)
+
+
+patch_popen()
