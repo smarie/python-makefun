@@ -19,7 +19,7 @@ Here is a non-exhaustive list of interesting open topics: [https://github.com/sm
 This project uses `nox` to define all lifecycle tasks. In order to be able to run those tasks, you should create python 3.6 environment and install the requirements:
 
 ```bash
->>> conda create -n noxenv python="3.6"
+>>> conda create -n noxenv python="3.7"
 >>> activate noxenv
 (noxenv) >>> pip install -r noxfile-requirements.txt
 ```

@@ -4,6 +4,8 @@ requires = [
     "setuptools_scm",
     "wheel"
 ]
+build-backend = "setuptools.build_meta"
+
 # pip: no ! does not work in old python 2.7 and not recommended here
 # https://setuptools.readthedocs.io/en/latest/userguide/quickstart.html#basic-use
 
