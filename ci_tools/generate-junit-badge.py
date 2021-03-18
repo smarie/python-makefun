@@ -1,4 +1,6 @@
 import sys
+from math import floor
+
 try:
     # python 3
     from urllib.parse import quote_plus
@@ -13,11 +15,12 @@ import xunitparser
 
 
 class TestStats(object):
-    def __init__(self, success_percentage, success, runned, skipped):
+    def __init__(self, success_percentage, success, runned, skipped, errors):
         self.success_percentage = success_percentage
         self.success = success
         self.runned = runned
         self.skipped = skipped
+        self.errors = errors
 
 
 def get_test_stats(junit_xml='reports/junit/junit.xml'  # type: str
@@ -32,11 +35,15 @@ def get_test_stats(junit_xml='reports/junit/junit.xml'  # type: str
     skipped = len(tr.skipped)
     runned = tr.testsRun - skipped
     failed = len(tr.failures)
+    errors = len(tr.errors)
     success = runned - failed
 
-    success_percentage = round(success * 100 / runned)
+    if runned > 0:
+        success_percentage = floor(success * 100 / (runned + errors))
+    else:
+        success_percentage = 100
 
-    return TestStats(success_percentage, success, runned, skipped)
+    return TestStats(success_percentage, success, runned, skipped, errors)
 
 
 def download_badge(test_stats,                   # type: TestStats
@@ -64,7 +71,7 @@ def download_badge(test_stats,                   # type: TestStats
 
     left_txt = "tests"
     # right_txt = "%s%%" % test_stats.success_percentage
-    right_txt = "%s/%s" % (test_stats.success, test_stats.runned)
+    right_txt = "%s/%s" % (test_stats.success, (test_stats.runned + test_stats.errors))
     url = 'https://img.shields.io/badge/%s-%s-%s.svg' % (left_txt, quote_plus(right_txt), color)
 
     dest_file = path.join(dest_folder, badge_name)
