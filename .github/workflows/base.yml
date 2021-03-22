@@ -5,10 +5,10 @@ on:
     tags:
       - '*'
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
 jobs:
   # pre-job to read nox tests matrix - see https://stackoverflow.com/q/66747359/7262247
   list_nox_test_sessions:
