@@ -1,6 +1,5 @@
 from itertools import product
 from json import dumps
-
 import logging
 
 import nox  # noqa
