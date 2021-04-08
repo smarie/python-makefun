@@ -203,9 +203,11 @@ def test_issue_pr_67():
 
     f = Foo(a=1)
 
+    # (1) The object can be represented but for some reason its repr can not be evaluated
     with pytest.raises(CustomException):
         eval(repr(f))
 
+    # (2) Lets check that this problem does not impact `makefun`
     def foo(a=Foo(a=1)):
         pass
 
