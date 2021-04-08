@@ -184,3 +184,33 @@ def test_issue_66():
 
     with pytest.raises(AttributeError):
         second_wrapper.__wrapped__
+
+
+def test_issue_pr_67():
+    """Test handcrafted for https://github.com/smarie/python-makefun/pull/67"""
+
+    class CustomException(Exception):
+        pass
+
+    class Foo(object):
+        def __init__(self, a=None):
+            if a is None:
+                raise CustomException()
+
+        def __repr__(self):
+            # this is a valid string but calling eval on it will raise an
+            return "Foo()"
+
+    f = Foo(a=1)
+
+    with pytest.raises(CustomException):
+        eval(repr(f))
+
+    def foo(a=Foo(a=1)):
+        pass
+
+    @wraps(foo, prepend_args="r")
+    def bar(*args, **kwargs):
+        pass
+
+    bar(1)
