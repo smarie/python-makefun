@@ -423,7 +423,7 @@
     <p id="t368" class="run"><span class="n"><a href="#t368">368</a></span><span class="t">        <span class="key">try</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t369" class="pln"><span class="n"><a href="#t369">369</a></span><span class="t">            <span class="com"># check if the repr() of the default value is equal to itself.</span>&nbsp;</span><span class="r"></span></p>
     <p id="t370" class="run"><span class="n"><a href="#t370">370</a></span><span class="t">            <span class="key">return</span> <span class="nam">eval</span><span class="op">(</span><span class="nam">repr</span><span class="op">(</span><span class="nam">symbol</span><span class="op">)</span><span class="op">,</span> <span class="nam">evaldict</span><span class="op">)</span> <span class="op">!=</span> <span class="nam">symbol</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t371" class="run"><span class="n"><a href="#t371">371</a></span><span class="t">        <span class="key">except</span> <span class="op">(</span><span class="nam">NameError</span><span class="op">,</span> <span class="nam">SyntaxError</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t371" class="run"><span class="n"><a href="#t371">371</a></span><span class="t">        <span class="key">except</span> <span class="nam">Exception</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t372" class="pln"><span class="n"><a href="#t372">372</a></span><span class="t">            <span class="com"># in case of error this needs protection</span>&nbsp;</span><span class="r"></span></p>
     <p id="t373" class="run"><span class="n"><a href="#t373">373</a></span><span class="t">            <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
     <p id="t374" class="pln"><span class="n"><a href="#t374">374</a></span><span class="t">    <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -1493,7 +1493,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v5.5</a>,
-            created at 2021-04-01 07:31 +0000
+            created at 2021-04-08 08:06 +0000
         </p>
     </div>
 </div>
