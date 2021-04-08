@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.11.3 - bugfix with default values representable but not evaluable
+
+ - When a default value `v` in a signature is representable but its `eval(repr(v))` raises an exception, created signatures would raise an exception instead of automatically protecting the symbol. PR [#67](https://github.com/smarie/python-makefun/pull/67) by [gcalmettes](https://github.com/gcalmettes).
+
 ### 1.11.2 - bugfix with chained `@wraps`
 
  - Fixed issue where `@wraps` does not remove the `__wrapped__` attribute when it wraps an already-wrapped function, and modifies its signature. Fixes [#66](https://github.com/smarie/python-makefun/issues/66)
