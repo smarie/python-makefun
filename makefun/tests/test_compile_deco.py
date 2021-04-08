@@ -97,13 +97,17 @@ def test_compilefun_nested_exclude(variant):
 def test_compilefun_co_names():
     """Test that today we do not compile imported names."""
 
+    # TODO one day it would be great to selectively recurse through such imported names. Unfortunately,
+    #   this comes with *many* side effects including compilation order, appropriate propagation or
+    #   non-propagation of globals(), locals()
+    #   See https://github.com/smarie/python-makefun/issues/52
+
+    # TODO this test is not sufficient, there are things happening in more complex settings that are not happening here.
+    #    see https://github.com/smarie/python-decopatch/pull/18
+
     @compile_fun
     def foo():
-        # TODO one day it would be great to selectively recurse through such imported names. Unfortunately,
-        #   this comes with *many* side effects including compilation order, appropriate propagation or
-        #   non-propagation of globals(), locals()
-        #   See https://github.com/smarie/python-makefun/issues/52
-        assert not is_compiled(dedent)
+        assert is_compiled(dedent)
         return dedent("   hoho")
 
     res = foo()

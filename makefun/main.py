@@ -1349,7 +1349,8 @@ def compile_fun(recurse=True,     # type: Union[bool, Callable]
 def compile_fun_manually(target,
                          recurse=True,     # type: Union[bool, Callable]
                          except_names=(),  # type: Iterable[str]
-                         _evaldict=None    # type: Union[bool, Dict]
+                         _evaldict=None,   # type: Union[bool, Dict]
+                         _nested_call=False  # type: bool
                          ):
     """
 
@@ -1359,12 +1360,27 @@ def compile_fun_manually(target,
     if not isinstance(target, FunctionType):
         raise UnsupportedForCompilation("Only functions can be compiled by this decorator")
 
-    if _evaldict is None or _evaldict is True:
-        if _evaldict is True:
-            frame = _get_callerframe(offset=1)
-        else:
-            frame = _get_callerframe()
-        _evaldict, _ = extract_module_and_evaldict(frame)
+    if not _nested_call:
+        # top call - grab the eval dict from the frame
+        if _evaldict is None or _evaldict is True:
+            if _evaldict is True:
+                frame = _get_callerframe(offset=1)
+            else:
+                frame = _get_callerframe()
+            _evaldict, module_name = extract_module_and_evaldict(frame)
+
+            if target.__module__ != module_name:
+                if hasattr(target, '__globals__'):
+                    _evaldict = copy(target.__globals__)
+        # else:
+        #     advanced - provided by user
+    else:
+        # nested: TODO should we propagate the eval dict ? How ? what about locals ?
+        # Note: this should be done bu
+        if hasattr(target, '__globals__'):
+            _evaldict = copy(_evaldict)
+            _evaldict.update(target.__globals__)
+        # TODO if value is a class, no __globals__ exist (they do on the functions only)
 
     # first make sure that source code is available for compilation
     try:
@@ -1385,38 +1401,44 @@ def compile_fun_manually(target,
         func_closure = target.func_closure
         func_code = target.func_code
 
-    # Does not work: if `self.i` is used in the code, `i` will appear here
-    # if func_code is not None:
-    #     for name in func_code.co_names:
-    #         try:
-    #             eval(name, _evaldict)
-    #         except NameError:
-    #             raise UndefinedSymbolError("Symbol `%s` does not seem to be defined yet. Make sure you apply "
-    #                                        "`compile_fun` *after* all required symbols have been defined." % name)
+    if recurse:
+        # recurse-compile used symbols
+        # already compiled since part of the source
+        #   - co_varnames: everything created locally, including args -
+        #   - co_cellvars: local variables that are referenced by nested functions
+        # to compile:
+        # - co_freevars: non-local variables that are referenced by nested functions
+        # - co_names: global variables used by the bytecode, local names in the class scope, attribute names, names of
+        # imported modules, etc. see https://github.com/python/cpython/pull/2743
+        if func_code is not None:
+            for names, raise_if_unknown in ((func_code.co_freevars, True),
+                                            (func_code.co_names, False)  # we can't do this now: this triggers some strange bugs with the docstrings and other things. see deopatch tests.
+                                            ):
+                for name in names:
+                    if name in except_names:
+                        continue
+                    try:
+                        value = _evaldict[name]
+                    except KeyError:
+                        if raise_if_unknown:
+                            raise UndefinedSymbolError("Symbol %s does not seem to be defined yet. Make sure you apply "
+                                                       "`compile_fun` *after* all required symbols have been defined."
+                                                       % name)
+                        else:
+                            # names in co_names can be attribute names, e.g. 'i' if self.i is used. So unknown will
+                            # happen.
+                            continue
+                    else:
+                        try:
+                            #
 
-    if recurse and func_closure is not None:
-        # recurse-compile
-        for name, cell in zip(func_code.co_freevars, func_closure):
-            if name in except_names:
-                continue
-            if name not in _evaldict:
-                raise UndefinedSymbolError("Symbol %s does not seem to be defined yet. Make sure you apply "
-                                           "`compile_fun` *after* all required symbols have been defined." % name)
-            try:
-                value = cell.cell_contents
-            except ValueError:
-                # empty cell
-                continue
-            else:
-                # non-empty cell
-                try:
-                    # note : not sure the compilation will be made in the appropriate order of dependencies...
-                    # if not, users will have to do it manually
-                    _evaldict[name] = compile_fun_manually(value,
-                                                           recurse=recurse, except_names=except_names,
-                                                           _evaldict=_evaldict)
-                except (UnsupportedForCompilation, SourceUnavailable):
-                    pass
+                            # note : not sure the compilation will be made in the appropriate order of dependencies...
+                            # if not, users will have to do it manually
+                            _evaldict[name] = compile_fun_manually(value,
+                                                                   recurse=recurse, except_names=except_names,
+                                                                   _evaldict=_evaldict, _nested_call=True)
+                        except (UnsupportedForCompilation, SourceUnavailable):
+                            pass
 
     # now compile from sources
     lines = dedent(lines)
