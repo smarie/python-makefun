@@ -368,7 +368,7 @@ def _signature_symbol_needs_protection(symbol, evaldict):
         try:
             # check if the repr() of the default value is equal to itself.
             return eval(repr(symbol), evaldict) != symbol
-        except (NameError, SyntaxError, TypeError):
+        except Exception:
             # in case of error this needs protection
             return True
     else:
