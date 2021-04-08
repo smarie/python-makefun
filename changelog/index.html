@@ -256,6 +256,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#1113-bugfix-with-default-values-representable-but-not-evaluable" class="md-nav__link">
+    1.11.3 - bugfix with default values representable but not evaluable
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#1112-bugfix-with-chained-wraps" class="md-nav__link">
     1.11.2 - bugfix with chained @wraps
   </a>
@@ -582,6 +589,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#1113-bugfix-with-default-values-representable-but-not-evaluable" class="md-nav__link">
+    1.11.3 - bugfix with default values representable but not evaluable
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#1112-bugfix-with-chained-wraps" class="md-nav__link">
     1.11.2 - bugfix with chained @wraps
   </a>
@@ -893,6 +907,10 @@
                 
                 
                 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<h3 id="1113-bugfix-with-default-values-representable-but-not-evaluable">1.11.3 - bugfix with default values representable but not evaluable<a class="headerlink" href="#1113-bugfix-with-default-values-representable-but-not-evaluable" title="Permanent link">&para;</a></h3>
+<ul>
+<li>When a default value <code>v</code> in a signature is representable but its <code>eval(repr(v))</code> raises an exception, created signatures would raise an exception instead of automatically protecting the symbol. PR <a href="https://github.com/smarie/python-makefun/pull/67">#67</a> by <a href="https://github.com/gcalmettes">gcalmettes</a>.</li>
+</ul>
 <h3 id="1112-bugfix-with-chained-wraps">1.11.2 - bugfix with chained <code>@wraps</code><a class="headerlink" href="#1112-bugfix-with-chained-wraps" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Fixed issue where <code>@wraps</code> does not remove the <code>__wrapped__</code> attribute when it wraps an already-wrapped function, and modifies its signature. Fixes <a href="https://github.com/smarie/python-makefun/issues/66">#66</a></li>
