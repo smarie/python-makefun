@@ -3,6 +3,8 @@ site_name: makefun
 repo_url: https://github.com/smarie/python-makefun
 docs_dir: .
 site_dir: ../site
+# default branch is main instead of master now on github
+edit_uri : ./edit/main/docs
 nav:
     - Home: index.md
     - API reference: api_reference.md
