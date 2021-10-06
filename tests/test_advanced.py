@@ -57,7 +57,7 @@ def test_empty_name_in_string():
 def test_same_than_wraps_basic():
     """Tests that the metadata set by @wraps is correct"""
 
-    from makefun.tests.test_doc import test_from_sig_wrapper
+    from tests.test_doc import test_from_sig_wrapper
     from functools import wraps as functools_wraps
 
     def foo_wrapper(*args, **kwargs):
@@ -133,7 +133,7 @@ def test_qualname_when_nested():
 def test_type_hint_error():
     """ Test for https://github.com/smarie/python-makefun/issues/32 """
 
-    from makefun.tests._test_py35 import make_ref_function
+    from tests._test_py35 import make_ref_function
     ref_f = make_ref_function()
 
     @wraps(ref_f)
@@ -147,7 +147,7 @@ def test_type_hint_error():
 def test_type_hint_error2():
     """ Test for https://github.com/smarie/python-makefun/issues/32 """
 
-    from makefun.tests._test_py35 import make_ref_function2
+    from tests._test_py35 import make_ref_function2
     ref_f = make_ref_function2()
 
     @wraps(ref_f)
