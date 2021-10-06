@@ -108,6 +108,8 @@ def tests(session: PowerSession, coverage, pkg_specs):
 
     # check that it can be imported even from a different folder
     # Important: do not surround the command into double quotes as in the shell !
+    print(session.bin_paths)
+    session.run('which', 'python')
     session.run('python', '-c', 'import os; os.chdir(\'./docs/\'); import %s' % pkg_name)
     session.run('python', '-c', 'import os; import makefun.main; print(os.getcwd())')
 
