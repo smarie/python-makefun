@@ -1,3 +1,7 @@
+# Authors: Sylvain MARIE <sylvain.marie@se.com>
+#          + All contributors to <https://github.com/smarie/python-makefun>
+#
+# License: 3-clause BSD, <https://github.com/smarie/python-makefun/blob/master/LICENSE>
 import sys
 from itertools import chain
 
@@ -66,7 +70,7 @@ def get_legacy_py_generator_body_template():
             try:
                 _m = _i.close        # if there is a close method
             except AttributeError:
-                pass               
+                pass
             else:
                 _m()                 # use it first
             raise _e                 # then re-raise exception
@@ -77,9 +81,9 @@ def get_legacy_py_generator_body_template():
             except AttributeError:
                 raise _e             # otherwise re-raise
             else:
-                _y = _m(*_x)         # use it 
+                _y = _m(*_x)         # use it
         else:                        # --- nominal case: the new input was received
-            # if _s is None:       
+            # if _s is None:
             #     _y = next(_i)
             # else:
             _y = _i.send(_s)     # let the implementation decide if None means "no new input" or "new input = None"

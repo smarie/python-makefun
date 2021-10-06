@@ -1,3 +1,7 @@
+# Authors: Sylvain MARIE <sylvain.marie@se.com>
+#          + All contributors to <https://github.com/smarie/python-makefun>
+#
+# License: 3-clause BSD, <https://github.com/smarie/python-makefun/blob/master/LICENSE>
 from itertools import chain
 
 from makefun.main import wraps

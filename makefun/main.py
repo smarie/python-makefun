@@ -1,3 +1,7 @@
+# Authors: Sylvain MARIE <sylvain.marie@se.com>
+#          + All contributors to <https://github.com/smarie/python-makefun>
+#
+# License: 3-clause BSD, <https://github.com/smarie/python-makefun/blob/master/LICENSE>
 from __future__ import print_function
 
 import functools
@@ -39,13 +43,15 @@ PY2 = sys.version_info < (3,)
 if not PY2:
     string_types = str,
 else:
-    string_types = basestring,
+    string_types = basestring,  # noqa
 
 
 # macroscopic signature strings checker (we do not look inside params, `signature` will do it for us)
-FUNC_DEF = re.compile('(?s)^\\s*(?P<funcname>[_\\w][_\\w\\d]*)?\\s*'
-                      '\\(\\s*(?P<params>.*?)\\s*\\)\\s*'
-                      '(((?P<typed_return_hint>->\\s*[^:]+)?(?P<colon>:)?\\s*)|:\\s*#\\s*(?P<comment_return_hint>.+))*$')
+FUNC_DEF = re.compile(
+    '(?s)^\\s*(?P<funcname>[_\\w][_\\w\\d]*)?\\s*'
+    '\\(\\s*(?P<params>.*?)\\s*\\)\\s*'
+    '(((?P<typed_return_hint>->\\s*[^:]+)?(?P<colon>:)?\\s*)|:\\s*#\\s*(?P<comment_return_hint>.+))*$'
+)
 
 
 def create_wrapper(wrapped,
@@ -360,14 +366,16 @@ def _signature_symbol_needs_protection(symbol, evaldict):
     """
     Helper method for signature symbols (defaults, type hints) protection.
 
-    Returns True if the given symbol needs to be protected - that is, if its repr() can not be correctly evaluated with current evaldict.
+    Returns True if the given symbol needs to be protected - that is, if its repr() can not be correctly evaluated with
+    current evaldict.
+
     :param symbol:
     :return:
     """
     if symbol is not None and symbol is not Parameter.empty and not isinstance(symbol, TYPES_WITH_SAFE_REPR):
         try:
             # check if the repr() of the default value is equal to itself.
-            return eval(repr(symbol), evaldict) != symbol
+            return eval(repr(symbol), evaldict) != symbol  # noqa  # we cannot use ast.literal_eval, too restrictive
         except Exception:
             # in case of error this needs protection
             return True
@@ -610,8 +618,8 @@ def _make(funcname, params_names, body, evaldict=None):
     filename = '<makefun-gen-%d>' % (next(_compile_count),)
     try:
         code = compile(body, filename, 'single')
-        exec(code, evaldict)
-    except:
+        exec(code, evaldict)  # noqa
+    except BaseException:
         print('Error in generated code:', file=sys.stderr)
         print(body, file=sys.stderr)
         raise
@@ -622,7 +630,9 @@ def _make(funcname, params_names, body, evaldict=None):
     return func
 
 
-def _update_fields(func, name, qualname=None, doc=None, annotations=None, defaults=(), kwonlydefaults=None, module=None, **kw):
+def _update_fields(
+        func, name, qualname=None, doc=None, annotations=None, defaults=(), kwonlydefaults=None, module=None, **kw
+):
     """
     Update the signature of func with the provided information
 
@@ -757,7 +767,8 @@ def wraps(wrapped_fun,
         `wrapped_fun` is automatically copied.
     :return: a decorator
     """
-    func_name, func_sig, doc, qualname, module_name, all_attrs = _get_args_for_wrapping(wrapped_fun, new_sig, remove_args,
+    func_name, func_sig, doc, qualname, module_name, all_attrs = _get_args_for_wrapping(wrapped_fun, new_sig,
+                                                                                        remove_args,
                                                                                         prepend_args, append_args,
                                                                                         func_name, doc,
                                                                                         qualname, module_name, attrs)
@@ -1139,6 +1150,7 @@ else:
 def gen_partial_sig(orig_sig,         # type: Signature
                     preset_pos_args,  # type: Tuple[Any]
                     preset_kwargs,    # type: Mapping[str, Any]
+                    f,                # type: Callable
                     ):
     """
     Returns the signature of partial(f, *preset_pos_args, **preset_kwargs)
@@ -1151,9 +1163,10 @@ def gen_partial_sig(orig_sig,         # type: Signature
        in the parameters order become keyword-only (if python 2, they do not become keyword-only as this is not allowed
        in the compiler, but we pass them a bad default value "KEYWORD_ONLY")
 
-    :param f:
+    :param orig_sig:
     :param preset_pos_args:
     :param preset_kwargs:
+    :param f: used in error messages only
     :return:
     """
     preset_kwargs = copy(preset_kwargs)
@@ -1238,7 +1251,7 @@ def gen_partial_doc(wrapped_name, wrapped_doc, orig_sig, new_sig, preset_pos_arg
     # where all values injected by partial appear
     all_strs = []
     kw_only = False
-    for i, (p_name, p) in enumerate(orig_sig.parameters.items()):
+    for i, (p_name, _p) in enumerate(orig_sig.parameters.items()):
         if i < len(preset_pos_args):
             # use the preset positional. Use repr() instead of str() so that e.g. "yes" appears with quotes
             all_strs.append(repr(preset_pos_args[i]))
@@ -1369,7 +1382,7 @@ def compile_fun_manually(target,
     # first make sure that source code is available for compilation
     try:
         lines = getsource(target)
-    except (OSError, IOError) as e:
+    except (OSError, IOError) as e:  # noqa # distinct exceptions in old python versions
         if 'could not get source code' in str(e):
             raise SourceUnavailable(target, e)
         else:
