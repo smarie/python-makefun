@@ -108,6 +108,7 @@ def tests(session: PowerSession, coverage, pkg_specs):
 
     # check that it can be imported even from a different folder
     session.run2(['python', '-c', '"import os; os.chdir(\'./docs/\'); import %s"' % pkg_name])
+    session.run2(['python', '-c', '"import os; import makefun.main; print(os.cwd())"'])
 
     # finally run all tests
     if not coverage:
