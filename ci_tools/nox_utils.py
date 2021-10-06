@@ -1,3 +1,5 @@
+from itertools import product
+
 import asyncio
 from collections import namedtuple
 from inspect import signature, isfunction
@@ -8,9 +10,9 @@ import subprocess
 import sys
 import os
 
-from typing import Sequence, Dict, Union, Iterable, IO, Mapping, Tuple
+from typing import Sequence, Dict, Union, Iterable, Mapping, Any, IO, Tuple, Optional, List
 
-from makefun import wraps, remove_signature_parameters
+from makefun import wraps, remove_signature_parameters, add_signature_parameters
 
 import nox
 from nox.sessions import Session
@@ -19,13 +21,14 @@ from nox.sessions import Session
 nox_logger = logging.getLogger("nox")
 
 
-PY27, PY35, PY36, PY37, PY38 = "2.7", "3.5", "3.6", "3.7", "3.8"
+PY27, PY35, PY36, PY37, PY38, PY39, PY310 = "2.7", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10"
 DONT_INSTALL = "dont_install"
 
 
 def power_session(
         func=None,
         envs=None,
+        grid_param_name="env",
         python=None,
         py=None,
         reuse_venv=None,
@@ -35,31 +38,40 @@ def power_session(
         logsdir=None,
         **kwargs
 ):
-    """A nox.session on steroids"""
+    """A nox.session on steroids
+
+    :param func:
+    :param envs: a dictionary {key: dict_of_params} where key is either the python version of a tuple (python version,
+        grid id) and all keys in the dict_of_params must be the same in all entries. The decorated function should
+        have one parameter for each of these keys, they will be injected with the value.
+    :param grid_param_name: when the key in `envs` is a tuple, this name will be the name of the generated parameter to
+        iterate through the various combinations for each python version.
+    :param python:
+    :param py:
+    :param reuse_venv:
+    :param name:
+    :param venv_backend:
+    :param venv_params:
+    :param logsdir:
+    :param kwargs:
+    :return:
+    """
     if func is not None:
         return power_session()(func)
     else:
-        if envs is not None:
-            if py is not None or python is not None:
-                raise ValueError("Only one of `envs` and `py/python` should be provided")
-            python = list(envs.keys())
-        nox_deco = nox.session(python=python, py=py, reuse_venv=reuse_venv, name=name, venv_backend=venv_backend,
-                               venv_params=venv_params, **kwargs)
-
         def combined_decorator(f):
-            # apply all decorators in turn
+            # replace Session with PowerSession
             f = with_power_session(f)
 
-            # @with_logfile
+            # open a log file for the session, use it to stream the commands stdout and stderrs,
+            # and possibly inject the log file in the session function
             if logsdir is not None:
                 f = with_logfile(logs_dir=logsdir)(f)
 
-            # @inject_envs_params
-            if envs is not None:
-                f = inject_envs_params(envs)(f)
-
-            # finally @nox.session
-            return nox_deco(f)
+            # decorate with @nox.session and possibly @nox.parametrize to create the grid
+            return nox_session_with_grid(python=python, py=py, envs=envs, reuse_venv=reuse_venv, name=name,
+                                         grid_param_name=grid_param_name, venv_backend=venv_backend,
+                                         venv_params=venv_params, **kwargs)(f)
 
         return combined_decorator
 
@@ -137,6 +149,7 @@ class PowerSession(Session):
             setup=False,
             install=False,
             tests=False,
+            extras=(),
             # custom phase
             phase=None,
             phase_reqs=None,
@@ -149,6 +162,7 @@ class PowerSession(Session):
          - setup.cfg "[options] setup_requires" (if setup=True)
          - setup.cfg "[options] install_requires" (if install=True)
          - setup.cfg "[options] test_requires" (if tests=True)
+         - setup.cfg "[options.extras_require] <...>" (if extras=(a tuple of extras))
 
         Two additional mechanisms are provided in order to customize how packages are installed.
 
@@ -194,6 +208,10 @@ class PowerSession(Session):
                              use_conda_for=toml_use_conda_for, versions_dct=versions_dct)
         if tests:
             self.install_any("setup.cfg#tests_requires", setup_cfg.tests_requires,
+                             use_conda_for=toml_use_conda_for, versions_dct=versions_dct)
+
+        for extra in extras:
+            self.install_any("setup.cfg#extras_require#%s" % extra, setup_cfg.extras_require[extra],
                              use_conda_for=toml_use_conda_for, versions_dct=versions_dct)
 
         if phase is not None:
@@ -309,7 +327,7 @@ def read_pyproject_toml():
         raise FileNotFoundError("No `pyproject.toml` file exists. No dependency will be installed ...")
 
 
-SetupCfg = namedtuple('SetupCfg', ('setup_requires', 'install_requires', 'tests_requires'))
+SetupCfg = namedtuple('SetupCfg', ('setup_requires', 'install_requires', 'tests_requires', 'extras_require'))
 
 
 def read_setuptools_cfg():
@@ -320,16 +338,10 @@ def read_setuptools_cfg():
     from setuptools import Distribution
     dist = Distribution()
     dist.parse_config_files()
-
-    # standard requirements
-    options_dct = dist.get_option_dict('options')
-    setup_reqs = options_dct['setup_requires'][1].strip().splitlines()
-    install_reqs = options_dct['install_requires'][1].strip().splitlines()
-    tests_reqs = options_dct['tests_require'][1].strip().splitlines()
-
-    return SetupCfg(setup_requires=setup_reqs,
-                    install_requires=install_reqs,
-                    tests_requires=tests_reqs)
+    return SetupCfg(setup_requires=dist.setup_requires,
+                    install_requires=dist.install_requires,
+                    tests_requires=dist.tests_require,
+                    extras_require=dist.extras_require)
 
 
 def get_req_pkg_name(r):
@@ -457,28 +469,97 @@ def remove_file_logger():
 
 # ------------ environment grid / parametrization related
 
+def nox_session_with_grid(python = None,
+                          py = None,
+                          envs: Mapping[str, Mapping[str, Any]] = None,
+                          reuse_venv: Optional[bool] = None,
+                          name: Optional[str] = None,
+                          venv_backend: Any = None,
+                          venv_params: Any = None,
+                          grid_param_name: str = None,
+                          **kwargs
+                          ):
+    """
+    Since nox is not yet capable to define a build matrix with python and parameters mixed in the same parametrize
+    this implements it with a dirty hack.
+    To remove when https://github.com/theacodes/nox/pull/404 is complete
 
-def inject_envs_params(envs):
-    param_names = None
-    for env_py, env_params in envs.items():
-        if param_names is None:
-            param_names = set(env_params.keys())
+    :param envs:
+    :param env_python_key:
+    :return:
+    """
+    if envs is None:
+        # Fast track default to @nox.session
+        return nox.session(python=python, py=py, reuse_venv=reuse_venv, name=name, venv_backend=venv_backend,
+                           venv_params=venv_params, **kwargs)
+    else:
+        # Current limitation : session param names can be 'python' or 'py' only
+        if py is not None or python is not None:
+            raise ValueError("`python` session argument can not be provided both directly and through the "
+                             "`env` with `session_param_names`")
+
+    # First examine the env and collect the parameter values for python
+    all_python = []
+    all_params = []
+
+    env_contents_names = None
+    has_parameter = None
+    for env_id, env_params in envs.items():
+        # consistency checks for the env_id
+        if has_parameter is None:
+            has_parameter = isinstance(env_id, tuple)
         else:
-            if param_names != set(env_params.keys()):
+            if has_parameter != isinstance(env_id, tuple):
+                raise ValueError("All keys in env should be tuples, or not be tuples. Error for %r" % env_id)
+
+        # retrieve python version and parameter
+        if not has_parameter:
+            if env_id not in all_python:
+                all_python.append(env_id)
+        else:
+            if len(env_id) != 2:
+                raise ValueError("Only a size-2 tuple can be used as env id")
+            py_id, param_id = env_id
+            if py_id not in all_python:
+                all_python.append(py_id)
+            if param_id not in all_params:
+                all_params.append(param_id)
+
+        # consistency checks for the dict contents.
+        if env_contents_names is None:
+            env_contents_names = set(env_params.keys())
+        else:
+            if env_contents_names != set(env_params.keys()):
                 raise ValueError("Environment %r parameters %r does not match parameters in the first environment: %r"
-                                 % (env_py, param_names, set(env_params.keys())))
+                                 % (env_id, env_contents_names, set(env_params.keys())))
+
+    if has_parameter and not grid_param_name:
+        raise ValueError("You must provide a grid parameter name when the env keys are tuples.")
 
     def _decorator(f):
+        s_name = name if name is not None else f.__name__
+        for pyv, _param in product(all_python, all_params):
+            if (pyv, _param) not in envs:
+                # create a dummy folder to avoid creating a useless venv ?
+                env_dir = Path(".nox") / ("%s-%s-%s-%s" % (s_name, pyv.replace('.', '-'), grid_param_name, _param))
+                env_dir.mkdir(parents=True, exist_ok=True)
+
         # check the signature of f
         foo_sig = signature(f)
-        missing = param_names - set(foo_sig.parameters)
+        missing = env_contents_names - set(foo_sig.parameters)
         if len(missing) > 0:
             raise ValueError("Session function %r does not contain environment parameter(s) %r" % (f.__name__, missing))
 
         # modify the exposed signature if needed
         new_sig = None
-        if len(param_names) > 0:
-            new_sig = remove_signature_parameters(foo_sig, *param_names)
+        if len(env_contents_names) > 0:
+            new_sig = remove_signature_parameters(foo_sig, *env_contents_names)
+
+        if has_parameter:
+            if grid_param_name in foo_sig.parameters:
+                raise ValueError("Internal error, this parameter has a reserved name: %r" % grid_param_name)
+            else:
+                new_sig = add_signature_parameters(new_sig, last=(grid_param_name,))
 
         @wraps(f, new_sig=new_sig)
         def _f_wrapper(**kwargs):
@@ -487,8 +568,13 @@ def inject_envs_params(envs):
 
             # get the versions to use for this environment
             try:
-                params_dct = envs[session.python]
+                if has_parameter:
+                    grid_param = kwargs.pop(grid_param_name)
+                    params_dct = envs[(session.python, grid_param)]
+                else:
+                    params_dct = envs[session.python]
             except KeyError:
+                # Skip this session, it is a dummy one
                 nox_logger.warning(
                     "Skipping configuration, this is not supported in python version %r" % session.python)
                 return
@@ -499,6 +585,11 @@ def inject_envs_params(envs):
             # finally execute the session
             return f(**kwargs)
 
+        if has_parameter:
+            _f_wrapper = nox.parametrize(grid_param_name, all_params)(_f_wrapper)
+
+        _f_wrapper = nox.session(python=all_python, reuse_venv=reuse_venv, name=name,
+                                 venv_backend=venv_backend, venv_params=venv_params)(_f_wrapper)
         return _f_wrapper
 
     return _decorator
