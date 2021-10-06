@@ -1107,7 +1107,7 @@ def partial(f,                 # type: Callable
 
     # (1) remove/change all preset arguments from the signature
     orig_sig = signature(f)
-    new_sig = gen_partial_sig(orig_sig, preset_pos_args, preset_kwargs)
+    new_sig = gen_partial_sig(orig_sig, preset_pos_args, preset_kwargs, f)
 
     if _is_generator_func(f):
         if sys.version_info >= (3, 3):
