@@ -104,8 +104,8 @@ def tests(session: PowerSession, coverage, pkg_specs):
     session.run2("python ci_tools/check_python_version.py %s" % session.python)
 
     # install self so that it is recognized by pytest
-    # session.run2("pip install -e . --no-deps") >> THIS DOES NOT USE THE CORRECT PIP !!
-    session.install("-e", ".", "--no-deps")
+    session.run2("pip install -e . --no-deps")
+    # session.install("-e", ".", "--no-deps")
 
     # check that it can be imported even from a different folder
     # Important: do not surround the command into double quotes as in the shell !
