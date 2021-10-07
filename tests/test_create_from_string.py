@@ -1,7 +1,6 @@
 import sys
 
 import pytest
-from pytest_cases import parametrize_with_cases
 
 from makefun import create_function
 
@@ -114,8 +113,75 @@ foo(b,      # type: int
     assert dynamic_fun.__annotations__ == {'a': float, 'b': int, 'return': str}
 
 
-@parametrize_with_cases("params_str,inputs,expected", cases=".test_create_from_string_cases")
-def test_arguments(params_str, inputs, expected):
+params_type_hints_allowed = sys.version_info.major >= 3 and sys.version_info.minor >= 5
+star_followed_by_arg_allowed = sys.version_info.major >= 3
+
+
+class TestArguments:
+    def test_case_simple(self):
+        params_str = "b, a = 0"
+        # case_simple.__name__ = params_str
+
+        # param_names = ['b', 'a']
+
+        inputs = "12"
+        args = ()
+        kwargs = {'a': 0, 'b': 12}
+
+        _test_arguments(params_str, inputs, (args, kwargs))
+
+    @pytest.mark.skipif(not star_followed_by_arg_allowed, reason='not allowed in this version of python')
+    def test_case_simple_with_star(self):
+        params_str = "b, *, a = 0"
+        # case_simple_with_star.__name__ = params_str
+
+        # param_names = ['b', '*', 'a']
+
+        inputs = "12"
+        args = ()
+        kwargs = {'a': 0, 'b': 12}
+        _test_arguments(params_str, inputs, (args, kwargs))
+
+    @pytest.mark.skipif(not star_followed_by_arg_allowed, reason='not allowed in this version of python')
+    def test_case_simple_with_star_args1(self):
+        params_str = "b, *args, a = 0"
+        # case_simple_with_star_args1.__name__ = params_str
+
+        # param_names = ['b', 'a']
+
+        inputs = "12"
+        # args = ()
+        # kwargs = {'a': 0, 'b': 12}
+        args = (12,)
+        kwargs = {'a': 0}
+        _test_arguments(params_str, inputs, (args, kwargs))
+
+    @pytest.mark.skipif(not star_followed_by_arg_allowed, reason='not allowed in this version of python')
+    def test_case_simple_with_star_args2(self):
+        params_str = "*args, a = 0"
+        # case_simple_with_star_args2.__name__ = params_str
+
+        # param_names = ['b', 'a']
+
+        inputs = "12"
+        args = (12, )
+        kwargs = {'a': 0}
+        _test_arguments(params_str, inputs, (args, kwargs))
+
+    def test_case_with_type_comments_and_newlines(self):
+        params_str = "b,      # type: int\n" \
+                     "a = 0   # type: float\n"
+        # test_case_with_type_comments_and_newlines.__name__ = params_str
+
+        # param_names = ['b', 'a']
+
+        inputs = "12"
+        args = ()
+        kwargs = {'a': 0, 'b': 12}
+        _test_arguments(params_str, inputs, (args, kwargs))
+
+
+def _test_arguments(params_str, inputs, expected):
     """ Tests that the `PARAM_DEF` regexp works correctly """
 
     def generic_handler(*args, **kwargs):
