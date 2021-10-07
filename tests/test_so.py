@@ -176,7 +176,7 @@ def test_so_sig_preserving(capsys):
     with capsys.disabled():
         print(captured.out)
 
-    assert captured.out == """Help on function my_func in module makefun.tests.test_so:
+    assert captured.out == """Help on function my_func in module tests.test_so:
 
 my_func(x)
     my function
@@ -223,7 +223,7 @@ def test_sig_preserving_2(capsys):
 
     assert captured.out == """wrapper executes
 22
-Help on function funny_function in module makefun.tests.test_so:
+Help on function funny_function in module tests.test_so:
 
 funny_function(x, y, z=3)
     Computes x*y + 2*z
@@ -255,7 +255,7 @@ def test_so_partial(capsys):
     sig_actual_call = "(a, b=10, c=1)"
     sig = sig_actual_call if PY2 else "(a, *, b=10, c=1)"
 
-    assert captured.out == """Help on function foo in module makefun.tests.test_so:
+    assert captured.out == """Help on function foo in module tests.test_so:
 
 foo{sig}
     <This function is equivalent to 'foo{sig_actual_call}', see original 'foo' doc below.>
@@ -302,12 +302,12 @@ def test_so_partial2(capsys):
 
         ref_str = """hello world
 1 2
-Help on function test in module makefun.tests.test_so:
+Help on function test in module tests.test_so:
 
 test{sig}
     <This function is equivalent to 'test{sig_actual_call}'.>
 
-Help on function test in module makefun.tests.test_so:
+Help on function test in module tests.test_so:
 
 test{sig}
     <This function is equivalent to 'test{sig_actual_call}', see original 'test' doc below.>
@@ -340,7 +340,7 @@ def test_so_partial_posargs(capsys):
         sig_actual_call = "('hello', b='world', x, y)"
         sig = "(b='world', x=KW_ONLY_ARG!, y=KW_ONLY_ARG!)" if PY2 else "(*, b='world', x, y)"
 
-        ref_str = """Help on function test in module makefun.tests.test_so:
+        ref_str = """Help on function test in module tests.test_so:
 
 test{sig}
     <This function is equivalent to 'test{sig_actual_call}'.>

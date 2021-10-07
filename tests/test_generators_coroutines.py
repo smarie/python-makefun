@@ -80,7 +80,7 @@ def test_native_coroutine():
     """ Tests that we can use a native async coroutine as function_handler in `create_function`"""
 
     # define the handler that should be called
-    from makefun.tests._test_py35 import make_native_coroutine_handler
+    from tests._test_py35 import make_native_coroutine_handler
     my_native_coroutine_handler = make_native_coroutine_handler()
 
     # create the dynamic function

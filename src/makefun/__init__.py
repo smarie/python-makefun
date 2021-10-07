@@ -2,7 +2,7 @@
 #          + All contributors to <https://github.com/smarie/python-makefun>
 #
 # License: 3-clause BSD, <https://github.com/smarie/python-makefun/blob/master/LICENSE>
-from makefun.main import create_function, with_signature, remove_signature_parameters, add_signature_parameters, \
+from .main import create_function, with_signature, remove_signature_parameters, add_signature_parameters, \
     wraps, create_wrapper, partial, with_partial, compile_fun, UndefinedSymbolError, UnsupportedForCompilation, \
     SourceUnavailable
 
