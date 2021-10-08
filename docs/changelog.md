@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.12.1 - Bugfix
+
+ - Fixed `TypeError` when a `func` attribute is present on the function provided to `create_function`. Fixed [#76](https://github.com/smarie/python-makefun/issues/76)
+
 ### 1.12.0 - Refactoring and consistency improvement
 
  - Fixed `partial` so that :
