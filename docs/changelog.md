@@ -1,5 +1,14 @@
 # Changelog
 
+### 1.12.0 - Refactoring and consistency improvement
+
+ - Fixed `partial` so that :
+   - when no argument is provided, it is equivalent to `wraps(f)(f)`. That is, the `__wrapped__` attribute is set. Fixed [#73](https://github.com/smarie/python-makefun/issues/73)
+   - it sets the `func` attribute just as `functools.partial` does. Fixed [#75](https://github.com/smarie/python-makefun/issues/75) 
+ - Removed `pytest-cases` dependency as it was a circular one. Fixed [#68](https://github.com/smarie/python-makefun/issues/68)
+ - Now using `flake8` for qualimetry and `genbadge` for badges. Fixed [#71](https://github.com/smarie/python-makefun/issues/71)
+ - Restructured project so that tests are truly independent, to ease rpm/apt/etc. packaging. Fixed [#69](https://github.com/smarie/python-makefun/issues/69)
+
 ### 1.11.3 - bugfix with default values representable but not evaluable
 
  - When a default value `v` in a signature is representable but its `eval(repr(v))` raises an exception, created signatures would raise an exception instead of automatically protecting the symbol. PR [#67](https://github.com/smarie/python-makefun/pull/67) by [gcalmettes](https://github.com/gcalmettes).
