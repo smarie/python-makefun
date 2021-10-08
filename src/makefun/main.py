@@ -268,7 +268,7 @@ def create_function(func_signature,             # type: Union[str, Signature]
     # update the signature
     _update_fields(f, name=func_name, qualname=qualname, doc=doc, annotations=annotations,
                    defaults=tuple(defaults), kwonlydefaults=kwonlydefaults,
-                   module=module_name, **attrs)
+                   module=module_name, kw=attrs)
 
     return f
 
@@ -631,18 +631,22 @@ def _make(funcname, params_names, body, evaldict=None):
 
 
 def _update_fields(
-        func, name, qualname=None, doc=None, annotations=None, defaults=(), kwonlydefaults=None, module=None, **kw
+        func, name, qualname=None, doc=None, annotations=None, defaults=(), kwonlydefaults=None, module=None, kw=None
 ):
     """
     Update the signature of func with the provided information
 
     This method merely exists to remind which field have to be filled.
 
-    :param self:
     :param func:
+    :param name:
+    :param qualname:
     :param kw:
     :return:
     """
+    if kw is None:
+        kw = dict()
+
     func.__name__ = name
 
     if qualname is not None:

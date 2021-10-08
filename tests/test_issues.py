@@ -7,7 +7,7 @@ try:  # python 3.3+
 except ImportError:
     from funcsigs import signature, Signature, Parameter
 
-from makefun import wraps, with_signature, partial
+from makefun import wraps, with_signature, partial, create_function
 
 
 @pytest.mark.skip("known to fail")
@@ -216,3 +216,11 @@ def test_issue_pr_67():
         pass
 
     bar(1)
+
+
+def test_issue_76():
+    def f(a):
+        return a + 1
+
+    f2 = create_function("zoo(a)", f, func=f)
+    assert f2(3) == 4
