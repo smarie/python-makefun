@@ -1131,6 +1131,9 @@ def partial(f,                 # type: Callable
     if new_sig is not None:
         partial_f.__doc__ = gen_partial_doc(partial_f.__name__, partial_f.__doc__, orig_sig, new_sig, preset_pos_args)
 
+    # Set the func attribute as `functools.partial` does
+    partial_f.func = f
+
     return partial_f
 
 

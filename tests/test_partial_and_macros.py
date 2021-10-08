@@ -182,9 +182,14 @@ def test_simple_partial_copy():
     f2 = makefun.partial(f1)
 
     # make sure that this is the same as wraps
-    assert f2.__wrapped__ == f1
+    # and same for the func attribute
+    assert f2.func == f2.__wrapped__ == f1
 
     f3 = makefun.wraps(f1)(f1)
     assert f3.__wrapped__ == f1
 
     assert f2(1) == f3(1) == 2
+
+    # the func attribute is there too
+    f4 = functools.partial(f1)
+    assert f2.func == f4.func
