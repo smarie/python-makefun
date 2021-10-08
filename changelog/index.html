@@ -269,6 +269,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#1120-refactoring-and-consistency-improvement" class="md-nav__link">
+    1.12.0 - Refactoring and consistency improvement
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#1113-bugfix-with-default-values-representable-but-not-evaluable" class="md-nav__link">
     1.11.3 - bugfix with default values representable but not evaluable
   </a>
@@ -603,6 +610,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#1120-refactoring-and-consistency-improvement" class="md-nav__link">
+    1.12.0 - Refactoring and consistency improvement
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#1113-bugfix-with-default-values-representable-but-not-evaluable" class="md-nav__link">
     1.11.3 - bugfix with default values representable but not evaluable
   </a>
@@ -921,6 +935,15 @@
                 
                 
                 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<h3 id="1120-refactoring-and-consistency-improvement">1.12.0 - Refactoring and consistency improvement<a class="headerlink" href="#1120-refactoring-and-consistency-improvement" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Fixed <code>partial</code> so that :</li>
+<li>when no argument is provided, it is equivalent to <code>wraps(f)(f)</code>. That is, the <code>__wrapped__</code> attribute is set. Fixed <a href="https://github.com/smarie/python-makefun/issues/73">#73</a></li>
+<li>it sets the <code>func</code> attribute just as <code>functools.partial</code> does. Fixed <a href="https://github.com/smarie/python-makefun/issues/75">#75</a> </li>
+<li>Removed <code>pytest-cases</code> dependency as it was a circular one. Fixed <a href="https://github.com/smarie/python-makefun/issues/68">#68</a></li>
+<li>Now using <code>flake8</code> for qualimetry and <code>genbadge</code> for badges. Fixed <a href="https://github.com/smarie/python-makefun/issues/71">#71</a></li>
+<li>Restructured project so that tests are truly independent, to ease rpm/apt/etc. packaging. Fixed <a href="https://github.com/smarie/python-makefun/issues/69">#69</a></li>
+</ul>
 <h3 id="1113-bugfix-with-default-values-representable-but-not-evaluable">1.11.3 - bugfix with default values representable but not evaluable<a class="headerlink" href="#1113-bugfix-with-default-values-representable-but-not-evaluable" title="Permanent link">&para;</a></h3>
 <ul>
 <li>When a default value <code>v</code> in a signature is representable but its <code>eval(repr(v))</code> raises an exception, created signatures would raise an exception instead of automatically protecting the symbol. PR <a href="https://github.com/smarie/python-makefun/pull/67">#67</a> by <a href="https://github.com/gcalmettes">gcalmettes</a>.</li>
