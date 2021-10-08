@@ -1107,7 +1107,10 @@ def partial(f,                 # type: Callable
 
     # (1) remove/change all preset arguments from the signature
     orig_sig = signature(f)
-    new_sig = gen_partial_sig(orig_sig, preset_pos_args, preset_kwargs, f)
+    if preset_pos_args or preset_kwargs:
+        new_sig = gen_partial_sig(orig_sig, preset_pos_args, preset_kwargs, f)
+    else:
+        new_sig = None
 
     if _is_generator_func(f):
         if sys.version_info >= (3, 3):
@@ -1125,7 +1128,8 @@ def partial(f,                 # type: Callable
 
     # update the doc.
     # Note that partial_f is generated above with a proper __name__ and __doc__ identical to the wrapped ones
-    partial_f.__doc__ = gen_partial_doc(partial_f.__name__, partial_f.__doc__, orig_sig, new_sig, preset_pos_args)
+    if new_sig is not None:
+        partial_f.__doc__ = gen_partial_doc(partial_f.__name__, partial_f.__doc__, orig_sig, new_sig, preset_pos_args)
 
     return partial_f
 

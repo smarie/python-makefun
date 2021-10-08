@@ -172,3 +172,19 @@ def test_args_order_and_kind():
             makefun.partial(f, b=0)
 
         # assert str(signature(fp_ref)) == str(signature(fp))
+
+
+def test_simple_partial_copy():
+    """Test that when not providing any argument to partial, it is equivalent to wraps with new sig = None"""
+    def f1(a):
+        return a + 1
+
+    f2 = makefun.partial(f1)
+
+    # make sure that this is the same as wraps
+    assert f2.__wrapped__ == f1
+
+    f3 = makefun.wraps(f1)(f1)
+    assert f3.__wrapped__ == f1
+
+    assert f2(1) == f3(1) == 2
