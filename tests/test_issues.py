@@ -1,3 +1,4 @@
+import inspect
 import sys
 
 import pytest
@@ -224,3 +225,31 @@ def test_issue_76():
 
     f2 = create_function("zoo(a)", f, func=f)
     assert f2(3) == 4
+
+
+@pytest.mark.skipif(sys.version_info < (3, 6), reason="requires python 3.6 or higher (async generator)")
+def test_issue_async_generator_wraps():
+    import asyncio
+    from ._test_py36 import make_async_generator, make_async_generator_wrapper
+
+    f = make_async_generator()
+    wrapper = make_async_generator_wrapper(f)
+
+    assert inspect.isasyncgenfunction(f)
+    assert inspect.isasyncgenfunction(wrapper)
+
+    assert asyncio.get_event_loop().run_until_complete(asyncio.ensure_future(wrapper(1).__anext__())) == 1
+
+
+@pytest.mark.skipif(sys.version_info < (3, 6), reason="requires python 3.6 or higher (async generator)")
+def test_issue_async_generator_partial():
+    import asyncio
+    from ._test_py36 import make_async_generator, make_async_generator_partial
+
+    f = make_async_generator()
+    f_partial = make_async_generator_partial(f, v=1)
+
+    assert inspect.isasyncgenfunction(f)
+    assert inspect.isasyncgenfunction(f_partial)
+
+    assert asyncio.get_event_loop().run_until_complete(asyncio.ensure_future(f_partial().__anext__())) == 1
