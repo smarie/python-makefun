@@ -33,6 +33,13 @@ except ImportError:
     def isgeneratorfunction(f):
         return False
 
+try:
+    from inspect import isasyncgenfunction
+except ImportError:
+    # assume no generator function in old Python versions
+    def isasyncgenfunction(f):
+        return False
+
 try:  # python 3.5+
     from typing import Callable, Any, Union, Iterable, Dict, Tuple, Mapping
 except ImportError:
@@ -246,6 +253,8 @@ def create_function(func_signature,             # type: Union[str, Signature]
         else:
             from makefun._main_legacy_py import get_legacy_py_generator_body_template
             body = get_legacy_py_generator_body_template() % (func_signature_str, params_str)
+    elif isasyncgenfunction(func_impl):
+        body = "async def %s\n    async for y in _func_impl_(%s):\n        yield y\n" % (func_signature_str, params_str)
     else:
         body = "def %s\n    return _func_impl_(%s)\n" % (func_signature_str, params_str)
 
@@ -1123,6 +1132,9 @@ def partial(f,                 # type: Callable
         else:
             from makefun._main_legacy_py import make_partial_using_yield
             partial_f = make_partial_using_yield(new_sig, f, *preset_pos_args, **preset_kwargs)
+    elif isasyncgenfunction(f) and sys.version_info >= (3, 6):
+        from makefun._main_latest_py import make_partial_using_async_for_in_yield
+        partial_f = make_partial_using_async_for_in_yield(new_sig, f, *preset_pos_args, **preset_kwargs)
     else:
         @wraps(f, new_sig=new_sig)
         def partial_f(*args, **kwargs):
