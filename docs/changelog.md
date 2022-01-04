@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.13.0 - Support for async generator functions
+
+ - async generator functions are now supported (See [PEP525](https://www.python.org/dev/peps/pep-0525/)). Fixed [#77](https://github.com/smarie/python-makefun/issues/77). [PR#78](https://github.com/smarie/python-makefun/pull/78) by [broglep-work](https://github.com/broglep-work).
+
 ### 1.12.1 - Bugfix
 
  - Fixed `TypeError` when a `func` attribute is present on the function provided to `create_function`. Fixed [#76](https://github.com/smarie/python-makefun/issues/76)
