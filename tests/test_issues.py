@@ -228,7 +228,7 @@ def test_issue_76():
 
 
 @pytest.mark.skipif(sys.version_info < (3, 6), reason="requires python 3.6 or higher (async generator)")
-def test_issue_async_generator_wraps():
+def test_issue_77_async_generator_wraps():
     import asyncio
     from ._test_py36 import make_async_generator, make_async_generator_wrapper
 
