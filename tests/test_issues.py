@@ -233,7 +233,7 @@ def test_issue_77_async_generator_wraps():
     from ._test_py36 import make_async_generator, make_async_generator_wrapper
 
     f = make_async_generator()
-    wrapper = make_async_generator_wrapper(f)
+    wrapper = wraps(f)(make_async_generator_wrapper(f))
 
     assert inspect.isasyncgenfunction(f)
     assert inspect.isasyncgenfunction(wrapper)
@@ -244,10 +244,10 @@ def test_issue_77_async_generator_wraps():
 @pytest.mark.skipif(sys.version_info < (3, 6), reason="requires python 3.6 or higher (async generator)")
 def test_issue_77_async_generator_partial():
     import asyncio
-    from ._test_py36 import make_async_generator, make_async_generator_partial
+    from ._test_py36 import make_async_generator
 
     f = make_async_generator()
-    f_partial = make_async_generator_partial(f, v=1)
+    f_partial = partial(f, v=1)
 
     assert inspect.isasyncgenfunction(f)
     assert inspect.isasyncgenfunction(f_partial)
