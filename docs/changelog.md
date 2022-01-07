@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.13.1 - Fixed regression with generators in python 3.5
+
+ - Fixed an issue where using `partial` on a generator function in python 3.5 was raising a `SyntaxError`. Fixed [#79](https://github.com/smarie/python-makefun/issues/79)
+
 ### 1.13.0 - Support for async generator functions
 
  - async generator functions are now supported (See [PEP525](https://www.python.org/dev/peps/pep-0525/)). Fixed [#77](https://github.com/smarie/python-makefun/issues/77). [PR#78](https://github.com/smarie/python-makefun/pull/78) by [broglep-work](https://github.com/broglep-work).
