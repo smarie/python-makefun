@@ -1127,13 +1127,13 @@ def partial(f,                 # type: Callable
 
     if _is_generator_func(f):
         if sys.version_info >= (3, 3):
-            from makefun._main_latest_py import make_partial_using_yield_from
+            from makefun._main_py35_and_higher import make_partial_using_yield_from
             partial_f = make_partial_using_yield_from(new_sig, f, *preset_pos_args, **preset_kwargs)
         else:
             from makefun._main_legacy_py import make_partial_using_yield
             partial_f = make_partial_using_yield(new_sig, f, *preset_pos_args, **preset_kwargs)
     elif isasyncgenfunction(f) and sys.version_info >= (3, 6):
-        from makefun._main_latest_py import make_partial_using_async_for_in_yield
+        from makefun._main_py36_and_higher import make_partial_using_async_for_in_yield
         partial_f = make_partial_using_async_for_in_yield(new_sig, f, *preset_pos_args, **preset_kwargs)
     else:
         @wraps(f, new_sig=new_sig)

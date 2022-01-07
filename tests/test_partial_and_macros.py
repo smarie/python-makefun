@@ -174,10 +174,19 @@ def test_args_order_and_kind():
         # assert str(signature(fp_ref)) == str(signature(fp))
 
 
-def test_simple_partial_copy():
-    """Test that when not providing any argument to partial, it is equivalent to wraps with new sig = None"""
-    def f1(a):
-        return a + 1
+@pytest.mark.parametrize("is_generator", [False, True])
+def test_simple_partial_copy(is_generator):
+    """Test that when not providing any argument to partial, it is equivalent to wraps with new sig = None
+
+    This test was extended to cover issue 79.
+    """
+
+    if is_generator:
+        def f1(a):
+            yield a + 1
+    else:
+        def f1(a):
+            return a + 1
 
     f2 = makefun.partial(f1)
 
@@ -188,7 +197,10 @@ def test_simple_partial_copy():
     f3 = makefun.wraps(f1)(f1)
     assert f3.__wrapped__ == f1
 
-    assert f2(1) == f3(1) == 2
+    if is_generator:
+        assert next(f2(1)) == next(f3(1)) == 2
+    else:
+        assert f2(1) == f3(1) == 2
 
     # the func attribute is there too
     f4 = functools.partial(f1)
