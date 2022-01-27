@@ -104,8 +104,8 @@ def tests(session: PowerSession, coverage, pkg_specs):
     session.run2("python ci_tools/check_python_version.py %s" % session.python)
 
     # install self so that it is recognized by pytest
-    session.run2("pip install -e . --no-deps")
-    # session.install("-e", ".", "--no-deps")
+    session.run2("pip install . --no-deps")
+    # session.install(".", "--no-deps")
 
     # check that it can be imported even from a different folder
     # Important: do not surround the command into double quotes as in the shell !
@@ -144,7 +144,7 @@ def flake8(session: PowerSession):
 
     session.install("-r", str(Folders.ci_tools / "flake8-requirements.txt"))
     session.install("genbadge[flake8]")
-    session.run2("pip install -e .[flake8]")
+    session.run2("pip install .")
 
     rm_folder(Folders.flake8_reports)
     Folders.flake8_reports.mkdir(parents=True, exist_ok=True)
