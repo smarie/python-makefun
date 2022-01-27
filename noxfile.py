@@ -103,19 +103,22 @@ def tests(session: PowerSession, coverage, pkg_specs):
     # Fail if the assumed python version is not the actual one
     session.run2("python ci_tools/check_python_version.py %s" % session.python)
 
-    # install self so that it is recognized by pytest
-    session.run2("pip install . --no-deps")
-    # session.install(".", "--no-deps")
-
     # check that it can be imported even from a different folder
     # Important: do not surround the command into double quotes as in the shell !
-    session.run('python', '-c', 'import os; os.chdir(\'./docs/\'); import %s' % pkg_name)
+    # session.run('python', '-c', 'import os; os.chdir(\'./docs/\'); import %s' % pkg_name)
 
     # finally run all tests
     if not coverage:
+        # install self so that it is recognized by pytest
+        session.run2("pip install . --no-deps")
+        # session.install(".", "--no-deps")
+
         # simple: pytest only
         session.run2("python -m pytest --cache-clear -v tests/")
     else:
+        # install self in "develop" mode so that coverage can be measured
+        session.run2("pip install -e . --no-deps")
+
         # coverage + junit html reports + badge generation
         session.install_reqs(phase="coverage",
                              phase_reqs=["coverage", "pytest-html", "genbadge[tests,coverage]"],
