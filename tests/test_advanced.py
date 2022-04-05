@@ -108,6 +108,19 @@ def tests_wraps_sigchange():
     assert goo('hello') == 'hello'
 
 
+def tests_wraps_lambda():
+    """ Tests that `@wraps` can duplicate the signature of a lambda """
+    foo = lambda a: a
+
+    @wraps(foo)
+    def goo(*args, **kwargs):
+        return foo(*args, **kwargs)
+
+    assert goo.__name__ == (lambda: None).__name__
+    assert str(signature(goo)) == "(a)"
+    assert goo('hello') == 'hello'
+
+
 @pytest.mark.skipif(sys.version_info < (3, 0), reason="requires python3 or higher")
 def test_qualname_when_nested():
     """ Tests that qualname is correctly set when `@with_signature` is applied on nested functions """

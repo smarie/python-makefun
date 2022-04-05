@@ -197,6 +197,9 @@ def create_function(func_signature,             # type: Union[str, Signature]
     if module_name is None:
         module_name = getattr_partial_aware(func_impl, '__module__', None)
 
+    # lambda check
+    is_lambda = func_name == (lambda: None).__name__
+
     # input signature handling
     if isinstance(func_signature, str):
         # transform the string into a Signature and make sure the string contains ":"
@@ -225,8 +228,12 @@ def create_function(func_signature,             # type: Union[str, Signature]
                              "probably happened because the decorated function %s has no __name__. You may "
                              "wish to pass an explicit `func_name` or to provide the new signature as a "
                              "string containing the name" % func_impl)
-        func_signature_str = get_signature_string(func_name, func_signature, evaldict)
 
+        if is_lambda:
+            # create signature string with no name, parentheses or colon
+            func_signature_str = get_signature_string('', func_signature, evaldict)[1:-2]
+        else:
+            func_signature_str = get_signature_string(func_name, func_signature, evaldict)
     else:
         raise TypeError("Invalid type for `func_signature`: %s" % type(func_signature))
 
@@ -255,6 +262,8 @@ def create_function(func_signature,             # type: Union[str, Signature]
             body = get_legacy_py_generator_body_template() % (func_signature_str, params_str)
     elif isasyncgenfunction(func_impl):
         body = "async def %s\n    async for y in _func_impl_(%s):\n        yield y\n" % (func_signature_str, params_str)
+    elif is_lambda:
+        body = "lambda_ = lambda %s: _func_impl_(%s)\n" % (func_signature_str, params_str)
     else:
         body = "def %s\n    return _func_impl_(%s)\n" % (func_signature_str, params_str)
 
@@ -264,7 +273,10 @@ def create_function(func_signature,             # type: Union[str, Signature]
     # create the function by compiling code, mapping the `_func_impl_` symbol to `func_impl`
     protect_eval_dict(evaldict, func_name, params_names)
     evaldict['_func_impl_'] = func_impl
-    f = _make(func_name, params_names, body, evaldict)
+    if is_lambda:
+        f = _make("lambda_", params_names, body, evaldict)
+    else:
+        f = _make(func_name, params_names, body, evaldict)
 
     # add the source annotation if needed
     if add_source:
