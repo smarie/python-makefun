@@ -233,7 +233,7 @@ def create_function(func_signature,             # type: Union[str, Signature]
 
         create_lambda = not _is_valid_func_def_name(co_name)
 
-        # if lambda, remove the name and parentheses from the signature
+        # if lambda, strip the name, parentheses and colon from the signature
         if create_lambda:
             name_len = len(func_name_from_str) if func_name_from_str else 0
             func_signature_str = func_signature_str[name_len + 1: -2]
