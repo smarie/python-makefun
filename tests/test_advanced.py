@@ -117,12 +117,26 @@ def tests_wraps_lambda():
         return foo(*args, **kwargs)
 
     assert goo.__name__ == (lambda: None).__name__
-    assert str(signature(goo)) == "(a)"
+    assert str(signature(goo)) == '(a)'
     assert goo('hello') == 'hello'
 
 
+def tests_wraps_renamed_lambda():
+     """ Tests that `@wraps` can duplicate the signature of a lambda that has been renamed """
+     foo = lambda a: a
+     foo.__name__ = 'bar'
+
+     @wraps(foo)
+     def goo(*args, **kwargs):
+         return foo(*args, **kwargs)
+
+     assert goo.__name__ == 'bar'
+     assert str(signature(goo)) == '(a)'
+     assert goo('hello') == 'hello'
+
+
 def test_lambda_signature_str():
-    """Tests that `@with_signature` can create a lambda from a signature string."""
+    """ Tests that `@with_signature` can create a lambda from a signature string """
     new_sig = '(a, b=5)'
 
     @with_signature(new_sig, func_name='<lambda>')
@@ -136,7 +150,7 @@ def test_lambda_signature_str():
 
 
 def test_co_name():
-    """Tests that `@with_signature` can be used to change the __code__.co_name"""
+    """ Tests that `@with_signature` can be used to change the __code__.co_name """
     @with_signature('()', co_name='bar')
     def foo():
         return 'hello'
@@ -147,7 +161,7 @@ def test_co_name():
 
 
 def test_lambda_co_name():
-    """Tests that `@with_signature` can be used to change the __code__.co_name to `'<lambda>'`"""
+    """ Tests that `@with_signature` can be used to change the __code__.co_name to `'<lambda>'` """
     @with_signature('()', co_name='<lambda>')
     def foo():
         return 'hello'
@@ -157,7 +171,7 @@ def test_lambda_co_name():
 
 
 def test_invalid_co_name():
-    """Tests that `@with_signature` raises a `ValueError` when given an `co_name` that cannot be duplicated."""
+    """ Tests that `@with_signature` raises a `ValueError` when given an `co_name` that cannot be duplicated. """
     with pytest.raises(ValueError):
         @with_signature('()', co_name='<invalid>')
         def foo():
@@ -165,7 +179,7 @@ def test_invalid_co_name():
 
 
 def test_invalid_func_name():
-    """Tests that `@with_signature` can duplicate a func_name that is invalid in a function definition."""
+    """ Tests that `@with_signature` can duplicate a func_name that is invalid in a function definition. """
     @with_signature('()', func_name='<invalid>')
     def foo():
         return 'hello'
