@@ -121,6 +121,59 @@ def tests_wraps_lambda():
     assert goo('hello') == 'hello'
 
 
+def test_lambda_signature_str():
+    """Tests that `@with_signature` can create a lambda from a signature string."""
+    new_sig = '(a, b=5)'
+
+    @with_signature(new_sig, func_name='<lambda>')
+    def foo(a, b):
+        return a + b
+
+    assert foo.__name__ == '<lambda>'
+    assert foo.__code__.co_name == '<lambda>'
+    assert str(signature(foo)) == new_sig
+    assert foo(a=4) == 9
+
+
+def test_co_name():
+    """Tests that `@with_signature` can be used to change the __code__.co_name"""
+    @with_signature('()', co_name='bar')
+    def foo():
+        return 'hello'
+
+    assert foo.__name__ == 'foo'
+    assert foo.__code__.co_name == 'bar'
+    assert foo() == 'hello'
+
+
+def test_lambda_co_name():
+    """Tests that `@with_signature` can be used to change the __code__.co_name to `'<lambda>'`"""
+    @with_signature('()', co_name='<lambda>')
+    def foo():
+        return 'hello'
+
+    assert foo.__code__.co_name == '<lambda>'
+    assert foo() == 'hello'
+
+
+def test_invalid_co_name():
+    """Tests that `@with_signature` raises a `ValueError` when given an `co_name` that cannot be duplicated."""
+    with pytest.raises(ValueError):
+        @with_signature('()', co_name='<invalid>')
+        def foo():
+            return 'hello'
+
+
+def test_invalid_func_name():
+    """Tests that `@with_signature` can duplicate a func_name that is invalid in a function definition."""
+    @with_signature('()', func_name='<invalid>')
+    def foo():
+        return 'hello'
+
+    assert foo.__name__ == '<invalid>'
+    assert foo() == 'hello'
+
+
 @pytest.mark.skipif(sys.version_info < (3, 0), reason="requires python3 or higher")
 def test_qualname_when_nested():
     """ Tests that qualname is correctly set when `@with_signature` is applied on nested functions """

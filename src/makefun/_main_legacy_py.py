@@ -88,3 +88,14 @@ def get_legacy_py_generator_body_template():
             # else:
             _y = _i.send(_s)     # let the implementation decide if None means "no new input" or "new input = None"
 """
+
+
+def is_identifier(string):
+    """
+    Replacement for Python 3's `str.isidentifier`.
+    :param string:
+    :return:
+    """
+    if len(string) == 0 or string[0].isdigit():
+        return False
+    return all([s.isalnum() for s in string.split("_")])
