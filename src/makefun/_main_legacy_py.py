@@ -92,7 +92,7 @@ def get_legacy_py_generator_body_template():
 
 def is_identifier(string):
     """
-    Replacement for Python 3's `str.isidentifier`.
+    Replacement for `str.isidentifier` when it is not available (e.g. on Python 2).
     :param string:
     :return:
     """
