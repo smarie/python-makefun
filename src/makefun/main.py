@@ -132,6 +132,9 @@ def create_function(func_signature,             # type: Union[str, Signature]
      - `__annotations__` attribute is created to match the annotations in the signature.
      - `__doc__` attribute is copied from `func_impl.__doc__` except if overridden using `doc`
      - `__module__` attribute is copied from `func_impl.__module__` except if overridden using `module_name`
+     - `__code__.co_name` (see above) defaults to the same value as the above `__name__` attribute, except when that
+       value is not a valid Python identifier, in which case it will be `<lambda>`. It can be  overridden by providing
+       a `co_name` that is either a valid Python identifier or `<lambda>`.
 
     Finally two new attributes are optionally created
 
@@ -139,6 +142,13 @@ def create_function(func_signature,             # type: Union[str, Signature]
      generated function
      - `__func_impl__` attribute: set if `add_impl` is `True` (default), this attribute contains a pointer to
      `func_impl`
+
+    A lambda function will be created in the following cases:
+
+     - when `func_signature` is a `Signature` object and `func_impl` is itself a lambda function,
+     - when the function name, either derived from a `func_signature` string, or given explicitly with `func_name`,
+       is not a valid Python identifier, or
+     - when the provided `co_name` is `<lambda>`.
 
     :param func_signature: either a string without 'def' such as "foo(a, b: int, *args, **kwargs)" or "(a, b: int)",
         or a `Signature` object, for example from the output of `inspect.signature` or from the `funcsigs.signature`
