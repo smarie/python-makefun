@@ -262,8 +262,8 @@ def create_function(func_signature,             # type: Union[str, Signature]
         create_lambda = not _is_valid_func_def_name(co_name)
 
         if create_lambda:
-            # create signature string with no name, parentheses or colon
-            func_signature_str = get_signature_string('', func_signature, evaldict)[1:-2]
+            # create signature string (or argument string in the case of a lambda function
+            func_signature_str = get_lambda_argument_string(func_signature, evaldict)
         else:
             func_signature_str = get_signature_string(co_name, func_signature, evaldict)
     else:
@@ -434,6 +434,17 @@ def get_signature_string(func_name, func_signature, evaldict):
 
     # return the final string representation
     return "%s%s:" % (func_name, s)
+
+
+def get_lambda_argument_string(func_signature, evaldict):
+    """
+    Returns the string to be used as arguments in a lambda function definition.
+     If there is a non-native symbol in the defaults, it is created as a variable in the evaldict
+     :param func_name:
+     :param func_signature:
+     :return:
+     """
+    return get_signature_string('', func_signature, evaldict)[1:-2]
 
 
 TYPES_WITH_SAFE_REPR = (int, str, bytes, bool)
