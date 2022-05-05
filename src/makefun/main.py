@@ -192,7 +192,7 @@ def create_function(func_signature,             # type: Union[str, Signature]
     # name defaults
     user_provided_name = True
     if func_name is None:
-        # allow None for now, we'll raise a ValueError later if needed
+        # allow None, this will result in a lambda function being created
         func_name = getattr_partial_aware(func_impl, '__name__', None)
         user_provided_name = False
 
