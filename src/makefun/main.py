@@ -253,12 +253,6 @@ def create_function(func_signature,             # type: Union[str, Signature]
 
     elif isinstance(func_signature, Signature):
         # create the signature string
-        if func_name is None:
-            raise ValueError("Invalid signature for created function: `None` function name. This "
-                             "probably happened because the decorated function %s has no __name__. You may "
-                             "wish to pass an explicit `func_name` or to provide the new signature as a "
-                             "string containing the name" % func_impl)
-
         create_lambda = not _is_valid_func_def_name(co_name)
 
         if create_lambda:
