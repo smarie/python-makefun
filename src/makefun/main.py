@@ -435,11 +435,11 @@ def get_signature_string(func_name, func_signature, evaldict):
 def get_lambda_argument_string(func_signature, evaldict):
     """
     Returns the string to be used as arguments in a lambda function definition.
-     If there is a non-native symbol in the defaults, it is created as a variable in the evaldict
-     :param func_name:
-     :param func_signature:
-     :return:
-     """
+    If there is a non-native symbol in the defaults, it is created as a variable in the evaldict
+    :param func_name:
+    :param func_signature:
+    :return:
+    """
     return get_signature_string('', func_signature, evaldict)[1:-2]
 
 
