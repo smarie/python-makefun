@@ -74,6 +74,7 @@ def create_wrapper(wrapped,
                    add_impl=True,              # type: bool
                    doc=None,                   # type: str
                    qualname=None,              # type: str
+                   co_name=None,               # type: str
                    module_name=None,           # type: str
                    **attrs
                    ):
@@ -85,7 +86,8 @@ def create_wrapper(wrapped,
     """
     return wraps(wrapped, new_sig=new_sig, prepend_args=prepend_args, append_args=append_args, remove_args=remove_args,
                  func_name=func_name, inject_as_first_arg=inject_as_first_arg, add_source=add_source,
-                 add_impl=add_impl, doc=doc, qualname=qualname, module_name=module_name, **attrs)(wrapper)
+                 add_impl=add_impl, doc=doc, qualname=qualname, module_name=module_name, co_name=co_name,
+                 **attrs)(wrapper)
 
 
 def getattr_partial_aware(obj, att_name, *att_default):
@@ -859,11 +861,13 @@ def wraps(wrapped_fun,
         `wrapped_fun` is automatically copied.
     :return: a decorator
     """
-    func_name, func_sig, doc, qualname, module_name, all_attrs = _get_args_for_wrapping(wrapped_fun, new_sig,
-                                                                                        remove_args,
-                                                                                        prepend_args, append_args,
-                                                                                        func_name, doc,
-                                                                                        qualname, module_name, attrs)
+    func_name, func_sig, doc, qualname, co_name, module_name, all_attrs = _get_args_for_wrapping(wrapped_fun, new_sig,
+                                                                                                 remove_args,
+                                                                                                 prepend_args,
+                                                                                                 append_args,
+                                                                                                 func_name, doc,
+                                                                                                 qualname, co_name,
+                                                                                                 module_name, attrs)
 
     return with_signature(func_sig,
                           func_name=func_name,
@@ -877,7 +881,7 @@ def wraps(wrapped_fun,
 
 
 def _get_args_for_wrapping(wrapped, new_sig, remove_args, prepend_args, append_args,
-                           func_name, doc, qualname, module_name, attrs):
+                           func_name, doc, qualname, co_name, module_name, attrs):
     """
     Internal method used by @wraps and create_wrapper
 
@@ -889,6 +893,7 @@ def _get_args_for_wrapping(wrapped, new_sig, remove_args, prepend_args, append_a
     :param func_name:
     :param doc:
     :param qualname:
+    :param co_name:
     :param module_name:
     :param attrs:
     :return:
@@ -940,6 +945,10 @@ def _get_args_for_wrapping(wrapped, new_sig, remove_args, prepend_args, append_a
         qualname = getattr_partial_aware(wrapped, '__qualname__', None)
     if module_name is None:
         module_name = getattr_partial_aware(wrapped, '__module__', None)
+    if co_name is None:
+        code = getattr_partial_aware(wrapped, '__code__', None)
+        if code is not None:
+            co_name = code.co_name
 
     # attributes: start from the wrapped dict, add '__wrapped__' if needed, and override with all attrs.
     all_attrs = copy(getattr_partial_aware(wrapped, '__dict__'))
@@ -954,7 +963,7 @@ def _get_args_for_wrapping(wrapped, new_sig, remove_args, prepend_args, append_a
         all_attrs['__wrapped__'] = wrapped
     all_attrs.update(attrs)
 
-    return func_name, func_sig, doc, qualname, module_name, all_attrs
+    return func_name, func_sig, doc, qualname, co_name, module_name, all_attrs
 
 
 def with_signature(func_signature,             # type: Union[str, Signature]
