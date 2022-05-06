@@ -1014,7 +1014,7 @@ def with_signature(func_signature,             # type: Union[str, Signature]
     :param attrs: other keyword attributes that should be set on the function. Note that the full `__dict__` of the
         decorated function is not automatically copied.
     """
-    if func_signature is None:
+    if func_signature is None and co_name is None:
         # make sure that user does not provide non-default other args
         if inject_as_first_arg or not add_source or not add_impl:
             raise ValueError("If `func_signature=None` no new signature will be generated so only `func_name`, "
