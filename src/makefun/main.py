@@ -16,11 +16,6 @@ from textwrap import dedent
 from types import FunctionType
 
 
-if sys.version_info >= (3, 0):
-    is_identifier = str.isidentifier
-else:
-    from makefun._main_legacy_py import is_identifier
-
 try:  # python 3.3+
     from inspect import signature, Signature, Parameter
 except ImportError:
@@ -1563,3 +1558,9 @@ def compile_fun_manually(target,
     new_f.__source__ = source_lines
 
     return new_f
+
+
+if sys.version_info >= (3, 0):
+    is_identifier = str.isidentifier
+else:
+    from makefun._main_legacy_py import is_identifier
