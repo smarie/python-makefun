@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.14.0 - Support for lambda functions
+
+ - `create_wrapper`, `create_function`, `wraps` and `with_signature` now support lambda functions. They also accept a new parameter `co_name` to define the name to be used in the compiled code. PR [#80](https://github.com/smarie/python-makefun/pull/80) by [andrewcleveland](https://github.com/andrewcleveland).
+
 ### 1.13.1 - Fixed regression with generators in python 3.5
 
  - Fixed an issue where using `partial` on a generator function in python 3.5 was raising a `SyntaxError`. Fixed [#79](https://github.com/smarie/python-makefun/issues/79)
