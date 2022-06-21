@@ -205,13 +205,12 @@ def create_function(func_signature,             # type: Union[str, Signature]
         user_provided_name = False
 
     # co_name default
-    user_provided_co_name = True
-    if co_name is None:
+    user_provided_co_name = co_name is not None
+    if not user_provided_co_name:
         if func_name is None:
             co_name = '<lambda>'
         else:
             co_name = func_name
-        user_provided_co_name = False
     else:
         if not (_is_valid_func_def_name(co_name)
                 or _is_lambda_func_name(co_name)):
