@@ -209,7 +209,7 @@ def create_function(func_signature,             # type: Union[str, Signature]
     else:
         if not (_is_valid_func_def_name(co_name)
                 or _is_lambda_func_name(co_name)):
-            raise ValueError("Invalid co_name %s for created function. "
+            raise ValueError("Invalid co_name %r for created function. "
                              "It is not possible to declare a function "
                              "with the provided co_name." % co_name)
 
