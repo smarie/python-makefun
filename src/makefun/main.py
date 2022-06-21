@@ -270,10 +270,6 @@ def create_function(func_signature,             # type: Union[str, Signature]
     else:
         raise TypeError("Invalid type for `func_signature`: %s" % type(func_signature))
 
-    # add space to lambda func_signature_str, if not empty
-    if create_lambda and func_signature_str:
-        func_signature_str = " " + func_signature_str
-
     # extract all information needed from the `Signature`
     params_to_kw_assignment_mode = get_signature_params(func_signature)
     params_names = list(params_to_kw_assignment_mode.keys())
@@ -300,7 +296,10 @@ def create_function(func_signature,             # type: Union[str, Signature]
     elif isasyncgenfunction(func_impl):
         body = "async def %s\n    async for y in _func_impl_(%s):\n        yield y\n" % (func_signature_str, params_str)
     elif create_lambda:
-        body = "lambda_ = lambda%s: _func_impl_(%s)\n" % (func_signature_str, params_str)
+        if func_signature_str:
+            body = "lambda_ = lambda %s: _func_impl_(%s)\n" % (func_signature_str, params_str)
+        else:
+            body = "lambda_ = lambda: _func_impl_(%s)\n" % (params_str)
     else:
         body = "def %s\n    return _func_impl_(%s)\n" % (func_signature_str, params_str)
 
