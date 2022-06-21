@@ -5,7 +5,7 @@ import pytest
 
 from makefun.main import get_signature_from_string, with_signature
 
-from makefun import wraps
+from makefun import create_wrapper, wraps
 
 try:  # python 3.3+
     from inspect import signature, Signature, Parameter
@@ -106,6 +106,96 @@ def tests_wraps_sigchange():
 
     assert str(signature(goo)) == "(a, b=0)"
     assert goo('hello') == 'hello'
+
+
+def tests_wraps_lambda():
+    """ Tests that `@wraps` can duplicate the signature of a lambda """
+    foo = lambda a: a
+
+    @wraps(foo)
+    def goo(*args, **kwargs):
+        return foo(*args, **kwargs)
+
+    assert goo.__name__ == (lambda: None).__name__
+    assert str(signature(goo)) == '(a)'
+    assert goo('hello') == 'hello'
+
+
+def tests_wraps_renamed_lambda():
+     """ Tests that `@wraps` can duplicate the signature of a lambda that has been renamed """
+     foo = lambda a: a
+     foo.__name__ = 'bar'
+
+     @wraps(foo)
+     def goo(*args, **kwargs):
+         return foo(*args, **kwargs)
+
+     assert goo.__name__ == 'bar'
+     assert str(signature(goo)) == '(a)'
+     assert goo('hello') == 'hello'
+
+
+def test_lambda_signature_str():
+    """ Tests that `@with_signature` can create a lambda from a signature string """
+    new_sig = '(a, b=5)'
+
+    @with_signature(new_sig, func_name='<lambda>')
+    def foo(a, b):
+        return a + b
+
+    assert foo.__name__ == '<lambda>'
+    assert foo.__code__.co_name == '<lambda>'
+    assert str(signature(foo)) == new_sig
+    assert foo(a=4) == 9
+
+
+def test_co_name():
+    """ Tests that `@with_signature` can be used to change the __code__.co_name """
+    @with_signature('()', co_name='bar')
+    def foo():
+        return 'hello'
+
+    assert foo.__name__ == 'foo'
+    assert foo.__code__.co_name == 'bar'
+    assert foo() == 'hello'
+
+
+def test_with_signature_lambda():
+    """ Tests that `@with_signature` can be used to change the __code__.co_name to `'<lambda>'` """
+    @with_signature('()', co_name='<lambda>')
+    def foo():
+        return 'hello'
+
+    assert foo.__code__.co_name == '<lambda>'
+    assert foo() == 'hello'
+
+
+def test_create_wrapper_lambda():
+    """ Tests that `create_wrapper` returns a lambda function when given a lambda function to wrap"""
+    def foo():
+        return 'hello'
+    bar = create_wrapper(lambda: None, foo)
+
+    assert bar.__name__ == '<lambda>'
+    assert bar() == 'hello'
+
+
+def test_invalid_co_name():
+    """ Tests that `@with_signature` raises a `ValueError` when given an `co_name` that cannot be duplicated. """
+    with pytest.raises(ValueError):
+        @with_signature('()', co_name='<invalid>')
+        def foo():
+            return 'hello'
+
+
+def test_invalid_func_name():
+    """ Tests that `@with_signature` can duplicate a func_name that is invalid in a function definition. """
+    @with_signature('()', func_name='<invalid>')
+    def foo():
+        return 'hello'
+
+    assert foo.__name__ == '<invalid>'
+    assert foo() == 'hello'
 
 
 @pytest.mark.skipif(sys.version_info < (3, 0), reason="requires python3 or higher")

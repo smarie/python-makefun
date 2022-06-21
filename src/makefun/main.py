@@ -11,8 +11,23 @@ import itertools
 from collections import OrderedDict
 from copy import copy
 from inspect import getsource
+from keyword import iskeyword
 from textwrap import dedent
 from types import FunctionType
+
+
+if sys.version_info >= (3, 0):
+    is_identifier = str.isidentifier
+else:
+    def is_identifier(string):
+        """
+        Replacement for `str.isidentifier` when it is not available (e.g. on Python 2).
+        :param string:
+        :return:
+        """
+        if len(string) == 0 or string[0].isdigit():
+            return False
+        return all([s.isalnum() for s in string.split("_")])
 
 try:  # python 3.3+
     from inspect import signature, Signature, Parameter
@@ -73,6 +88,7 @@ def create_wrapper(wrapped,
                    add_impl=True,              # type: bool
                    doc=None,                   # type: str
                    qualname=None,              # type: str
+                   co_name=None,               # type: str
                    module_name=None,           # type: str
                    **attrs
                    ):
@@ -84,7 +100,8 @@ def create_wrapper(wrapped,
     """
     return wraps(wrapped, new_sig=new_sig, prepend_args=prepend_args, append_args=append_args, remove_args=remove_args,
                  func_name=func_name, inject_as_first_arg=inject_as_first_arg, add_source=add_source,
-                 add_impl=add_impl, doc=doc, qualname=qualname, module_name=module_name, **attrs)(wrapper)
+                 add_impl=add_impl, doc=doc, qualname=qualname, module_name=module_name, co_name=co_name,
+                 **attrs)(wrapper)
 
 
 def getattr_partial_aware(obj, att_name, *att_default):
@@ -106,6 +123,7 @@ def create_function(func_signature,             # type: Union[str, Signature]
                     add_impl=True,              # type: bool
                     doc=None,                   # type: str
                     qualname=None,              # type: str
+                    co_name=None,               # type: str
                     module_name=None,           # type: str
                     **attrs):
     """
@@ -130,6 +148,9 @@ def create_function(func_signature,             # type: Union[str, Signature]
      - `__annotations__` attribute is created to match the annotations in the signature.
      - `__doc__` attribute is copied from `func_impl.__doc__` except if overridden using `doc`
      - `__module__` attribute is copied from `func_impl.__module__` except if overridden using `module_name`
+     - `__code__.co_name` (see above) defaults to the same value as the above `__name__` attribute, except when that
+       value is not a valid Python identifier, in which case it will be `<lambda>`. It can be  overridden by providing
+       a `co_name` that is either a valid Python identifier or `<lambda>`.
 
     Finally two new attributes are optionally created
 
@@ -137,6 +158,13 @@ def create_function(func_signature,             # type: Union[str, Signature]
      generated function
      - `__func_impl__` attribute: set if `add_impl` is `True` (default), this attribute contains a pointer to
      `func_impl`
+
+    A lambda function will be created in the following cases:
+
+     - when `func_signature` is a `Signature` object and `func_impl` is itself a lambda function,
+     - when the function name, either derived from a `func_signature` string, or given explicitly with `func_name`,
+       is not a valid Python identifier, or
+     - when the provided `co_name` is `<lambda>`.
 
     :param func_signature: either a string without 'def' such as "foo(a, b: int, *args, **kwargs)" or "(a, b: int)",
         or a `Signature` object, for example from the output of `inspect.signature` or from the `funcsigs.signature`
@@ -159,6 +187,9 @@ def create_function(func_signature,             # type: Union[str, Signature]
     :param qualname: a string representing the qualified name to be used. If None (default), the `__qualname__` will
         default to the one of `func_impl` if `func_signature` is a `Signature`, or to the name defined in
         `func_signature` if `func_signature` is a `str` and contains a non-empty name.
+    :param co_name: a string representing the name to be used in the compiled code of the function. If None (default),
+        the `__code__.co_name` will default to the one of `func_impl` if `func_signature` is a `Signature`, or to the
+        name defined in `func_signature` if `func_signature` is a `str` and contains a non-empty name.
     :param module_name: the name of the module to be set on the function (under __module__ ). If None (default),
         `func_impl.__module__` will be used.
     :param attrs: other keyword attributes that should be set on the function. Note that `func_impl.__dict__` is not
@@ -177,9 +208,23 @@ def create_function(func_signature,             # type: Union[str, Signature]
     # name defaults
     user_provided_name = True
     if func_name is None:
-        # allow None for now, we'll raise a ValueError later if needed
+        # allow None, this will result in a lambda function being created
         func_name = getattr_partial_aware(func_impl, '__name__', None)
         user_provided_name = False
+
+    # co_name default
+    user_provided_co_name = co_name is not None
+    if not user_provided_co_name:
+        if func_name is None:
+            co_name = '<lambda>'
+        else:
+            co_name = func_name
+    else:
+        if not (_is_valid_func_def_name(co_name)
+                or _is_lambda_func_name(co_name)):
+            raise ValueError("Invalid co_name %r for created function. "
+                             "It is not possible to declare a function "
+                             "with the provided co_name." % co_name)
 
     # qname default
     user_provided_qname = True
@@ -208,25 +253,28 @@ def create_function(func_signature,             # type: Union[str, Signature]
                 func_name = func_name_from_str
             if not user_provided_qname:
                 qualname = func_name
+            if not user_provided_co_name:
+                co_name = func_name
 
+        create_lambda = not _is_valid_func_def_name(co_name)
+
+        # if lambda, strip the name, parentheses and colon from the signature
+        if create_lambda:
+            name_len = len(func_name_from_str) if func_name_from_str else 0
+            func_signature_str = func_signature_str[name_len + 1: -2]
         # fix the signature if needed
-        if func_name_from_str is None:
-            if func_name is None:
-                raise ValueError("Invalid signature for created function: `None` function name. This "
-                                 "probably happened because the decorated function %s has no __name__. You may "
-                                 "wish to pass an explicit `func_name` or to complete the signature string"
-                                 "with the name before the parenthesis." % func_impl)
-            func_signature_str = func_name + func_signature_str
+        elif func_name_from_str is None:
+            func_signature_str = co_name + func_signature_str
 
     elif isinstance(func_signature, Signature):
         # create the signature string
-        if func_name is None:
-            raise ValueError("Invalid signature for created function: `None` function name. This "
-                             "probably happened because the decorated function %s has no __name__. You may "
-                             "wish to pass an explicit `func_name` or to provide the new signature as a "
-                             "string containing the name" % func_impl)
-        func_signature_str = get_signature_string(func_name, func_signature, evaldict)
+        create_lambda = not _is_valid_func_def_name(co_name)
 
+        if create_lambda:
+            # create signature string (or argument string in the case of a lambda function
+            func_signature_str = get_lambda_argument_string(func_signature, evaldict)
+        else:
+            func_signature_str = get_signature_string(co_name, func_signature, evaldict)
     else:
         raise TypeError("Invalid type for `func_signature`: %s" % type(func_signature))
 
@@ -255,6 +303,11 @@ def create_function(func_signature,             # type: Union[str, Signature]
             body = get_legacy_py_generator_body_template() % (func_signature_str, params_str)
     elif isasyncgenfunction(func_impl):
         body = "async def %s\n    async for y in _func_impl_(%s):\n        yield y\n" % (func_signature_str, params_str)
+    elif create_lambda:
+        if func_signature_str:
+            body = "lambda_ = lambda %s: _func_impl_(%s)\n" % (func_signature_str, params_str)
+        else:
+            body = "lambda_ = lambda: _func_impl_(%s)\n" % (params_str)
     else:
         body = "def %s\n    return _func_impl_(%s)\n" % (func_signature_str, params_str)
 
@@ -264,7 +317,10 @@ def create_function(func_signature,             # type: Union[str, Signature]
     # create the function by compiling code, mapping the `_func_impl_` symbol to `func_impl`
     protect_eval_dict(evaldict, func_name, params_names)
     evaldict['_func_impl_'] = func_impl
-    f = _make(func_name, params_names, body, evaldict)
+    if create_lambda:
+        f = _make("lambda_", params_names, body, evaldict)
+    else:
+        f = _make(co_name, params_names, body, evaldict)
 
     # add the source annotation if needed
     if add_source:
@@ -295,6 +351,24 @@ def _is_generator_func(func_impl):
         return isgeneratorfunction(func_impl) and not iscoroutinefunction(func_impl)
     else:
         return isgeneratorfunction(func_impl)
+
+
+def _is_lambda_func_name(func_name):
+    """
+    Return True if func_name is the name of a lambda
+    :param func_name:
+    :return:
+    """
+    return func_name == (lambda: None).__code__.co_name
+
+
+def _is_valid_func_def_name(func_name):
+    """
+    Return True if func_name is valid in a function definition.
+    :param func_name:
+    :return:
+    """
+    return is_identifier(func_name) and not iskeyword(func_name)
 
 
 class _SymbolRef:
@@ -364,6 +438,17 @@ def get_signature_string(func_name, func_signature, evaldict):
 
     # return the final string representation
     return "%s%s:" % (func_name, s)
+
+
+def get_lambda_argument_string(func_signature, evaldict):
+    """
+    Returns the string to be used as arguments in a lambda function definition.
+    If there is a non-native symbol in the defaults, it is created as a variable in the evaldict
+    :param func_name:
+    :param func_signature:
+    :return:
+    """
+    return get_signature_string('', func_signature, evaldict)[1:-2]
 
 
 TYPES_WITH_SAFE_REPR = (int, str, bytes, bool)
@@ -694,6 +779,7 @@ def wraps(wrapped_fun,
           append_args=None,           # type: Union[str, Parameter, Iterable[Union[str, Parameter]]]
           remove_args=None,           # type: Union[str, Iterable[str]]
           func_name=None,             # type: str
+          co_name=None,               # type: str
           inject_as_first_arg=False,  # type: bool
           add_source=True,            # type: bool
           add_impl=True,              # type: bool
@@ -774,17 +860,22 @@ def wraps(wrapped_fun,
     :param qualname: a string representing the qualified name to be used. If None (default), the `__qualname__` will
         default to the one of `wrapped_fun`, or the one in `new_sig` if `new_sig` is provided as a string with a
         non-empty function name.
+    :param co_name: a string representing the name to be used in the compiled code of the function. If None (default),
+        the `__code__.co_name` will default to the one of `func_impl` if `func_signature` is a `Signature`, or to the
+        name defined in `func_signature` if `func_signature` is a `str` and contains a non-empty name.
     :param module_name: the name of the module to be set on the function (under __module__ ). If None (default), the
         `__module__` attribute of `wrapped_fun` will be used.
     :param attrs: other keyword attributes that should be set on the function. Note that the full `__dict__` of
         `wrapped_fun` is automatically copied.
     :return: a decorator
     """
-    func_name, func_sig, doc, qualname, module_name, all_attrs = _get_args_for_wrapping(wrapped_fun, new_sig,
-                                                                                        remove_args,
-                                                                                        prepend_args, append_args,
-                                                                                        func_name, doc,
-                                                                                        qualname, module_name, attrs)
+    func_name, func_sig, doc, qualname, co_name, module_name, all_attrs = _get_args_for_wrapping(wrapped_fun, new_sig,
+                                                                                                 remove_args,
+                                                                                                 prepend_args,
+                                                                                                 append_args,
+                                                                                                 func_name, doc,
+                                                                                                 qualname, co_name,
+                                                                                                 module_name, attrs)
 
     return with_signature(func_sig,
                           func_name=func_name,
@@ -792,12 +883,13 @@ def wraps(wrapped_fun,
                           add_source=add_source, add_impl=add_impl,
                           doc=doc,
                           qualname=qualname,
+                          co_name=co_name,
                           module_name=module_name,
                           **all_attrs)
 
 
 def _get_args_for_wrapping(wrapped, new_sig, remove_args, prepend_args, append_args,
-                           func_name, doc, qualname, module_name, attrs):
+                           func_name, doc, qualname, co_name, module_name, attrs):
     """
     Internal method used by @wraps and create_wrapper
 
@@ -809,6 +901,7 @@ def _get_args_for_wrapping(wrapped, new_sig, remove_args, prepend_args, append_a
     :param func_name:
     :param doc:
     :param qualname:
+    :param co_name:
     :param module_name:
     :param attrs:
     :return:
@@ -860,6 +953,10 @@ def _get_args_for_wrapping(wrapped, new_sig, remove_args, prepend_args, append_a
         qualname = getattr_partial_aware(wrapped, '__qualname__', None)
     if module_name is None:
         module_name = getattr_partial_aware(wrapped, '__module__', None)
+    if co_name is None:
+        code = getattr_partial_aware(wrapped, '__code__', None)
+        if code is not None:
+            co_name = code.co_name
 
     # attributes: start from the wrapped dict, add '__wrapped__' if needed, and override with all attrs.
     all_attrs = copy(getattr_partial_aware(wrapped, '__dict__'))
@@ -874,7 +971,7 @@ def _get_args_for_wrapping(wrapped, new_sig, remove_args, prepend_args, append_a
         all_attrs['__wrapped__'] = wrapped
     all_attrs.update(attrs)
 
-    return func_name, func_sig, doc, qualname, module_name, all_attrs
+    return func_name, func_sig, doc, qualname, co_name, module_name, all_attrs
 
 
 def with_signature(func_signature,             # type: Union[str, Signature]
@@ -884,6 +981,7 @@ def with_signature(func_signature,             # type: Union[str, Signature]
                    add_impl=True,            # type: bool
                    doc=None,                   # type: str
                    qualname=None,              # type: str
+                   co_name=None,                # type: str
                    module_name=None,            # type: str
                    **attrs
                    ):
@@ -925,12 +1023,15 @@ def with_signature(func_signature,             # type: Union[str, Signature]
     :param qualname: a string representing the qualified name to be used. If None (default), the `__qualname__` will
         default to the one of `func_impl` if `func_signature` is a `Signature`, or to the name defined in
         `func_signature` if `func_signature` is a `str` and contains a non-empty name.
+    :param co_name: a string representing the name to be used in the compiled code of the function. If None (default),
+        the `__code__.co_name` will default to the one of `func_impl` if `func_signature` is a `Signature`, or to the
+        name defined in `func_signature` if `func_signature` is a `str` and contains a non-empty name.
     :param module_name: the name of the module to be set on the function (under __module__ ). If None (default), the
         `__module__` attribute of the decorated function will be used.
     :param attrs: other keyword attributes that should be set on the function. Note that the full `__dict__` of the
         decorated function is not automatically copied.
     """
-    if func_signature is None:
+    if func_signature is None and co_name is None:
         # make sure that user does not provide non-default other args
         if inject_as_first_arg or not add_source or not add_impl:
             raise ValueError("If `func_signature=None` no new signature will be generated so only `func_name`, "
@@ -959,6 +1060,7 @@ def with_signature(func_signature,             # type: Union[str, Signature]
                                    add_impl=add_impl,
                                    doc=doc,
                                    qualname=qualname,
+                                   co_name=co_name,
                                    module_name=module_name,
                                    _with_sig_=True,  # special trick to tell create_function that we're @with_signature
                                    **attrs
