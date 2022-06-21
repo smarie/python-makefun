@@ -15,6 +15,7 @@ def create_function(func_signature: Union[str, Signature],
                     add_impl: bool = True,
                     doc: str = None,
                     qualname: str = None,
+                    co_name: str = None,
                     module_name: str = None,
                     **attrs):
 ```
@@ -34,12 +35,18 @@ All the other metadata of the created function are defined as follows:
  - `__annotations__` attribute is created to match the annotations in the signature.
  - `__doc__` attribute is copied from `func_impl.__doc__` except if overridden using `doc`
  - `__module__` attribute is copied from `func_impl.__module__` except if overridden using `module_name`
+ - `__code__.co_name` (see above) defaults to the same value as the above `__name__` attribute, except when that value is not a valid Python identifier, in which case it will be `<lambda>`. It can be  overridden by providing a `co_name` that is either a valid Python identifier or `<lambda>`.
 
 Finally two new attributes are optionally created
 
  - `__source__` attribute: set if `add_source` is `True` (default), this attribute contains the source code of the generated function
  - `__func_impl__` attribute: set if `add_impl` is `True` (default), this attribute contains a pointer to `func_impl`
 
+A lambda function will be created in the following cases:
+
+- when `func_signature` is a `Signature` object and `func_impl` is itself a lambda function,
+- when the function name, either derived from a `func_signature` string, or given explicitly with `func_name`, is not a valid Python identifier, or
+- when the provided `co_name` is `<lambda>`.
 
 **Parameters:**
 
@@ -58,7 +65,9 @@ Finally two new attributes are optionally created
  * `doc`: a string representing the docstring that will be used to set the __doc__ attribute on the generated function. If None (default), the doc of func_impl will be used.
    
  * `qualname`: a string representing the qualified name to be used. If None (default), the `__qualname__` will default to the one of `func_impl` if `func_signature` is a `Signature`, or to the name defined in `func_signature` if `func_signature` is a `str` and contains a non-empty name.
-   
+ 
+ * `co_name`: a string representing the name to be used in the compiled code of the function. If None (default), the `__code__.co_name` will default to the one of `func_impl` if `func_signature` is a `Signature`, or to the name defined in `func_signature` if `func_signature` is a `str` and contains a non-empty name.
+
  * `module_name`: the name of the module to be set on the function (under __module__ ). If None (default), `func_impl.__module__` will be used.
    
  * `attrs`: other keyword attributes that should be set on the function. Note that `func_impl.__dict__` is not automatically copied.
@@ -73,6 +82,7 @@ def with_signature(func_signature: Union[str, Signature],
                    add_impl: bool = True,
                    doc: str = None,
                    qualname: str = None,
+                   co_name: str = None,
                    module_name: str = None,
                    **attrs
                    ):
@@ -104,7 +114,9 @@ is totally equivalent to `impl = create_function(<arguments>, func_impl=impl)` e
  * `doc`: a string representing the docstring that will be used to set the __doc__ attribute on the generated function. If None (default), the doc of the decorated function will be used.
    
  * `qualname`: a string representing the qualified name to be used. If None (default), the `__qualname__` will default to the one of `func_impl` if `func_signature` is a `Signature`, or to the name defined in `func_signature` if `func_signature` is a `str` and contains a non-empty name.
-   
+
+ * `co_name`: a string representing the name to be used in the compiled code of the function. If None (default), the `__code__.co_name` will default to the one of `func_impl` if `func_signature` is a `Signature`, or to the name defined in `func_signature` if `func_signature` is a `str` and contains a non-empty name.
+
  * `module_name`: the name of the module to be set on the function (under __module__ ). If None (default), the `__module__` attribute of the decorated function will be used.
    
  * `attrs`: other keyword attributes that should be set on the function. Note that the full `__dict__` of the decorated function is not automatically copied.
@@ -124,6 +136,7 @@ def wraps(f,
           add_impl: bool = True,
           doc: str = None,
           qualname: str = None,
+          co_name: str = None,
           module_name: str = None,
           **attrs
           ):
@@ -180,7 +193,9 @@ See also [python documentation on @wraps](https://docs.python.org/3/library/func
  - `doc`: a string representing the docstring that will be used to set the __doc__ attribute on the generated function. If None (default), the doc of `wrapped_fun` will be used. If `wrapped_fun` is an instance of `functools.partial`, a special enhanced doc will be generated.
    
  - `qualname`: a string representing the qualified name to be used. If None (default), the `__qualname__` will default to the one of `wrapped_fun`, or the one in `new_sig` if `new_sig` is provided as a string with a non-empty function name.
-   
+ 
+ - `co_name`: a string representing the name to be used in the compiled code of the function. If None (default), the `__code__.co_name` will default to the one of `func_impl` if `func_signature` is a `Signature`, or to the name defined in `func_signature` if `func_signature` is a `str` and contains a non-empty name.
+
  - `module_name`: the name of the module to be set on the function (under __module__ ). If None (default), the `__module__` attribute of `wrapped_fun` will be used.
    
  - `attrs`: other keyword attributes that should be set on the function. Note that the full `__dict__` of `wrapped_fun` is automatically copied.
@@ -201,6 +216,7 @@ def create_wrapper(wrapped,
                    add_impl: bool = True,
                    doc: str = None,
                    qualname: str = None,
+                   co_name: str = None,
                    module_name: str = None,
                    **attrs
                    ):
