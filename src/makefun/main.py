@@ -362,10 +362,6 @@ def _is_valid_func_def_name(func_name):
     :param func_name:
     :return:
     """
-    if sys.version_info >= (3, 0):
-        is_identifier = str.isidentifier
-    else:
-        from makefun._main_legacy_py import is_identifier
     return is_identifier(func_name) and not iskeyword(func_name)
 
 
