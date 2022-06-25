@@ -3,6 +3,5 @@ def forwardref_method(foo: "ForwardRef", bar: str) -> "ForwardRef":
 
 
 class ForwardRef:
-    x: str
     def __init__(self, x="default"):
         self.x = x

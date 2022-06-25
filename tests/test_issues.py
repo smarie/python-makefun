@@ -255,7 +255,7 @@ def test_issue_77_async_generator_partial():
 
 
 
-@pytest.mark.skipif(sys.version_info < (3, 3), reason="Tests PEP 367 behavior, which was introduced in python 3.3.")
+@pytest.mark.skipif(sys.version_info < (3, 7, 6), reason="The __wrapped__ behavior in get_type_hints being tested was not added until python 3.7.6.")
 def test_issue_85_wrapped_forwardref_annotation():
     import typing
     from . import issue_85_module
