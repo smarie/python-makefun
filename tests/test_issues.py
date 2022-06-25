@@ -263,6 +263,8 @@ def test_issue_85_wrapped_forwardref_annotation():
         return issue_85_module.forwardref_method(*args, **kwargs, bar="x")
 
     assert decorated(issue_85_module.ForwardRef()) == "defaultx"
+
+    # Check that the type hints of the wrapper are ok with the forward reference correctly resolved
     expected_annotations = {
         "foo": issue_85_module.ForwardRef,
         "return": issue_85_module.ForwardRef,
