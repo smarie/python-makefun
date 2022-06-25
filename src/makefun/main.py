@@ -246,6 +246,8 @@ def create_function(func_signature,             # type: Union[str, Signature]
     if isinstance(func_signature, str):
         # transform the string into a Signature and make sure the string contains ":"
         func_name_from_str, func_signature, func_signature_str = get_signature_from_string(func_signature, evaldict)
+        if '__signature__' in attrs:
+            attrs['__signature__'] = func_signature
 
         # if not explicitly overridden using `func_name`, the name in the string takes over
         if func_name_from_str is not None:
@@ -819,9 +821,11 @@ def wraps(wrapped_fun,
     `wrapped_fun`, so that the created function seems to be identical (except possiblyfor the signature).
     Note that all options in `with_signature` can still be overrided using parameters of `@wraps`.
 
-    If the signature is *not* modified through `new_sig`, `remove_args`, `append_args` or `prepend_args`, the
-    additional `__wrapped__` attribute  on the created function, to stay consistent with the `functools.wraps`
-    behaviour.
+    The additional `__wrapped__` attribute is set on the created function, to stay consistent
+    with the `functools.wraps` behaviour. If the signature is modified through `new_sig`,
+    `remove_args`, `append_args` or `prepend_args`, the additional
+    `__signature__` attribute will be set so that `inspect.signature` and related functionality
+    works as expected. See PEP 362 for more detail on `__wrapped__` and `__signature__`.
 
     See also [python documentation on @wraps](https://docs.python.org/3/library/functools.html#functools.wraps)
 
@@ -960,15 +964,9 @@ def _get_args_for_wrapping(wrapped, new_sig, remove_args, prepend_args, append_a
 
     # attributes: start from the wrapped dict, add '__wrapped__' if needed, and override with all attrs.
     all_attrs = copy(getattr_partial_aware(wrapped, '__dict__'))
+    all_attrs.setdefault("__wrapped__", wrapped)
     if has_new_sig:
-        # change of signature: delete the __wrapped__ attribute if any
-        try:
-            del all_attrs['__wrapped__']
-        except KeyError:
-            pass
-    else:
-        # no change of signature: we can safely set the __wrapped__ attribute
-        all_attrs['__wrapped__'] = wrapped
+        all_attrs["__signature__"] = func_sig
     all_attrs.update(attrs)
 
     return func_name, func_sig, doc, qualname, co_name, module_name, all_attrs

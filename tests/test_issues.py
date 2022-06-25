@@ -181,10 +181,9 @@ def test_issue_66():
     def second_wrapper(foo, bar):
         return wrapper(foo) + bar
 
+    assert second_wrapper.__wrapped__ is a
+    assert "bar" in inspect.signature(second_wrapper).parameters
     assert second_wrapper(1, -1) == 0
-
-    with pytest.raises(AttributeError):
-        second_wrapper.__wrapped__
 
 
 def test_issue_pr_67():
