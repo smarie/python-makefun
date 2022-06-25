@@ -253,3 +253,19 @@ def test_issue_77_async_generator_partial():
     assert inspect.isasyncgenfunction(f_partial)
 
     assert asyncio.get_event_loop().run_until_complete(asyncio.ensure_future(f_partial().__anext__())) == 1
+
+
+def test_issue_85_wrapped_forwardref_annotation():
+    import typing
+    from . import issue_85_module
+
+    @wraps(issue_85_module.forwardref_method, remove_args=["bar"])
+    def decorated(*args, **kwargs):
+        return issue_85_module.forwardref_method(*args, **kwargs, bar="x")
+
+    assert decorated(issue_85_module.ForwardRef()) == "defaultx"
+    expected_annotations = {
+        "foo": issue_85_module.ForwardRef,
+        "return": issue_85_module.ForwardRef,
+    }
+    assert typing.get_type_hints(decorated) == expected_annotations
