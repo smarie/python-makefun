@@ -1,10 +1,8 @@
-from dataclasses import dataclass
-
-
 def forwardref_method(foo: "ForwardRef", bar: str) -> "ForwardRef":
-    return foo.x + bar
+    return ForwardRef(foo.x + bar)
 
 
-@dataclass
 class ForwardRef:
-    x: str = "default"
+    x: str
+    def __init__(self, x="default"):
+        self.x = x
