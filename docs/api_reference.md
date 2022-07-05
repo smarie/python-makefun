@@ -166,7 +166,7 @@ Comparison with `@with_signature`: `@wraps(f)` is equivalent to
 
 In other words, as opposed to `@with_signature`, the metadata (doc, module name, etc.) is provided by the wrapped `wrapped_fun`, so that the created function seems to be identical (except possiblyfor the signature). Note that all options in `with_signature` can still be overrided using parameters of `@wraps`.
 
-If the signature is *not* modified through `new_sig`, `remove_args`, `append_args` or `prepend_args`, the additional `__wrapped__` attribute  on the created function, to stay consistent with the `functools.wraps` behaviour.
+The additional `__wrapped__` attribute is added on the created function, to stay consistent with the `functools.wraps` behaviour. If the signature is modified through `new_sig`, `remove_args`, `append_args` or `prepend_args`, the `__signature__` attribute will be added per [PEP 362](https://peps.python.org/pep-0362/).
 
 See also [python documentation on @wraps](https://docs.python.org/3/library/functools.html#functools.wraps)
 
