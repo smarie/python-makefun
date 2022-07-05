@@ -246,6 +246,9 @@ def create_function(func_signature,             # type: Union[str, Signature]
     if isinstance(func_signature, str):
         # transform the string into a Signature and make sure the string contains ":"
         func_name_from_str, func_signature, func_signature_str = get_signature_from_string(func_signature, evaldict)
+        # If the signature is specified as a string, `__signature__` will not be correct in this case, since it
+        # will be a string. If it was computed in some other fashion (i.e. is an instance of inspect.Signature),
+        # then there is no need to update it.
         if '__signature__' in attrs:
             attrs['__signature__'] = func_signature
 
