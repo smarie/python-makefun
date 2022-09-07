@@ -146,7 +146,6 @@ def flake8(session: PowerSession):
     """Launch flake8 qualimetry."""
 
     session.install("-r", str(Folders.ci_tools / "flake8-requirements.txt"))
-    session.install("genbadge[flake8]")
     session.run2("pip install .")
 
     rm_folder(Folders.flake8_reports)
