@@ -267,6 +267,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#1150-more-pep-compliant-wraps" class="md-nav__link">
+    1.15.0 - More PEP-compliant wraps
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#1140-support-for-lambda-functions" class="md-nav__link">
     1.14.0 - Support for lambda functions
   </a>
@@ -637,6 +644,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#1150-more-pep-compliant-wraps" class="md-nav__link">
+    1.15.0 - More PEP-compliant wraps
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#1140-support-for-lambda-functions" class="md-nav__link">
     1.14.0 - Support for lambda functions
   </a>
@@ -992,6 +1006,10 @@
 
 
 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<h3 id="1150-more-pep-compliant-wraps">1.15.0 - More PEP-compliant <code>wraps</code><a class="headerlink" href="#1150-more-pep-compliant-wraps" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>wraps</code> now always sets the <code>__wrapped__</code> attribute, and also sets the <code>__signature__</code> attribute when the signature changes, as specified by PEP 362. PR <a href=""></a> by <a href="https://github.com/smarie/python-makefun/pull/86">#86</a> by <a href="https://github.com/lucaswiman">lucaswiman</a>.</li>
+</ul>
 <h3 id="1140-support-for-lambda-functions">1.14.0 - Support for lambda functions<a class="headerlink" href="#1140-support-for-lambda-functions" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>create_wrapper</code>, <code>create_function</code>, <code>wraps</code> and <code>with_signature</code> now support lambda functions. They also accept a new parameter <code>co_name</code> to define the name to be used in the compiled code. PR <a href="https://github.com/smarie/python-makefun/pull/80">#80</a> by <a href="https://github.com/andrewcleveland">andrewcleveland</a>.</li>
