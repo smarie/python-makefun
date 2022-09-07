@@ -181,10 +181,9 @@ def test_issue_66():
     def second_wrapper(foo, bar):
         return wrapper(foo) + bar
 
+    assert second_wrapper.__wrapped__ is wrapper
+    assert "bar" in signature(second_wrapper).parameters
     assert second_wrapper(1, -1) == 0
-
-    with pytest.raises(AttributeError):
-        second_wrapper.__wrapped__
 
 
 def test_issue_pr_67():
@@ -253,3 +252,25 @@ def test_issue_77_async_generator_partial():
     assert inspect.isasyncgenfunction(f_partial)
 
     assert asyncio.get_event_loop().run_until_complete(asyncio.ensure_future(f_partial().__anext__())) == 1
+
+
+
+@pytest.mark.skipif(sys.version_info < (3, 7, 6), reason="The __wrapped__ behavior in get_type_hints being tested was not added until python 3.7.6.")
+def test_issue_85_wrapped_forwardref_annotation():
+    import typing
+    from . import _issue_85_module
+
+    @wraps(_issue_85_module.forwardref_method, remove_args=["bar"])
+    def wrapper(**kwargs):
+        kwargs["bar"] = "x"  # python 2 syntax to prevent syntax error.
+        return _issue_85_module.forwardref_method(**kwargs)
+
+    # Make sure the wrapper function works as expected
+    assert wrapper(_issue_85_module.ForwardRef()).x == "defaultx"
+
+    # Check that the type hints of the wrapper are ok with the forward reference correctly resolved
+    expected_annotations = {
+        "foo": _issue_85_module.ForwardRef,
+        "return": _issue_85_module.ForwardRef,
+    }
+    assert typing.get_type_hints(wrapper) == expected_annotations
