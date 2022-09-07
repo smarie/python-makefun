@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.15.0 - More PEP-compliant `wraps`
+
+ - `wraps` now always sets the `__wrapped__` attribute, and also sets the `__signature__` attribute when the signature changes, as specified by PEP 362. PR []() by [#86](https://github.com/smarie/python-makefun/pull/86) by [lucaswiman](https://github.com/lucaswiman).
+
 ### 1.14.0 - Support for lambda functions
 
  - `create_wrapper`, `create_function`, `wraps` and `with_signature` now support lambda functions. They also accept a new parameter `co_name` to define the name to be used in the compiled code. PR [#80](https://github.com/smarie/python-makefun/pull/80) by [andrewcleveland](https://github.com/andrewcleveland).
