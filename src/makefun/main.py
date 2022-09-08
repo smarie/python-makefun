@@ -278,11 +278,6 @@ def create_function(func_signature,             # type: Union[str, Signature]
     else:
         raise TypeError("Invalid type for `func_signature`: %s" % type(func_signature))
 
-    if isinstance(attrs.get('__signature__'), str):
-        # __signature__ must be a Signature object, so if it is a string,
-        # we need to evaluate it.
-        attrs['__signature__'] = get_signature_from_string(attrs['__signature__'], evaldict)[1]
-
     # extract all information needed from the `Signature`
     params_to_kw_assignment_mode = get_signature_params(func_signature)
     params_names = list(params_to_kw_assignment_mode.keys())
@@ -970,7 +965,17 @@ def _get_args_for_wrapping(wrapped, new_sig, remove_args, prepend_args, append_a
     # PEP362: always set `__wrapped__`, and if signature was changed, set `__signature__` too
     all_attrs["__wrapped__"] = wrapped
     if has_new_sig:
-        all_attrs["__signature__"] = func_sig
+        if isinstance(func_sig, Signature):
+            all_attrs["__signature__"] = func_sig
+        else:
+            # __signature__ must be a Signature object, so if it is a string we need to evaluate it.
+            frame = _get_callerframe(offset=1)
+            evaldict, _ = extract_module_and_evaldict(frame)
+            # Here we could wish to directly override `func_name` and `func_sig` so that this does not have to be done
+            # again by `create_function` later... Would this be risky ?
+            _func_name, func_sig_as_sig, _ = get_signature_from_string(func_sig, evaldict)
+            all_attrs["__signature__"] = func_sig_as_sig
+
     all_attrs.update(attrs)
 
     return func_name, func_sig, doc, qualname, co_name, module_name, all_attrs

@@ -245,3 +245,18 @@ def test_type_hint_error2():
         return a
 
     assert foo(10) == 10
+
+
+@pytest.mark.skipif(sys.version_info < (3, 5), reason="requires python 3.5 or higher (non-comment type hints)")
+def test_type_hint_error_sigchange():
+    """ Test for https://github.com/smarie/python-makefun/issues/32 """
+
+    from tests._test_py35 import make_ref_function
+    from typing import Any
+    ref_f = make_ref_function()
+
+    @wraps(ref_f, new_sig="(a: Any)")
+    def foo(a):
+        return a
+
+    assert foo(10) == 10
