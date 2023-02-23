@@ -281,3 +281,19 @@ def test_issue_91():
     """This test should work also in python 2 ! """
     assert is_identifier("_results_bag")
     assert is_identifier("hello__bag")
+
+
+def test_issue_90():
+    """Test that passing a string to @wraps as new_sig works"""
+
+    def f(a):
+        return 2 * a
+
+    @wraps(f, new_sig="_results_bag()")
+    def g():
+        return f(2)
+
+    assert g() == 4
+    assert g.__name__ == "_results_bag"
+    assert g.__code__.co_name == "_results_bag"
+    assert str(signature(g)) == "()"
