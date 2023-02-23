@@ -213,6 +213,8 @@ def create_function(func_signature,             # type: Union[str, Signature]
         user_provided_name = False
 
     # co_name default
+    # TODO this section should happen later, after and/or at the same time than
+    #  the if isinstance(func_signature, X)
     user_provided_co_name = co_name is not None
     if not user_provided_co_name:
         if func_name is None:
@@ -265,6 +267,9 @@ def create_function(func_signature,             # type: Union[str, Signature]
         # fix the signature if needed
         elif func_name_from_str is None:
             func_signature_str = co_name + func_signature_str
+        elif user_provided_co_name:
+            raise ValueError("Providing both a name in the signature string and a non-none `co_name` is unsupported at"
+                             " the moment")
 
     elif isinstance(func_signature, Signature):
         # create the signature string
@@ -816,7 +821,7 @@ def wraps(wrapped_fun,
                          **attrs)`
 
     In other words, as opposed to `@with_signature`, the metadata (doc, module name, etc.) is provided by the wrapped
-    `wrapped_fun`, so that the created function seems to be identical (except possiblyfor the signature).
+    `wrapped_fun`, so that the created function seems to be identical (except possibly for the signature).
     Note that all options in `with_signature` can still be overrided using parameters of `@wraps`.
 
     The additional `__wrapped__` attribute is set on the created function, to stay consistent
@@ -955,10 +960,10 @@ def _get_args_for_wrapping(wrapped, new_sig, remove_args, prepend_args, append_a
         qualname = getattr_partial_aware(wrapped, '__qualname__', None)
     if module_name is None:
         module_name = getattr_partial_aware(wrapped, '__module__', None)
-    if co_name is None:
-        code = getattr_partial_aware(wrapped, '__code__', None)
-        if code is not None:
-            co_name = code.co_name
+    # if co_name is None:
+    #     code = getattr_partial_aware(wrapped, '__code__', None)
+    #     if code is not None:
+    #         co_name = code.co_name
 
     # attributes: start from the wrapped dict, add '__wrapped__' if needed, and override with all attrs.
     all_attrs = copy(getattr_partial_aware(wrapped, '__dict__'))
@@ -1012,7 +1017,7 @@ def with_signature(func_signature,             # type: Union[str, Signature]
         `inspect.signature` or from the `funcsigs.signature` backport. Note that these objects can be created manually
         too. If the signature is provided as a string and contains a non-empty name, this name will be used instead
         of the one of the decorated function. Finally `None` can be provided to indicate that user wants to only change
-        the medatadata (func_name, doc, module_name, attrs) of the decorated function, without generating a new
+        the metadata (func_name, doc, module_name, attrs) of the decorated function, without generating a new
         function.
     :param inject_as_first_arg: if `True`, the created function will be injected as the first positional argument of
         the decorated function. This can be handy in case the implementation is shared between several facades and needs

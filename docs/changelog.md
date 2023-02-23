@@ -1,5 +1,10 @@
 # Changelog
 
+### x.y.z - in progress
+
+- Fixed a `KeyError` happening when `wraps` is provided with a string `new_sig`. Fixes
+  [#90](https://github.com/smarie/python-makefun/issues/90)
+
 ### 1.15.1 - bugfixes
 
  - Fixed `ValueError: Invalid co_name` happening on python 2 when the name of a function to create starts or ends with
