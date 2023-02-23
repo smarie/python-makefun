@@ -27,7 +27,7 @@ else:
         """
         if len(string) == 0 or string[0].isdigit():
             return False
-        return all([s.isalnum() for s in string.split("_")])
+        return all([(len(s) == 0) or s.isalnum() for s in string.split("_")])
 
 try:  # python 3.3+
     from inspect import signature, Signature, Parameter

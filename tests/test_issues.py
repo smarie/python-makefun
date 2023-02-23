@@ -3,6 +3,8 @@ import sys
 
 import pytest
 
+from makefun.main import is_identifier
+
 try:  # python 3.3+
     from inspect import signature, Signature, Parameter
 except ImportError:
@@ -254,7 +256,6 @@ def test_issue_77_async_generator_partial():
     assert asyncio.get_event_loop().run_until_complete(asyncio.ensure_future(f_partial().__anext__())) == 1
 
 
-
 @pytest.mark.skipif(sys.version_info < (3, 7, 6), reason="The __wrapped__ behavior in get_type_hints being tested was not added until python 3.7.6.")
 def test_issue_85_wrapped_forwardref_annotation():
     import typing
@@ -274,3 +275,9 @@ def test_issue_85_wrapped_forwardref_annotation():
         "return": _issue_85_module.ForwardRef,
     }
     assert typing.get_type_hints(wrapper) == expected_annotations
+
+
+def test_issue_91():
+    """This test should work also in python 2 ! """
+    assert is_identifier("_results_bag")
+    assert is_identifier("hello__bag")
