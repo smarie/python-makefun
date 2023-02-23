@@ -83,7 +83,7 @@
                class="code sev- "><tt><i>22</i>     <span class="k">def</span> <span class="nf">is_identifier</span><span class="p">(</span><span class="n">string</span><span class="p">):</span></tt>
             </div>
             <div id="l23"
-               class="code sev- "><tt><i>23</i>         <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>23</i> <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l24"
                class="code sev- "><tt><i>24</i> <span class="sd">        Replacement for `str.isidentifier` when it is not available (e.g. on Python 2).</span></tt>
@@ -104,7 +104,7 @@
                class="code sev- "><tt><i>29</i>             <span class="k">return</span> <span class="kc">False</span></tt>
             </div>
             <div id="l30"
-               class="code sev- "><tt><i>30</i>         <span class="k">return</span> <span class="nb">all</span><span class="p">([</span><span class="n">s</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)])</span></tt>
+               class="code sev- "><tt><i>30</i>         <span class="k">return</span> <span class="nb">all</span><span class="p">([(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="n">s</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)])</span></tt>
             </div>
             <div id="l31"
                class="code sev- "><tt><i>31</i> &nbsp;</tt>
@@ -299,7 +299,7 @@
                class="code sev- "><tt><i>94</i>                    <span class="p">):</span></tt>
             </div>
             <div id="l95"
-               class="code sev- "><tt><i>95</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>95</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l96"
                class="code sev- "><tt><i>96</i> <span class="sd">    Creates a signature-preserving wrapper function.</span></tt>
@@ -338,7 +338,7 @@
                class="code sev- "><tt><i>107</i> <span class="k">def</span> <span class="nf">getattr_partial_aware</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">att_name</span><span class="p">,</span> <span class="o">*</span><span class="n">att_default</span><span class="p">):</span></tt>
             </div>
             <div id="l108"
-               class="code sev- "><tt><i>108</i>     <span class="sd">&quot;&quot;&quot; Same as getattr but recurses in obj.func if obj is a partial &quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>108</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot; Same as getattr but recurses in obj.func if obj is a partial &quot;&quot;&quot;</span></tt>
             </div>
             <div id="l109"
                class="code sev- "><tt><i>109</i> &nbsp;</tt>
@@ -401,7 +401,7 @@
                class="code sev- "><tt><i>128</i>                     <span class="o">**</span><span class="n">attrs</span><span class="p">):</span></tt>
             </div>
             <div id="l129"
-               class="code sev- "><tt><i>129</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>129</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l130"
                class="code sev- "><tt><i>130</i> <span class="sd">    Creates a function with signature `func_signature` that will call `func_impl` when called. All arguments received</span></tt>
@@ -1040,7 +1040,7 @@
                class="code sev- "><tt><i>341</i> <span class="k">def</span> <span class="nf">_is_generator_func</span><span class="p">(</span><span class="n">func_impl</span><span class="p">):</span></tt>
             </div>
             <div id="l342"
-               class="code sev- "><tt><i>342</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>342</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l343"
                class="code sev- "><tt><i>343</i> <span class="sd">    Return True if the func_impl is a generator</span></tt>
@@ -1085,7 +1085,7 @@
                class="code sev- "><tt><i>356</i> <span class="k">def</span> <span class="nf">_is_lambda_func_name</span><span class="p">(</span><span class="n">func_name</span><span class="p">):</span></tt>
             </div>
             <div id="l357"
-               class="code sev- "><tt><i>357</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>357</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l358"
                class="code sev- "><tt><i>358</i> <span class="sd">    Return True if func_name is the name of a lambda</span></tt>
@@ -1112,7 +1112,7 @@
                class="code sev- "><tt><i>365</i> <span class="k">def</span> <span class="nf">_is_valid_func_def_name</span><span class="p">(</span><span class="n">func_name</span><span class="p">):</span></tt>
             </div>
             <div id="l366"
-               class="code sev- "><tt><i>366</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>366</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l367"
                class="code sev- "><tt><i>367</i> <span class="sd">    Return True if func_name is valid in a function definition.</span></tt>
@@ -1139,7 +1139,7 @@
                class="code sev- "><tt><i>374</i> <span class="k">class</span> <span class="nc">_SymbolRef</span><span class="p">:</span></tt>
             </div>
             <div id="l375"
-               class="code sev- "><tt><i>375</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>375</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l376"
                class="code sev- "><tt><i>376</i> <span class="sd">    A class used to protect signature default values and type hints when the local context would not be able</span></tt>
@@ -1184,7 +1184,7 @@
                class="code sev- "><tt><i>389</i> <span class="k">def</span> <span class="nf">get_signature_string</span><span class="p">(</span><span class="n">func_name</span><span class="p">,</span> <span class="n">func_signature</span><span class="p">,</span> <span class="n">evaldict</span><span class="p">):</span></tt>
             </div>
             <div id="l390"
-               class="code sev- "><tt><i>390</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>390</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l391"
                class="code sev- "><tt><i>391</i> <span class="sd">    Returns the string to be used as signature.</span></tt>
@@ -1346,7 +1346,7 @@
                class="code sev- "><tt><i>443</i> <span class="k">def</span> <span class="nf">get_lambda_argument_string</span><span class="p">(</span><span class="n">func_signature</span><span class="p">,</span> <span class="n">evaldict</span><span class="p">):</span></tt>
             </div>
             <div id="l444"
-               class="code sev- "><tt><i>444</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>444</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l445"
                class="code sev- "><tt><i>445</i> <span class="sd">    Returns the string to be used as arguments in a lambda function definition.</span></tt>
@@ -1394,7 +1394,7 @@
                class="code sev- "><tt><i>459</i> <span class="k">def</span> <span class="nf">_signature_symbol_needs_protection</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">evaldict</span><span class="p">):</span></tt>
             </div>
             <div id="l460"
-               class="code sev- "><tt><i>460</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>460</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l461"
                class="code sev- "><tt><i>461</i> <span class="sd">    Helper method for signature symbols (defaults, type hints) protection.</span></tt>
@@ -1457,7 +1457,7 @@
                class="code sev- "><tt><i>480</i> <span class="k">def</span> <span class="nf">_protect_signature_symbol</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">needs_protection</span><span class="p">,</span> <span class="n">varname</span><span class="p">,</span> <span class="n">evaldict</span><span class="p">):</span></tt>
             </div>
             <div id="l481"
-               class="code sev- "><tt><i>481</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>481</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l482"
                class="code sev- "><tt><i>482</i> <span class="sd">    Helper method for signature symbols (defaults, type hints) protection.</span></tt>
@@ -1520,7 +1520,7 @@
                class="code sev- "><tt><i>501</i> <span class="k">def</span> <span class="nf">get_signature_from_string</span><span class="p">(</span><span class="n">func_sig_str</span><span class="p">,</span> <span class="n">evaldict</span><span class="p">):</span></tt>
             </div>
             <div id="l502"
-               class="code sev- "><tt><i>502</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>502</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l503"
                class="code sev- "><tt><i>503</i> <span class="sd">    Creates a `Signature` object from the given function signature string.</span></tt>
@@ -1775,7 +1775,7 @@
                class="code sev- "><tt><i>586</i> <span class="k">def</span> <span class="nf">get_signature_params</span><span class="p">(</span><span class="n">s</span><span class="p">):</span></tt>
             </div>
             <div id="l587"
-               class="code sev- "><tt><i>587</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>587</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l588"
                class="code sev- "><tt><i>588</i> <span class="sd">    Utility method to return the parameter names in the provided `Signature` object, by group of kind</span></tt>
@@ -1862,7 +1862,7 @@
                class="code sev- "><tt><i>615</i> <span class="k">def</span> <span class="nf">get_signature_details</span><span class="p">(</span><span class="n">s</span><span class="p">):</span></tt>
             </div>
             <div id="l616"
-               class="code sev- "><tt><i>616</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>616</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l617"
                class="code sev- "><tt><i>617</i> <span class="sd">    Utility method to extract the annotations, defaults and kwdefaults from a `Signature` object</span></tt>
@@ -1934,7 +1934,7 @@
                class="code sev- "><tt><i>639</i> <span class="k">def</span> <span class="nf">extract_module_and_evaldict</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span></tt>
             </div>
             <div id="l640"
-               class="code sev- "><tt><i>640</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>640</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l641"
                class="code sev- "><tt><i>641</i> <span class="sd">    Utility function to extract the module name from the given frame,</span></tt>
@@ -2009,7 +2009,7 @@
                class="code sev- "><tt><i>664</i> <span class="k">def</span> <span class="nf">protect_eval_dict</span><span class="p">(</span><span class="n">evaldict</span><span class="p">,</span> <span class="n">func_name</span><span class="p">,</span> <span class="n">params_names</span><span class="p">):</span></tt>
             </div>
             <div id="l665"
-               class="code sev- "><tt><i>665</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>665</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l666"
                class="code sev- "><tt><i>666</i> <span class="sd">    remove all symbols that could be harmful in evaldict</span></tt>
@@ -2087,7 +2087,7 @@
                class="code sev- "><tt><i>690</i> <span class="k">def</span> <span class="nf">_make</span><span class="p">(</span><span class="n">funcname</span><span class="p">,</span> <span class="n">params_names</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">evaldict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span></tt>
             </div>
             <div id="l691"
-               class="code sev- "><tt><i>691</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>691</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l692"
                class="code sev- "><tt><i>692</i> <span class="sd">    Make a new function from a given template and update the signature</span></tt>
@@ -2222,7 +2222,7 @@
                class="code sev- "><tt><i>729</i> <span class="p">):</span></tt>
             </div>
             <div id="l730"
-               class="code sev- "><tt><i>730</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>730</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l731"
                class="code sev- "><tt><i>731</i> <span class="sd">    Update the signature of func with the provided information</span></tt>
@@ -2405,7 +2405,7 @@
                class="code sev- "><tt><i>790</i>           <span class="p">):</span></tt>
             </div>
             <div id="l791"
-               class="code sev- "><tt><i>791</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>791</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l792"
                class="code sev- "><tt><i>792</i> <span class="sd">    A decorator to create a signature-preserving wrapper function.</span></tt>
@@ -2717,7 +2717,7 @@
                class="code sev- "><tt><i>894</i>                            <span class="n">func_name</span><span class="p">,</span> <span class="n">doc</span><span class="p">,</span> <span class="n">qualname</span><span class="p">,</span> <span class="n">co_name</span><span class="p">,</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span></tt>
             </div>
             <div id="l895"
-               class="code sev- "><tt><i>895</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>895</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l896"
                class="code sev- "><tt><i>896</i> <span class="sd">    Internal method used by @wraps and create_wrapper</span></tt>
@@ -3017,7 +3017,7 @@
                class="code sev- "><tt><i>994</i>                    <span class="p">):</span></tt>
             </div>
             <div id="l995"
-               class="code sev- "><tt><i>995</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>995</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l996"
                class="code sev- "><tt><i>996</i> <span class="sd">    A decorator for functions, to change their signature. The new signature should be compliant with the old one.</span></tt>
@@ -3275,7 +3275,7 @@
                class="code sev- "><tt><i>1080</i>                                 <span class="o">*</span><span class="n">param_names</span><span class="p">):</span></tt>
             </div>
             <div id="l1081"
-               class="code sev- "><tt><i>1081</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>1081</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l1082"
                class="code sev- "><tt><i>1082</i> <span class="sd">    Removes the provided parameters from the signature `s` (returns a new `Signature` instance).</span></tt>
@@ -3332,7 +3332,7 @@
                class="code sev- "><tt><i>1099</i>                              <span class="p">):</span></tt>
             </div>
             <div id="l1100"
-               class="code sev- "><tt><i>1100</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>1100</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l1101"
                class="code sev- "><tt><i>1101</i> <span class="sd">    Adds the provided parameters to the signature `s` (returns a new `Signature` instance).</span></tt>
@@ -3638,7 +3638,7 @@
                class="code sev- "><tt><i>1201</i> <span class="k">def</span> <span class="nf">with_partial</span><span class="p">(</span><span class="o">*</span><span class="n">preset_pos_args</span><span class="p">,</span> <span class="o">**</span><span class="n">preset_kwargs</span><span class="p">):</span></tt>
             </div>
             <div id="l1202"
-               class="code sev- "><tt><i>1202</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>1202</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l1203"
                class="code sev- "><tt><i>1203</i> <span class="sd">    Decorator to &#39;partialize&#39; a function using `partial`</span></tt>
@@ -3686,7 +3686,7 @@
                class="code sev- "><tt><i>1217</i>             <span class="p">):</span></tt>
             </div>
             <div id="l1218"
-               class="code sev- "><tt><i>1218</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>1218</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l1219"
                class="code sev- "><tt><i>1219</i> <span class="sd">    Equivalent of `functools.partial` but relies on a dynamically-created function. As a result the function</span></tt>
@@ -3893,7 +3893,7 @@
                class="code sev- "><tt><i>1286</i>                     <span class="p">):</span></tt>
             </div>
             <div id="l1287"
-               class="code sev- "><tt><i>1287</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>1287</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l1288"
                class="code sev- "><tt><i>1288</i> <span class="sd">    Returns the signature of partial(f, *preset_pos_args, **preset_kwargs)</span></tt>
@@ -4145,7 +4145,7 @@
                class="code sev- "><tt><i>1370</i> <span class="k">def</span> <span class="nf">gen_partial_doc</span><span class="p">(</span><span class="n">wrapped_name</span><span class="p">,</span> <span class="n">wrapped_doc</span><span class="p">,</span> <span class="n">orig_sig</span><span class="p">,</span> <span class="n">new_sig</span><span class="p">,</span> <span class="n">preset_pos_args</span><span class="p">):</span></tt>
             </div>
             <div id="l1371"
-               class="code sev- "><tt><i>1371</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>1371</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l1372"
                class="code sev- "><tt><i>1372</i> <span class="sd">    Generate a documentation indicating which positional arguments and keyword arguments are set in this</span></tt>
@@ -4280,7 +4280,7 @@
                class="code sev- "><tt><i>1415</i> <span class="k">class</span> <span class="nc">UnsupportedForCompilation</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span></tt>
             </div>
             <div id="l1416"
-               class="code sev- "><tt><i>1416</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>1416</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l1417"
                class="code sev- "><tt><i>1417</i> <span class="sd">    Exception raised by @compile_fun when decorated target is not supported</span></tt>
@@ -4301,7 +4301,7 @@
                class="code sev- "><tt><i>1422</i> <span class="k">class</span> <span class="nc">UndefinedSymbolError</span><span class="p">(</span><span class="ne">NameError</span><span class="p">):</span></tt>
             </div>
             <div id="l1423"
-               class="code sev- "><tt><i>1423</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>1423</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l1424"
                class="code sev- "><tt><i>1424</i> <span class="sd">    Exception raised by @compile_fun when the function requires a name not yet defined</span></tt>
@@ -4322,7 +4322,7 @@
                class="code sev- "><tt><i>1429</i> <span class="k">class</span> <span class="nc">SourceUnavailable</span><span class="p">(</span><span class="ne">OSError</span><span class="p">):</span></tt>
             </div>
             <div id="l1430"
-               class="code sev- "><tt><i>1430</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>1430</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l1431"
                class="code sev- "><tt><i>1431</i> <span class="sd">    Exception raised by @compile_fun when the function source is not available (inspect.getsource raises an error)</span></tt>
@@ -4349,7 +4349,7 @@
                class="code sev- "><tt><i>1438</i>                 <span class="p">):</span></tt>
             </div>
             <div id="l1439"
-               class="code sev- "><tt><i>1439</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>1439</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l1440"
                class="code sev- "><tt><i>1440</i> <span class="sd">    A draft decorator to `compile` any existing function so that users cant</span></tt>
@@ -4529,7 +4529,7 @@
                class="code sev- "><tt><i>1498</i>                          <span class="p">):</span></tt>
             </div>
             <div id="l1499"
-               class="code sev- "><tt><i>1499</i>     <span class="sd">&quot;&quot;&quot;</span></tt>
+               class="code sev- "><tt><i>1499</i> <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span></tt>
             </div>
             <div id="l1500"
                class="code sev- "><tt><i>1500</i> &nbsp;</tt>
