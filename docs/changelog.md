@@ -1,5 +1,10 @@
 # Changelog
 
+### 1.15.1 - bugfixes
+
+ - Fixed `ValueError: Invalid co_name` happening on python 2 when the name of a function to create starts or ends with
+   `_` or contains a double `__` . Fixes [#91](https://github.com/smarie/python-makefun/issues/91)
+
 ### 1.15.0 - More PEP-compliant `wraps`
 
  - `wraps` now always sets the `__wrapped__` attribute, and also sets the `__signature__` attribute when the signature changes, as specified by PEP 362. PR []() by [#86](https://github.com/smarie/python-makefun/pull/86) by [lucaswiman](https://github.com/lucaswiman).
