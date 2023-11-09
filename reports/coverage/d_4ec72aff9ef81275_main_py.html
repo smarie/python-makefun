@@ -66,8 +66,8 @@
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a id="nextFileLink" class="nav" href="index.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io">coverage.py v7.2.0</a>,
-            created at 2023-02-23 10:38 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.2.7">coverage.py v7.2.7</a>,
+            created at 2023-11-09 21:48 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"/>
@@ -396,7 +396,7 @@
     <p class="run"><span class="n"><a id="t312" href="#t312">312</a></span><span class="t">        <span class="nam">body</span> <span class="op">=</span> <span class="str">"def %s\n    return _func_impl_(%s)\n"</span> <span class="op">%</span> <span class="op">(</span><span class="nam">func_signature_str</span><span class="op">,</span> <span class="nam">params_str</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t313" href="#t313">313</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t314" href="#t314">314</a></span><span class="t">    <span class="key">if</span> <span class="nam">iscoroutinefunction</span><span class="op">(</span><span class="nam">func_impl</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t315" href="#t315">315</a></span><span class="t">        <span class="nam">body</span> <span class="op">=</span> <span class="op">(</span><span class="str">"async "</span> <span class="op">+</span> <span class="nam">body</span><span class="op">)</span><span class="op">.</span><span class="nam">replace</span><span class="op">(</span><span class="str">'return'</span><span class="op">,</span> <span class="str">'return await'</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t315" href="#t315">315</a></span><span class="t">        <span class="nam">body</span> <span class="op">=</span> <span class="op">(</span><span class="str">"async "</span> <span class="op">+</span> <span class="nam">body</span><span class="op">)</span><span class="op">.</span><span class="nam">replace</span><span class="op">(</span><span class="str">'return _func_impl_'</span><span class="op">,</span> <span class="str">'return await _func_impl_'</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t316" href="#t316">316</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t317" href="#t317">317</a></span><span class="t">    <span class="com"># create the function by compiling code, mapping the `_func_impl_` symbol to `func_impl`</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t318" href="#t318">318</a></span><span class="t">    <span class="nam">protect_eval_dict</span><span class="op">(</span><span class="nam">evaldict</span><span class="op">,</span> <span class="nam">func_name</span><span class="op">,</span> <span class="nam">params_names</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -1670,8 +1670,8 @@
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a id="nextFileLink" class="nav" href="index.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io">coverage.py v7.2.0</a>,
-            created at 2023-02-23 10:38 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.2.7">coverage.py v7.2.7</a>,
+            created at 2023-11-09 21:48 +0000
         </p>
     </div>
 </footer>

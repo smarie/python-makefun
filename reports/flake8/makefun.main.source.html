@@ -959,7 +959,7 @@
                class="code sev- "><tt><i>314</i>     <span class="k">if</span> <span class="n">iscoroutinefunction</span><span class="p">(</span><span class="n">func_impl</span><span class="p">):</span></tt>
             </div>
             <div id="l315"
-               class="code sev- "><tt><i>315</i>         <span class="n">body</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;async &quot;</span> <span class="o">+</span> <span class="n">body</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;return&#39;</span><span class="p">,</span> <span class="s1">&#39;return await&#39;</span><span class="p">)</span></tt>
+               class="code sev- "><tt><i>315</i>         <span class="n">body</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;async &quot;</span> <span class="o">+</span> <span class="n">body</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;return _func_impl_&#39;</span><span class="p">,</span> <span class="s1">&#39;return await _func_impl_&#39;</span><span class="p">)</span></tt>
             </div>
             <div id="l316"
                class="code sev- "><tt><i>316</i> &nbsp;</tt>
@@ -4475,7 +4475,7 @@
                class="code sev- "><tt><i>1480</i> <span class="sd">    &quot;&quot;&quot;</span></tt>
             </div>
             <div id="l1481"
-               class="code sev- "><tt><i>1481</i>     <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">recurse</span><span class="p">):</span></tt>
+               class="code sev- "><tt><i>1481</i>     <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">recurse</span><span class="p">):</span></tt>
             </div>
             <div id="l1482"
                class="code sev- "><tt><i>1482</i>         <span class="c1"># called with no-args, apply immediately</span></tt>
