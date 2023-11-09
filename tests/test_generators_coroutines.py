@@ -95,3 +95,25 @@ def test_native_coroutine():
     from asyncio import get_event_loop
     out = get_event_loop().run_until_complete(dynamic_fun(0.1))
     assert out == 0.1
+
+
+@pytest.mark.skipif(sys.version_info < (3, 5), reason="native coroutines with async/await require python3.6 or higher")
+def test_issue_96():
+    """Same as `test_native_coroutine` but tests that we can use 'return' in the coroutine name"""
+
+    # define the handler that should be called
+    from tests._test_py35 import make_native_coroutine_handler
+    my_native_coroutine_handler = make_native_coroutine_handler()
+
+    # create the dynamic function
+    dynamic_fun = create_function("foo_returns_bar(sleep_time=2)", my_native_coroutine_handler)
+
+    # check that this is a coroutine for inspect and for asyncio
+    assert iscoroutinefunction(dynamic_fun)
+    from asyncio import iscoroutinefunction as is_native_co
+    assert is_native_co(dynamic_fun)
+
+    # verify that the new function is a native coroutine and behaves correctly
+    from asyncio import get_event_loop
+    out = get_event_loop().run_until_complete(dynamic_fun(0.1))
+    assert out == 0.1

@@ -312,7 +312,7 @@ def create_function(func_signature,             # type: Union[str, Signature]
         body = "def %s\n    return _func_impl_(%s)\n" % (func_signature_str, params_str)
 
     if iscoroutinefunction(func_impl):
-        body = ("async " + body).replace('return', 'return await')
+        body = ("async " + body).replace('return _func_impl_', 'return await _func_impl_')
 
     # create the function by compiling code, mapping the `_func_impl_` symbol to `func_impl`
     protect_eval_dict(evaldict, func_name, params_names)
