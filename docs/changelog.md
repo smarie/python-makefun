@@ -1,5 +1,10 @@
 # Changelog
 
+### 1.15.2 - bugfix
+
+ - Fixed `SyntaxError` happening when the name of a native coroutine function to create contains `'return'`.
+   Fixes [#96](https://github.com/smarie/python-makefun/issues/96).
+
 ### 1.15.1 - bugfixes
 
  - Fixed `ValueError: Invalid co_name` happening on python 2 when the name of a function to create starts or ends with
