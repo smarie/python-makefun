@@ -816,8 +816,8 @@ def wraps(wrapped_fun,
                          **attrs)`
 
     In other words, as opposed to `@with_signature`, the metadata (doc, module name, etc.) is provided by the wrapped
-    `wrapped_fun`, so that the created function seems to be identical (except possiblyfor the signature).
-    Note that all options in `with_signature` can still be overrided using parameters of `@wraps`.
+    `wrapped_fun`, so that the created function seems to be identical (except possibly for the signature).
+    Note that all options in `with_signature` can still be overridden using parameters of `@wraps`.
 
     The additional `__wrapped__` attribute is set on the created function, to stay consistent
     with the `functools.wraps` behaviour. If the signature is modified through `new_sig`,
