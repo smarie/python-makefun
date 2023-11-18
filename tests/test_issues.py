@@ -13,17 +13,16 @@ except ImportError:
 from makefun import wraps, with_signature, partial, create_function
 
 
-@pytest.mark.skip("known to fail")
-def test_wraps_varpositional():
+def test_wraps_varpositional_issue_34():
     """ test for https://github.com/smarie/python-makefun/issues/34 """
     def f(a, *args):
-        pass
+        return a, args
 
     @wraps(f)
     def foo(*args, **kwargs):
         return f(*args, **kwargs)
 
-    foo('hello', 12)
+    assert foo('hello', 12) == ("hello", (12,))
 
 
 def test_varpositional2():
