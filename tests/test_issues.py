@@ -280,3 +280,17 @@ def test_issue_91():
     """This test should work also in python 2 ! """
     assert is_identifier("_results_bag")
     assert is_identifier("hello__bag")
+
+
+def test_issue_98():
+    from enum import StrEnum
+
+    class A(StrEnum):
+        a = 'a'
+
+    def foo(a=A.a):
+        pass
+
+    @wraps(foo)
+    def test(*args, **kwargs):
+        return foo(*args, **kwargs)
