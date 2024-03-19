@@ -466,7 +466,7 @@ def _signature_symbol_needs_protection(symbol, evaldict):
     :param symbol:
     :return:
     """
-    if symbol is not None and symbol is not Parameter.empty and not isinstance(symbol, TYPES_WITH_SAFE_REPR):
+    if symbol is not None and symbol is not Parameter.empty and type(symbol) not in TYPES_WITH_SAFE_REPR:
         try:
             # check if the repr() of the default value is equal to itself.
             return eval(repr(symbol), evaldict) != symbol  # noqa  # we cannot use ast.literal_eval, too restrictive

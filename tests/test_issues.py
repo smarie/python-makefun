@@ -280,3 +280,19 @@ def test_issue_91():
     """This test should work also in python 2 ! """
     assert is_identifier("_results_bag")
     assert is_identifier("hello__bag")
+
+
+def test_issue_98():
+    class A(str):
+        def __str__(self):
+            return 'custom str'
+
+        def __repr__(self):
+            return 'custom repr'
+
+    def foo(a=A()):
+        pass
+
+    @wraps(foo)
+    def test(*args, **kwargs):
+        return foo(*args, **kwargs)
