@@ -283,12 +283,14 @@ def test_issue_91():
 
 
 def test_issue_98():
-    from enum import StrEnum
+    class A(str):
+        def __str__(self):
+            return 'custom str'
 
-    class A(StrEnum):
-        a = 'a'
+        def __repr__(self):
+            return 'custom repr'
 
-    def foo(a=A.a):
+    def foo(a=A()):
         pass
 
     @wraps(foo)
