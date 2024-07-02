@@ -1,5 +1,11 @@
 # Changelog
 
+### 1.15.3 - bugfix
+
+ - Fixed `SyntaxError: invalid syntax` happening when the default value of one argument of the created function is a subclass of a basic primitive.
+   Fixes [#98](https://github.com/smarie/python-makefun/issues/98). PR [#99](https://github.com/smarie/python-makefun/pull/99) by
+   [moskupols](https://github.com/moskupols)
+
 ### 1.15.2 - bugfix
 
  - Fixed `SyntaxError` happening when the name of a native coroutine function to create contains `'return'`.
@@ -12,7 +18,7 @@
 
 ### 1.15.0 - More PEP-compliant `wraps`
 
- - `wraps` now always sets the `__wrapped__` attribute, and also sets the `__signature__` attribute when the signature changes, as specified by PEP 362. PR []() by [#86](https://github.com/smarie/python-makefun/pull/86) by [lucaswiman](https://github.com/lucaswiman).
+ - `wraps` now always sets the `__wrapped__` attribute, and also sets the `__signature__` attribute when the signature changes, as specified by PEP 362. PR [#86](https://github.com/smarie/python-makefun/pull/86) by [lucaswiman](https://github.com/lucaswiman).
 
 ### 1.14.0 - Support for lambda functions
 
