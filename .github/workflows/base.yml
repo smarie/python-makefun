@@ -36,7 +36,7 @@ jobs:
 
       - name: List 'tests' nox sessions and required python versions
         id: set-matrix
-        run: echo "::set-output name=matrix::$(nox -s gha_list -- -s tests -v)"
+        run: echo "::set-output name=matrix::$(nox --json -l -- -s tests -v)"
 
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}  # save nox sessions list to outputs
