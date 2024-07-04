@@ -161,7 +161,7 @@ def test_args_order_and_kind():
         # it is possible to keyword-partialize a positional-only argument...
         fp_ref = functools.partial(f, b=0)
 
-        # but 'signature' does not support it !
+        # but 'signature' does not support it before Python 3.12.4 !
         if sys.version_info < (3, 12, 4):
             with pytest.raises(ValueError):
                 signature(fp_ref)
