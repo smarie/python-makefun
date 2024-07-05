@@ -161,12 +161,14 @@ def test_args_order_and_kind():
         # it is possible to keyword-partialize a positional-only argument...
         fp_ref = functools.partial(f, b=0)
 
-        # but 'signature' does not support it !
-        with pytest.raises(ValueError):
-            signature(fp_ref)
+        # but 'signature' does not support it before Python 3.12.4 !
+        if sys.version_info < (3, 12, 4):
+            with pytest.raises(ValueError):
+                signature(fp_ref)
+        else:
+            assert str(signature(fp_ref)) == "(a, c, /, *, d, **e)"
 
-        # assert str(signature(fp_ref)) == "(c, /, *, d, **e)"
-
+        # TODO https://github.com/smarie/python-makefun/issues/107
         # so we do not support it
         with pytest.raises(NotImplementedError):
             makefun.partial(f, b=0)
