@@ -2,9 +2,9 @@
 
 ### 1.15.3 - bugfix
 
- - Fixed `SyntaxError: invalid syntax` happening when the default value of one argument of the created function is a subclass of a basic primitive.
-   Fixes [#98](https://github.com/smarie/python-makefun/issues/98). PR [#99](https://github.com/smarie/python-makefun/pull/99) by
-   [moskupols](https://github.com/moskupols)
+ - Fixed `SyntaxError: invalid syntax` happening when the default value of one argument of the created function is a 
+   subclass of a basic primitive. Fixes [#98](https://github.com/smarie/python-makefun/issues/98). PR
+   [#99](https://github.com/smarie/python-makefun/pull/99) by [moskupols](https://github.com/moskupols).
 
 ### 1.15.2 - bugfix
 
