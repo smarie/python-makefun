@@ -1421,7 +1421,7 @@
                class="code sev- "><tt><i>468</i> <span class="sd">    &quot;&quot;&quot;</span></tt>
             </div>
             <div id="l469"
-               class="code sev- "><tt><i>469</i>     <span class="k">if</span> <span class="n">symbol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">symbol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">TYPES_WITH_SAFE_REPR</span><span class="p">):</span></tt>
+               class="code sev- "><tt><i>469</i>     <span class="k">if</span> <span class="n">symbol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">symbol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">TYPES_WITH_SAFE_REPR</span><span class="p">:</span></tt>
             </div>
             <div id="l470"
                class="code sev- "><tt><i>470</i>         <span class="k">try</span><span class="p">:</span></tt>

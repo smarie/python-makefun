@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="index.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.2.7">coverage.py v7.2.7</a>,
-            created at 2024-03-12 17:34 +0000
+            created at 2024-07-05 09:11 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"/>
@@ -550,7 +550,7 @@
     <p class="pln"><span class="n"><a id="t466" href="#t466">466</a></span><span class="t"><span class="str">    :param symbol:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t467" href="#t467">467</a></span><span class="t"><span class="str">    :return:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t468" href="#t468">468</a></span><span class="t"><span class="str">    """</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t469" href="#t469">469</a></span><span class="t">    <span class="key">if</span> <span class="nam">symbol</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span> <span class="key">and</span> <span class="nam">symbol</span> <span class="key">is</span> <span class="key">not</span> <span class="nam">Parameter</span><span class="op">.</span><span class="nam">empty</span> <span class="key">and</span> <span class="key">not</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">symbol</span><span class="op">,</span> <span class="nam">TYPES_WITH_SAFE_REPR</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t469" href="#t469">469</a></span><span class="t">    <span class="key">if</span> <span class="nam">symbol</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span> <span class="key">and</span> <span class="nam">symbol</span> <span class="key">is</span> <span class="key">not</span> <span class="nam">Parameter</span><span class="op">.</span><span class="nam">empty</span> <span class="key">and</span> <span class="nam">type</span><span class="op">(</span><span class="nam">symbol</span><span class="op">)</span> <span class="key">not</span> <span class="key">in</span> <span class="nam">TYPES_WITH_SAFE_REPR</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t470" href="#t470">470</a></span><span class="t">        <span class="key">try</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t471" href="#t471">471</a></span><span class="t">            <span class="com"># check if the repr() of the default value is equal to itself.</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t472" href="#t472">472</a></span><span class="t">            <span class="key">return</span> <span class="nam">eval</span><span class="op">(</span><span class="nam">repr</span><span class="op">(</span><span class="nam">symbol</span><span class="op">)</span><span class="op">,</span> <span class="nam">evaldict</span><span class="op">)</span> <span class="op">!=</span> <span class="nam">symbol</span>  <span class="com"># noqa  # we cannot use ast.literal_eval, too restrictive</span>&nbsp;</span><span class="r"></span></p>
@@ -1671,7 +1671,7 @@
             <a id="nextFileLink" class="nav" href="index.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.2.7">coverage.py v7.2.7</a>,
-            created at 2024-03-12 17:34 +0000
+            created at 2024-07-05 09:11 +0000
         </p>
     </div>
 </footer>
