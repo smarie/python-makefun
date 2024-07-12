@@ -74,7 +74,9 @@ jobs:
         uses: actions/setup-python@v5
         id: set-py-latest
         with:
-          python-version: ${{ matrix.nox_session.python }}
+          # Include all versions including pre releases
+          # See https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#specifying-a-python-version
+          python-version: format('{0}-alpha - {0}', matrix.nox_session.python)
           architecture: x64
           allow-build: info
           cache-build: true
