@@ -1,5 +1,10 @@
 # Changelog
 
+### 1.15.4 - Python 3.13 official support
+
+ - Python 3.13 is now supported. PR [#108](https://github.com/smarie/python-makefun/pull/108) and PR
+   [#104](https://github.com/smarie/python-makefun/pull/104) by [mgorny](https://github.com/mgorny)
+
 ### 1.15.3 - bugfix
 
  - Fixed `SyntaxError: invalid syntax` happening when the default value of one argument of the created function is a 
