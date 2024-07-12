@@ -12,8 +12,8 @@ import nox
 nox_logger = logging.getLogger("nox")
 
 
-PY27, PY35, PY36, PY37, PY38, PY39, PY310, PY311, PY312 = ("2.7", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10", "3.11",
-                                                           "3.12")
+PY27, PY35, PY36, PY37, PY38, PY39, PY310, PY311, PY312, PY313 = ("2.7", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10",
+                                                                "3.11", "3.12", "3.13")
 DONT_INSTALL = "dont_install"
 
 
