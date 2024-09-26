@@ -136,7 +136,7 @@ def tests(session, coverage, pkg_specs):
                     "-m", "pytest", "--cache-clear",
                     f"--junitxml={Folders.test_xml}", f"--html={Folders.test_html}",
                     "-v", "tests/")
-        session.run("coverage", "report")
+        session.run("coverage", "report")  # this shows in terminal + fails under XX%, same as --cov-report term --cov-fail-under=70  # noqa
         session.run("coverage", "xml", "-o", f"{Folders.coverage_xml}")
         session.run("coverage", "html", "-d", f"{Folders.coverage_reports}")
         # delete this intermediate file, it is not needed anymore
@@ -154,7 +154,7 @@ def flake8(session):
     """Launch flake8 qualimetry."""
 
     session.install("-r", str(Folders.ci_tools / "flake8-requirements.txt"))
-    session.run("pip", "install", ".")
+    session.install(".")
 
     rm_folder(Folders.flake8_reports)
     Folders.flake8_reports.mkdir(parents=True, exist_ok=True)
@@ -285,7 +285,7 @@ def gha_list(session):
     out = session.run("nox", "-l", "--json", "-s", "tests", external=True, silent=True)
     sessions_list = [{"python": s["python"], "session": s["session"]} for s in json.loads(out)]
 
-    # TODO filter
+    # TODO filter ?
 
     # print the list so that it can be caught by GHA.
     # Note that json.dumps is optional since this is a list of string.
