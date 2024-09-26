@@ -36,7 +36,7 @@ jobs:
 
       - name: List 'tests' nox sessions and required python versions
         id: set-matrix
-        run: echo "::set-output name=matrix::$(nox --json -l -s tests -v)"
+        run: echo "matrix=$(nox --json -l -s tests -v)" >> $GITHUB_OUTPUT
 
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}  # save nox sessions list to outputs
@@ -100,7 +100,7 @@ jobs:
 
       # Share ./docs/reports so that they can be deployed with doc in next job
       - name: Share reports with other jobs
-        # if: matrix.nox_session == '...': not needed, if empty won't be shared
+        if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4.3.0
         with:
           name: reports_dir
