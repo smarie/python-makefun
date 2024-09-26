@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.15.5 - compatibility fix
+
+- Fixed issue with legacy python 2.7 and 3.5. Fixes [#110](https://github.com/smarie/python-makefun/issues/110)
+
 ### 1.15.4 - Python 3.13 official support
 
  - Python 3.13 is now supported. PR [#108](https://github.com/smarie/python-makefun/pull/108) and PR
