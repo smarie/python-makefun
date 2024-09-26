@@ -183,6 +183,9 @@ jobs:
         uses: codecov/codecov-action@v4.0.1
         with:
           files: ./docs/reports/coverage/coverage.xml
+      - name: \[not on TAG\] Build wheel and sdist
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads')
+        run: nox -s build
 
       # -------------- only on Ubuntu + TAG PUSH (no pull request) -----------
 

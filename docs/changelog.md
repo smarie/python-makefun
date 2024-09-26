@@ -1,8 +1,12 @@
 # Changelog
 
-### 1.15.5 - compatibility fix
+### 1.15.6 - compatibility fix
 
 - Fixed issue with legacy python 2.7 and 3.5. Fixes [#110](https://github.com/smarie/python-makefun/issues/110)
+
+### 1.15.5 - yanked version
+
+- This version was yanked as the fix declared in the changelog was not actually active on the version deployed on PyPi
 
 ### 1.15.4 - Python 3.13 official support
 

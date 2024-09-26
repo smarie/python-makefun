@@ -19,7 +19,7 @@ gh_repo = "python-makefun"
 
 
 # set the default activated sessions, minimal for CI
-nox.options.sessions = ["tests", "flake8", "docs"]  # , "docs", "gh_pages"
+nox.options.sessions = ["tests", "flake8", "docs", "build"]  # , "docs", "gh_pages"
 nox.options.error_on_missing_interpreters = True
 nox.options.reuse_existing_virtualenvs = True  # this can be done using -r
 # if platform.system() == "Windows":  >> always use this for better control
@@ -208,11 +208,9 @@ def publish(session):
     # session.run2('codecov -t %s -f %s' % (codecov_token, Folders.coverage_xml))
 
 
-@nox.session(python=PY39)
-def release(session):
-    """Create a release on github corresponding to the latest tag"""
-
-    install_reqs(session, phase="setup.py#dist", phase_reqs=["setuptools_scm"])
+def _build(session):
+    """Common code used by build and release sessions"""
+    install_reqs(session, setup=True, phase="setup.py#dist", phase_reqs=["setuptools_scm"])
 
     # Get current tag using setuptools_scm and make sure this is not a dirty/dev one
     from setuptools_scm import get_version  # (note that this import is not from the session env but the main nox env)
@@ -222,11 +220,39 @@ def release(session):
     def my_scheme(version_):
         version.append(version_)
         return guess_next_dev_version(version_)
+
     current_tag = get_version(".", version_scheme=my_scheme)
 
     # create the package
     rm_folder(Folders.dist)
+
     session.run("python", "setup.py", "sdist", "bdist_wheel")
+
+    # Make sure that the generated _version.py file exists and is compliant with python 2.7
+    version_py = Path(f"src/{pkg_name}/_version.py")
+    if not version_py.exists():
+        raise ValueError("Error with setuptools_scm: _version.py file not generated")
+
+    if ":" in version_py.read_text():
+        raise ValueError("Error with setuptools_scm: _version.py file contains annotations")
+
+    return current_tag, version
+
+
+@nox.session(python=PY39)
+def build(session):
+    """Same as release but just builds"""
+
+    current_tag, version = _build(session)
+    print(f"current tag: {current_tag}")
+    print(f"version: {version}")
+
+
+@nox.session(python=PY39)
+def release(session):
+    """Create a release on github corresponding to the latest tag"""
+
+    current_tag, version = _build(session)
 
     if version[0].dirty or not version[0].exact:
         raise ValueError("You need to execute this action on a clean tag version with no local changes.")
