@@ -9,7 +9,7 @@ import sys
 # add parent folder to python path so that we can import noxfile_utils.py
 # note that you need to "pip install -r noxfile-requiterements.txt" for this file to work.
 sys.path.append(str(Path(__file__).parent / "ci_tools"))
-from nox_utils import (PY27, PY37, PY36, PY38, PY39, PY310, PY311, PY312, PY313, install_reqs, rm_folder, rm_file,
+from nox_utils import (PY27, PY37, PY36, PY35, PY38, PY39, PY310, PY311, PY312, PY313, install_reqs, rm_folder, rm_file,
                        DONT_INSTALL)  # noqa
 
 
@@ -61,6 +61,7 @@ ENVS = {
     PY39: {"coverage": False, "pkg_specs": {"pip": ">19"}},
     PY38: {"coverage": False, "pkg_specs": {"pip": ">19"}},
     PY27: {"coverage": False, "pkg_specs": {"pip": ">10"}},
+    PY35: {"coverage": False, "pkg_specs": {"pip": ">10"}},
     PY36: {"coverage": False, "pkg_specs": {"pip": ">19"}},
     # IMPORTANT: this should be last so that the folder docs/reports is not deleted afterwards
     PY37: {"coverage": True, "pkg_specs": {"pip": ">19"}},  # , "pytest-html": "1.9.0"
@@ -289,34 +290,34 @@ def release(session):
                 "-d", f"https://{gh_org}.github.io/{gh_repo}/changelog", current_tag)
 
 
-@nox.session(python=False)
-def gha_list(session):
-    """(mandatory arg: <base_session_name>) Prints all sessions available for <base_session_name>, for GithubActions."""
-
-    # see https://stackoverflow.com/q/66747359/7262247
-
-    # The options
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--session", help="The nox base session name")
-    parser.add_argument(
-        "-v",
-        "--with_version",
-        action="store_true",
-        default=False,
-        help="Return a list of lists where the first element is the python version and the second the nox session.",
-    )
-    additional_args = parser.parse_args(session.posargs)
-
-    # Now use --json CLI option
-    out = session.run("nox", "-l", "--json", "-s", "tests", external=True, silent=True)
-    sessions_list = [{"python": s["python"], "session": s["session"]} for s in json.loads(out)]
-
-    # TODO filter ?
-
-    # print the list so that it can be caught by GHA.
-    # Note that json.dumps is optional since this is a list of string.
-    # However it is to remind us that GHA expects a well-formatted json list of strings.
-    print(json.dumps(sessions_list))
+# @nox.session(python=False)
+# def gha_list(session):
+#     """(mandatory arg: <base_session_name>) Prints all sessions available for <base_session_name>, for GithubActions."""
+#
+#     # see https://stackoverflow.com/q/66747359/7262247
+#
+#     # The options
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument("-s", "--session", help="The nox base session name")
+#     parser.add_argument(
+#         "-v",
+#         "--with_version",
+#         action="store_true",
+#         default=False,
+#         help="Return a list of lists where the first element is the python version and the second the nox session.",
+#     )
+#     additional_args = parser.parse_args(session.posargs)
+#
+#     # Now use --json CLI option
+#     out = session.run("nox", "-l", "--json", "-s", "tests", external=True, silent=True)
+#     sessions_list = [{"python": s["python"], "session": s["session"]} for s in json.loads(out)]
+#
+#     # TODO filter ?
+#
+#     # print the list so that it can be caught by GHA.
+#     # Note that json.dumps is optional since this is a list of string.
+#     # However it is to remind us that GHA expects a well-formatted json list of strings.
+#     print(json.dumps(sessions_list))
 
 
 # if __name__ == '__main__':
