@@ -156,6 +156,7 @@ jobs:
         uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0  # so that gh-deploy works
+          # persist-credentials: false  # see https://github.com/orgs/community/discussions/25702
 
       - name: Install python 3.9 for nox
         uses: actions/setup-python@v5.1.0
@@ -209,7 +210,11 @@ jobs:
       # 7) Create github release and build the wheel
       - name: \[TAG only\] Build wheel and create github release
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-        run: nox -s release -- ${{ secrets.GITHUB_TOKEN }}
+        # We would have to use a PAT instead of GITHUB_TOKEN if we want the next job to trigger.
+        # See https://github.com/orgs/community/discussions/25702
+        # For now we will rather rely on a "workflow completed" trigger to avoid
+        # having a token expiration date to manage
+        run: nox -s release -- ${{ secrets.GITHUB_TOKEN }}  #  ${{ secrets.WORKFLOW_SECRET}}
 
       # 8) Publish the wheel on PyPi
       - name: \[TAG only\] Deploy on PyPi

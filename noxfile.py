@@ -1,5 +1,3 @@
-import argparse
-import json
 import logging
 
 import nox  # noqa
@@ -9,7 +7,7 @@ import sys
 # add parent folder to python path so that we can import noxfile_utils.py
 # note that you need to "pip install -r noxfile-requiterements.txt" for this file to work.
 sys.path.append(str(Path(__file__).parent / "ci_tools"))
-from nox_utils import (PY27, PY37, PY36, PY35, PY38, PY39, PY310, PY311, PY312, PY313, install_reqs, rm_folder, rm_file,
+from nox_utils import (PY27, PY39, PY310, PY311, PY312, PY313, PY314, install_reqs, rm_folder, rm_file,
                        DONT_INSTALL)  # noqa
 
 
@@ -54,17 +52,14 @@ class Folders:
 
 
 ENVS = {
+    PY314: {"coverage": False, "pkg_specs": {"pip": ">19"}},
     PY313: {"coverage": False, "pkg_specs": {"pip": ">19"}},
     PY312: {"coverage": False, "pkg_specs": {"pip": ">19"}},
     PY311: {"coverage": False, "pkg_specs": {"pip": ">19"}},
     PY310: {"coverage": False, "pkg_specs": {"pip": ">19"}},
-    PY39: {"coverage": False, "pkg_specs": {"pip": ">19"}},
-    PY38: {"coverage": False, "pkg_specs": {"pip": ">19"}},
     PY27: {"coverage": False, "pkg_specs": {"pip": ">10"}},
-    PY35: {"coverage": False, "pkg_specs": {"pip": ">10"}},
-    PY36: {"coverage": False, "pkg_specs": {"pip": ">19"}},
     # IMPORTANT: this should be last so that the folder docs/reports is not deleted afterwards
-    PY37: {"coverage": True, "pkg_specs": {"pip": ">19"}},  # , "pytest-html": "1.9.0"
+    PY39: {"coverage": True, "pkg_specs": {"pip": ">19"}},
 }
 
 ENV_PARAMS = tuple((k, v["coverage"], v["pkg_specs"]) for k, v in ENVS.items())
