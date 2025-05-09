@@ -92,8 +92,8 @@ def test_native_coroutine():
     assert is_native_co(dynamic_fun)
 
     # verify that the new function is a native coroutine and behaves correctly
-    from asyncio import get_event_loop
-    out = get_event_loop().run_until_complete(dynamic_fun(0.1))
+    from asyncio import run
+    out = run(dynamic_fun(0.1))
     assert out == 0.1
 
 
@@ -114,6 +114,6 @@ def test_issue_96():
     assert is_native_co(dynamic_fun)
 
     # verify that the new function is a native coroutine and behaves correctly
-    from asyncio import get_event_loop
-    out = get_event_loop().run_until_complete(dynamic_fun(0.1))
+    from asyncio import run
+    out = run(dynamic_fun(0.1))
     assert out == 0.1
