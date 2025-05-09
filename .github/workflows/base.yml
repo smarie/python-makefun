@@ -26,7 +26,7 @@ jobs:
         uses: actions/checkout@v4.1.1
 
       - name: Install python 3.9
-        uses: actions/setup-python@v5.0.0
+        uses: actions/setup-python@v5.1.0
         with:
           python-version: 3.9
           architecture: x64
@@ -59,9 +59,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4.1.1
 
-      - name: Install python ${{ matrix.nox_session.python }} for tests
-        if: ${{ ! contains(fromJson('["3.13"]'), matrix.nox_session.python ) }}
-        uses: MatteoH2O1999/setup-python@v3.2.1  # actions/setup-python@v5.0.0
+        # General case
+      - name: Install python ${{ matrix.nox_session.python }} for tests (not 3.5 not 3.14)
+        if: ${{ ! contains(fromJson('["3.5", "3.14"]'), matrix.nox_session.python ) }}
+        uses: MatteoH2O1999/setup-python@v4  # actions/setup-python@v5.0.0
         id: set-py
         with:
           python-version: ${{ matrix.nox_session.python }}
@@ -69,8 +70,24 @@ jobs:
           allow-build: info
           cache-build: true
 
-      - name: Install python ${{ matrix.nox_session.python }} for tests (3.13)
-        if: contains(fromJson('["3.13"]'), matrix.nox_session.python )
+        # Particular case of issue with 3.5
+      - name: Install python ${{ matrix.nox_session.python }} for tests (3.5)
+        if: contains(fromJson('["3.5"]'), matrix.nox_session.python )
+        uses: MatteoH2O1999/setup-python@v4  # actions/setup-python@v5.0.0
+        id: set-py-35
+        with:
+          python-version: ${{ matrix.nox_session.python }}
+          architecture: x64
+          allow-build: info
+          cache-build: true
+        env:
+          # workaround found in https://github.com/actions/setup-python/issues/866
+          # for issue "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:728)" on Python 3.5
+          PIP_TRUSTED_HOST: "pypi.python.org pypi.org files.pythonhosted.org"
+
+
+      - name: Install python ${{ matrix.nox_session.python }} for tests (3.14)
+        if: contains(fromJson('["3.14"]'), matrix.nox_session.python )
         uses: actions/setup-python@v5
         id: set-py-latest
         with:
@@ -82,7 +99,7 @@ jobs:
           cache-build: true
 
       - name: Install python 3.12 for nox
-        uses: actions/setup-python@v5.0.0
+        uses: actions/setup-python@v5.1.0
         with:
           python-version: 3.12
           architecture: x64
@@ -101,7 +118,7 @@ jobs:
       # Share ./docs/reports so that they can be deployed with doc in next job
       - name: Share reports with other jobs
         if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v4.3.0
+        uses: actions/upload-artifact@v4.3.1
         with:
           name: reports_dir
           path: ./docs/reports
@@ -114,7 +131,7 @@ jobs:
         uses: actions/checkout@v4.1.1
 
       - name: Install python 3.9 for nox
-        uses: actions/setup-python@v5.0.0
+        uses: actions/setup-python@v5.1.0
         with:
           python-version: 3.9
           architecture: x64
@@ -139,16 +156,17 @@ jobs:
         uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0  # so that gh-deploy works
+          # persist-credentials: false  # see https://github.com/orgs/community/discussions/25702
 
       - name: Install python 3.9 for nox
-        uses: actions/setup-python@v5.0.0
+        uses: actions/setup-python@v5.1.0
         with:
           python-version: 3.9
           architecture: x64
 
       # 1) retrieve the reports generated previously
       - name: Retrieve reports
-        uses: actions/download-artifact@v4.1.1
+        uses: actions/download-artifact@v4.1.4
         with:
           name: reports_dir
           path: ./docs/reports
@@ -180,7 +198,7 @@ jobs:
           EOF
       - name: \[not on TAG\] Publish coverage report
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads')
-        uses: codecov/codecov-action@v4.0.1
+        uses: codecov/codecov-action@v4.1.1
         with:
           files: ./docs/reports/coverage/coverage.xml
       - name: \[not on TAG\] Build wheel and sdist
@@ -192,7 +210,11 @@ jobs:
       # 7) Create github release and build the wheel
       - name: \[TAG only\] Build wheel and create github release
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-        run: nox -s release -- ${{ secrets.GITHUB_TOKEN }}
+        # We would have to use a PAT instead of GITHUB_TOKEN if we want the next job to trigger.
+        # See https://github.com/orgs/community/discussions/25702
+        # For now we will rather rely on a "workflow completed" trigger to avoid
+        # having a token expiration date to manage
+        run: nox -s release -- ${{ secrets.GITHUB_TOKEN }}  #  ${{ secrets.WORKFLOW_SECRET}}
 
       # 8) Publish the wheel on PyPi
       - name: \[TAG only\] Deploy on PyPi
