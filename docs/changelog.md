@@ -3,7 +3,8 @@
 ### 1.16.0 - (in progress) new python versions scope
 
 - Removed official support for python versions `<3.9`. These versions will not run in CI anymore.
-
+- Fixed `RuntimeError` in tests when running on python 3.14. Added python 3.14 to CI. Fixes
+  [#112](https://github.com/smarie/python-makefun/issues/112)
 
 ### 1.15.6 - compatibility fix
 

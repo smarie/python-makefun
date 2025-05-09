@@ -76,7 +76,7 @@ def test_generator_based_coroutine():
 
 
 @pytest.mark.skipif(sys.version_info < (3, 5), reason="native coroutines with async/await require python3.6 or higher")
-def test_native_coroutine():
+async def test_native_coroutine():
     """ Tests that we can use a native async coroutine as function_handler in `create_function`"""
 
     # define the handler that should be called
@@ -92,13 +92,12 @@ def test_native_coroutine():
     assert is_native_co(dynamic_fun)
 
     # verify that the new function is a native coroutine and behaves correctly
-    from asyncio import get_event_loop
-    out = get_event_loop().run_until_complete(dynamic_fun(0.1))
+    out = await dynamic_fun(0.1)
     assert out == 0.1
 
 
 @pytest.mark.skipif(sys.version_info < (3, 5), reason="native coroutines with async/await require python3.6 or higher")
-def test_issue_96():
+async def test_issue_96():
     """Same as `test_native_coroutine` but tests that we can use 'return' in the coroutine name"""
 
     # define the handler that should be called
@@ -114,6 +113,5 @@ def test_issue_96():
     assert is_native_co(dynamic_fun)
 
     # verify that the new function is a native coroutine and behaves correctly
-    from asyncio import get_event_loop
-    out = get_event_loop().run_until_complete(dynamic_fun(0.1))
+    out = await dynamic_fun(0.1)
     assert out == 0.1
