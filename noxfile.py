@@ -7,7 +7,7 @@ import sys
 # add parent folder to python path so that we can import noxfile_utils.py
 # note that you need to "pip install -r noxfile-requiterements.txt" for this file to work.
 sys.path.append(str(Path(__file__).parent / "ci_tools"))
-from nox_utils import (PY27, PY39, PY310, PY311, PY312, PY313, PY314, install_reqs, rm_folder, rm_file,
+from nox_utils import (PY39, PY310, PY311, PY312, PY313, PY314, install_reqs, rm_folder, rm_file,
                        DONT_INSTALL)  # noqa
 
 
@@ -57,7 +57,6 @@ ENVS = {
     PY312: {"coverage": False, "pkg_specs": {"pip": ">19"}},
     PY311: {"coverage": False, "pkg_specs": {"pip": ">19"}},
     PY310: {"coverage": False, "pkg_specs": {"pip": ">19"}},
-    PY27: {"coverage": False, "pkg_specs": {"pip": ">10"}},
     # IMPORTANT: this should be last so that the folder docs/reports is not deleted afterwards
     PY39: {"coverage": True, "pkg_specs": {"pip": ">19"}},
 }

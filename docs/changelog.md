@@ -2,8 +2,7 @@
 
 ### 1.16.0 - (in progress) new python versions scope
 
-- Removed official support for python versions `<3.9`. These versions will not run in CI anymore. Note that `2.7` is 
-  still supported - until corresponding github action stops working.
+- Removed official support for python versions `<3.9`. These versions will not run in CI anymore.
 
 
 ### 1.15.6 - compatibility fix
