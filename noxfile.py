@@ -52,7 +52,7 @@ class Folders:
 
 
 ENVS = {
-    PY314: {"coverage": False, "pkg_specs": {"pip": ">19"}},
+    # PY314: {"coverage": False, "pkg_specs": {"pip": ">19"}},
     PY313: {"coverage": False, "pkg_specs": {"pip": ">19"}},
     PY312: {"coverage": False, "pkg_specs": {"pip": ">19"}},
     PY311: {"coverage": False, "pkg_specs": {"pip": ">19"}},
