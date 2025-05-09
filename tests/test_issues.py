@@ -228,7 +228,7 @@ def test_issue_76():
 
 
 @pytest.mark.skipif(sys.version_info < (3, 6), reason="requires python 3.6 or higher (async generator)")
-def test_issue_77_async_generator_wraps():
+async def test_issue_77_async_generator_wraps():
     import asyncio
     from ._test_py36 import make_async_generator, make_async_generator_wrapper
 
@@ -238,11 +238,12 @@ def test_issue_77_async_generator_wraps():
     assert inspect.isasyncgenfunction(f)
     assert inspect.isasyncgenfunction(wrapper)
 
-    assert asyncio.get_event_loop().run_until_complete(asyncio.ensure_future(wrapper(1).__anext__())) == 1
+    out = await asyncio.ensure_future(wrapper(1).__anext__())
+    assert out == 1
 
 
 @pytest.mark.skipif(sys.version_info < (3, 6), reason="requires python 3.6 or higher (async generator)")
-def test_issue_77_async_generator_partial():
+async def test_issue_77_async_generator_partial():
     import asyncio
     from ._test_py36 import make_async_generator
 
@@ -252,7 +253,8 @@ def test_issue_77_async_generator_partial():
     assert inspect.isasyncgenfunction(f)
     assert inspect.isasyncgenfunction(f_partial)
 
-    assert asyncio.get_event_loop().run_until_complete(asyncio.ensure_future(f_partial().__anext__())) == 1
+    out = await asyncio.ensure_future(f_partial().__anext__())
+    assert out == 1
 
 
 @pytest.mark.skipif(sys.version_info < (3, 7, 6), reason="The __wrapped__ behavior in get_type_hints being tested was not added until python 3.7.6.")
