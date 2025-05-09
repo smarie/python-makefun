@@ -1,6 +1,6 @@
 # Changelog
 
-### 1.16.0 - (in progress) new python versions scope
+### 1.16.0 - Support for 3.14, dropped support for < 3.9
 
 - Removed official support for python versions `<3.9`. These versions will not run in CI anymore.
 - Fixed `RuntimeError` in tests when running on python 3.14. Added python 3.14 to CI. Fixes
