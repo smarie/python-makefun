@@ -1,3 +1,34 @@
+
+<div align="right">
+  <details>
+    <summary >🌐 Language</summary>
+    <div>
+      <div align="center">
+        <a href="https://openaitx.github.io/view.html?user=smarie&project=python-makefun&lang=en">English</a>
+        | <a href="https://openaitx.github.io/view.html?user=smarie&project=python-makefun&lang=zh-CN">简体中文</a>
+        | <a href="https://openaitx.github.io/view.html?user=smarie&project=python-makefun&lang=zh-TW">繁體中文</a>
+        | <a href="https://openaitx.github.io/view.html?user=smarie&project=python-makefun&lang=ja">日本語</a>
+        | <a href="https://openaitx.github.io/view.html?user=smarie&project=python-makefun&lang=ko">한국어</a>
+        | <a href="https://openaitx.github.io/view.html?user=smarie&project=python-makefun&lang=hi">हिन्दी</a>
+        | <a href="https://openaitx.github.io/view.html?user=smarie&project=python-makefun&lang=th">ไทย</a>
+        | <a href="https://openaitx.github.io/view.html?user=smarie&project=python-makefun&lang=fr">Français</a>
+        | <a href="https://openaitx.github.io/view.html?user=smarie&project=python-makefun&lang=de">Deutsch</a>
+        | <a href="https://openaitx.github.io/view.html?user=smarie&project=python-makefun&lang=es">Español</a>
+        | <a href="https://openaitx.github.io/view.html?user=smarie&project=python-makefun&lang=it">Italiano</a>
+        | <a href="https://openaitx.github.io/view.html?user=smarie&project=python-makefun&lang=ru">Русский</a>
+        | <a href="https://openaitx.github.io/view.html?user=smarie&project=python-makefun&lang=pt">Português</a>
+        | <a href="https://openaitx.github.io/view.html?user=smarie&project=python-makefun&lang=nl">Nederlands</a>
+        | <a href="https://openaitx.github.io/view.html?user=smarie&project=python-makefun&lang=pl">Polski</a>
+        | <a href="https://openaitx.github.io/view.html?user=smarie&project=python-makefun&lang=ar">العربية</a>
+        | <a href="https://openaitx.github.io/view.html?user=smarie&project=python-makefun&lang=fa">فارسی</a>
+        | <a href="https://openaitx.github.io/view.html?user=smarie&project=python-makefun&lang=tr">Türkçe</a>
+        | <a href="https://openaitx.github.io/view.html?user=smarie&project=python-makefun&lang=vi">Tiếng Việt</a>
+        | <a href="https://openaitx.github.io/view.html?user=smarie&project=python-makefun&lang=id">Bahasa Indonesia</a>
+      </div>
+    </div>
+  </details>
+</div>
+
 # python-makefun
 
 *Small library to dynamically create python functions.*
