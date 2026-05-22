@@ -12,18 +12,10 @@ See also:
   https://packaging.python.org/en/latest/distributing.html
   https://github.com/pypa/sampleproject
 """
+from importlib.metadata import version
+
 from setuptools import setup
-
-
-# (1) check required versions (from https://medium.com/@daveshawley/safely-using-setup-cfg-for-metadata-1babbe54c108)
-import pkg_resources
-
-pkg_resources.require("setuptools>=39.2")
-pkg_resources.require("setuptools_scm")
-
-
-# (2) Generate download url using git version
-from setuptools_scm import get_version  # noqa: E402
+from setuptools_scm import get_version
 
 URL = "https://github.com/smarie/python-makefun"
 DOWNLOAD_URL = URL + "/tarball/" + get_version()
@@ -34,7 +26,7 @@ args = {
     "write_to": "src/makefun/_version.py",
 }
 # Use the 'version_file_template' directive if possible to avoid type hints and annotations (python <3.8)
-setuptools_scm_version = pkg_resources.get_distribution("setuptools_scm").version
+setuptools_scm_version = version("setuptools-scm")
 # for some reason importing packaging.version.Version here fails on python 3.5
 # from packaging.version import Version
 # if Version(setuptools_scm_version) >= Version('6'):
