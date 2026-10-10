@@ -211,3 +211,60 @@ def test_simple_partial_copy(is_generator):
     # the func attribute is there too
     f4 = functools.partial(f1)
     assert f2.func == f4.func
+
+
+@pytest.mark.parametrize("is_generator", [False, True])
+def test_partial_keyword_overrides(is_generator):
+    """Call-time and nested keyword assignments override partial defaults."""
+    if is_generator:
+        def f(a, b):
+            yield a, b
+
+        def invoke(partial_f, **kwargs):
+            return next(partial_f(**kwargs))
+    else:
+        def f(a, b):
+            return a, b
+
+        def invoke(partial_f, **kwargs):
+            return partial_f(**kwargs)
+
+    inner = makefun.partial(f, a=1)
+    outer = makefun.partial(inner, a=2, b=3)
+    reference = functools.partial(functools.partial(f, a=1), a=2, b=3)
+
+    assert str(signature(outer)) == str(signature(reference))
+    assert invoke(outer) == (2, 3)
+    assert invoke(inner, b=4) == (1, 4)
+
+    call_kwargs = {"a": 5, "b": 6}
+    assert invoke(inner, **call_kwargs) == (5, 6)
+    assert invoke(outer, **call_kwargs) == (5, 6)
+    assert call_kwargs == {"a": 5, "b": 6}
+    assert invoke(outer) == (2, 3)
+
+
+def test_partial_keyword_override_preserves_positional_arguments():
+    def f(a, b, c):
+        return a, b, c
+
+    inner = makefun.partial(f, 1, c=2)
+    outer = makefun.partial(inner, 3, c=4)
+
+    assert outer() == (1, 3, 4)
+    assert outer(c=5) == (1, 3, 5)
+    assert inner(6) == (1, 6, 2)
+
+
+def test_legacy_generator_partial_keyword_override():
+    from makefun._main_legacy_py import make_partial_using_yield
+
+    def f(a):
+        yield a
+
+    inner = make_partial_using_yield(signature(makefun.partial(f, a=1)), f, a=1)
+    outer = makefun.partial(inner, a=2)
+
+    assert next(outer()) == 2
+    assert next(inner(a=3)) == 3
+    assert next(inner()) == 1

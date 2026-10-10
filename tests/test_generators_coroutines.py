@@ -2,7 +2,7 @@ import sys
 
 import pytest
 
-from makefun import with_signature, create_function
+from makefun import with_signature, create_function, partial
 
 try:
     from inspect import iscoroutinefunction
@@ -115,3 +115,29 @@ async def test_issue_96():
     # verify that the new function is a native coroutine and behaves correctly
     out = await dynamic_fun(0.1)
     assert out == 0.1
+
+
+@pytest.mark.parametrize("is_async_generator", [False, True])
+async def test_partial_async_keyword_overrides(is_async_generator):
+    if is_async_generator:
+        async def f(a):
+            yield a
+
+        async def invoke(partial_f, **kwargs):
+            values = [item async for item in partial_f(**kwargs)]
+            return values[0]
+    else:
+        async def f(a):
+            return a
+
+        async def invoke(partial_f, **kwargs):
+            return await partial_f(**kwargs)
+
+    inner = partial(f, a=1)
+    outer = partial(inner, a=2)
+
+    assert await invoke(outer) == 2
+    assert await invoke(inner, a=3) == 3
+    assert await invoke(outer, a=4) == 4
+    assert await invoke(inner) == 1
+    assert await invoke(outer) == 2
