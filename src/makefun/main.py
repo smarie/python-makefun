@@ -1248,8 +1248,9 @@ def partial(f,                 # type: Callable
         @wraps(f, new_sig=new_sig)
         def partial_f(*args, **kwargs):
             # since the signature does the checking for us, no need to check for redundancy.
-            kwargs.update(preset_kwargs)
-            return f(*itertools.chain(preset_pos_args, args), **kwargs)
+            final_kwargs = preset_kwargs.copy()
+            final_kwargs.update(kwargs)
+            return f(*itertools.chain(preset_pos_args, args), **final_kwargs)
 
     # update the doc.
     # Note that partial_f is generated above with a proper __name__ and __doc__ identical to the wrapped ones

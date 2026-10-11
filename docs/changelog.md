@@ -1,5 +1,11 @@
 # Changelog
 
+### Unreleased
+
+- Fixed `partial` so call-time keyword arguments and nested partials can override preset keyword values,
+  consistently with `functools.partial`. This also applies to generators and async generators.
+  Fixes [#95](https://github.com/smarie/python-makefun/issues/95).
+
 ### 1.16.0 - Support for 3.14, dropped support for < 3.9
 
 - Removed official support for python versions `<3.9`. These versions will not run in CI anymore.

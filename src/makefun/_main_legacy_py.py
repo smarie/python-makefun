@@ -21,8 +21,9 @@ def make_partial_using_yield(new_sig, f, *preset_pos_args, **preset_kwargs):
     @wraps(f, new_sig=new_sig)
     def partial_f(*args, **kwargs):
         # since the signature does the checking for us, no need to check for redundancy.
-        kwargs.update(preset_kwargs)
-        gen = f(*chain(preset_pos_args, args), **kwargs)
+        final_kwargs = preset_kwargs.copy()
+        final_kwargs.update(kwargs)
+        gen = f(*chain(preset_pos_args, args), **final_kwargs)
         _i = iter(gen)  # initialize the generator
         _y = next(_i)  # first iteration
         while 1:

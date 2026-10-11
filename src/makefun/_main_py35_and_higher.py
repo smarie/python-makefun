@@ -19,6 +19,7 @@ def make_partial_using_yield_from(new_sig, f, *preset_pos_args, **preset_kwargs)
     @wraps(f, new_sig)
     def partial_f(*args, **kwargs):
         # since the signature does the checking for us, no need to check for redundancy.
-        kwargs.update(preset_kwargs)  # for python 3.4: explicit dict update
-        yield from f(*chain(preset_pos_args, args), **kwargs)
+        final_kwargs = preset_kwargs.copy()
+        final_kwargs.update(kwargs)
+        yield from f(*chain(preset_pos_args, args), **final_kwargs)
     return partial_f
