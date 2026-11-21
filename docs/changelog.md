@@ -1,5 +1,10 @@
 # Changelog
 
+### Unreleased
+
+- Fixed `wraps` for callables without `__dict__` and classes with read-only attribute mappings.
+  Fixes [#94](https://github.com/smarie/python-makefun/issues/94).
+
 ### 1.16.0 - Support for 3.14, dropped support for < 3.9
 
 - Removed official support for python versions `<3.9`. These versions will not run in CI anymore.
