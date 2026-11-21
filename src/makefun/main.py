@@ -961,7 +961,7 @@ def _get_args_for_wrapping(wrapped, new_sig, remove_args, prepend_args, append_a
             co_name = code.co_name
 
     # attributes: start from the wrapped dict, add '__wrapped__' if needed, and override with all attrs.
-    all_attrs = copy(getattr_partial_aware(wrapped, '__dict__'))
+    all_attrs = dict(getattr_partial_aware(wrapped, '__dict__', {}))
     # PEP362: always set `__wrapped__`, and if signature was changed, set `__signature__` too
     all_attrs["__wrapped__"] = wrapped
     if has_new_sig:

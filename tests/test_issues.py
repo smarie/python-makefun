@@ -1,3 +1,4 @@
+import functools
 import inspect
 import sys
 
@@ -128,13 +129,18 @@ def test_wraps_dict():
     def foo():
         pass
 
-    foo._mark = True
+    foo._mark = []
+    foo._label = 'original'
 
-    @wraps(foo)
+    @wraps(foo, _label='wrapper')
     def g():
         pass
 
-    assert g._mark is True
+    assert g._mark is foo._mark
+    assert g._label == 'wrapper'
+    assert foo._label == 'original'
+    assert g.__wrapped__ is foo
+    assert not hasattr(foo, '__wrapped__')
 
 
 def test_issue_62():
@@ -282,6 +288,86 @@ def test_issue_91():
     """This test should work also in python 2 ! """
     assert is_identifier("_results_bag")
     assert is_identifier("hello__bag")
+
+
+@pytest.mark.parametrize('wrapped, args, expected', [
+    (len, ('abc',), 3),
+    (str.upper, ('abc',), 'ABC'),
+    (functools.partial(len), ('abc',), 3),
+    (functools.partial(str.upper), ('abc',), 'ABC'),
+])
+def test_wraps_builtin_issue_94(wrapped, args, expected):
+    """Builtins and their partials do not require a writable attribute dict."""
+    @wraps(wrapped, _mark=True)
+    def wrapper(*args, **kwargs):
+        return wrapped(*args, **kwargs)
+
+    assert wrapper(*args) == expected
+    assert signature(wrapper) == signature(wrapped)
+    assert wrapper.__wrapped__ is wrapped
+    assert wrapper._mark is True
+    assert not hasattr(wrapped, '_mark')
+
+
+def test_wraps_setattr_issue_94():
+    """The wrapper_descriptor from the original report can be decorated."""
+    class Wrapped(object):
+        @wraps(object.__setattr__)
+        def __setattr__(self, name, value):
+            object.__setattr__(self, name, value + 1)
+
+    instance = Wrapped()
+    instance.value = 3
+    assert instance.value == 4
+    assert signature(Wrapped.__setattr__) == signature(object.__setattr__)
+    assert Wrapped.__setattr__.__wrapped__ is object.__setattr__
+
+
+@pytest.mark.parametrize('use_partial', [False, True])
+def test_wraps_slots_issue_94(use_partial):
+    """Callable instances with slots also work through functools.partial."""
+    class Wrapped(object):
+        __slots__ = ()
+
+        def __call__(self, value):
+            return value + 1
+
+    wrapped = Wrapped()
+    if use_partial:
+        wrapped = functools.partial(wrapped)
+
+    @wraps(wrapped)
+    def wrapper(*args, **kwargs):
+        return wrapped(*args, **kwargs)
+
+    assert wrapper(3) == 4
+    assert signature(wrapper) == signature(wrapped)
+    assert wrapper.__wrapped__ is wrapped
+
+
+def test_wraps_class_issue_94():
+    """A class's read-only attribute mapping is copied without modification."""
+    class Wrapped(object):
+        """Wrapped class documentation."""
+        _mark = []
+
+        def __init__(self, value):
+            self.value = value
+
+    original_attrs = dict(Wrapped.__dict__)
+
+    @wraps(Wrapped)
+    def wrapper(*args, **kwargs):
+        return Wrapped(*args, **kwargs)
+
+    instance = wrapper(3)
+    assert isinstance(instance, Wrapped)
+    assert instance.value == 3
+    assert signature(wrapper) == signature(Wrapped)
+    assert wrapper.__wrapped__ is Wrapped
+    assert wrapper.__doc__ == Wrapped.__doc__
+    assert wrapper._mark is Wrapped._mark
+    assert dict(Wrapped.__dict__) == original_attrs
 
 
 def test_issue_98():
